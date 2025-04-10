@@ -1,5 +1,5 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -95,7 +95,12 @@
     @apply bg-background text-foreground font-nunito;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-playfair;
   }
 }
@@ -104,13 +109,13 @@
   .art-card {
     @apply overflow-hidden bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300;
   }
-  
+
   .art-card img {
     @apply transition-all duration-500 hover:scale-105;
   }
 
   .section-title {
-    @apply text-3xl md:text-4xl font-playfair font-semibold mb-8 text-center;
+    @apply text-3xl md:text-4xl font-poppins font-semibold mb-8 text-center;
   }
 
   .btn-primary {

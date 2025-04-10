@@ -7,15 +7,16 @@ import Footer from "../components/Footer";
 import QuoteSection from "../components/QuoteSection";
 import GalleryShowcase from "../components/GalleryShowcase";
 import TestimonialsSection from "../components/TestimonialsSection";
+import ArtCategorySection from "@/components/ArtCategory";
+import FeaturedArtistCarousel from "@/components/FeaturedArtistCarousel";
 
 const Index = () => {
   return (
     <div className="min-h-screen">
-      <Navbar />
       <HeroSection />
 
       {/* Features Section */}
-      <section className="py-16 bg-white">
+      {/* <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="p-6 text-center">
@@ -101,14 +102,16 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       <GalleryShowcase />
       <QuoteSection />
 
       <ArtworkGrid />
 
-      <FeaturedArtists />
+      <ArtCategorySection />
+
+      <FeaturedArtistCarousel />
 
       <TestimonialsSection />
 
@@ -117,22 +120,18 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="font-playfair font-bold text-3xl mb-4">
-              Join Our Art Community
+              Are You an Artist Looking to Showcase Your Work?
             </h2>
+
             <p className="text-gray-700 mb-8">
-              Subscribe to our newsletter to receive updates on new artists,
-              exclusive collections, and special promotions.
+              Join our community of talented artists. Create your own store,
+              showcase your artwork, and connect with art lovers around the
+              world.
             </p>
-            <form className="flex flex-col sm:flex-row gap-2 max-w-lg mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-grow px-4 py-3 rounded-md focus:outline-none"
-              />
-              <button className="px-6 py-3 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors">
-                Subscribe
-              </button>
-            </form>
+
+            <button className="px-6 py-3 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors">
+              Join as an Artist
+            </button>
           </div>
         </div>
       </section>

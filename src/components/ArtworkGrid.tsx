@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ArtworkCard from "./ArtworkCard";
 import { Button } from "@/components/ui/button";
 import { Filter } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 // Sample artwork data
 const artworkData = [
@@ -89,6 +90,7 @@ const categories = [
 ];
 
 const ArtworkGrid = () => {
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
 
@@ -172,7 +174,10 @@ const ArtworkGrid = () => {
 
         {/* Load More Button */}
         <div className="mt-12 text-center">
-          <Button className="bg-transparent border border-gray-300 text-gray-700 hover:bg-pastel-blue px-8 py-6">
+          <Button
+            className="bg-transparent border border-gray-300 text-gray-700 hover:bg-pastel-blue px-8 py-6"
+            onClick={() => navigate("/artwork-browse")}
+          >
             Load More Artworks
           </Button>
         </div>
