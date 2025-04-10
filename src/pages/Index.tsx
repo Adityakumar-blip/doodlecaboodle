@@ -11,7 +11,7 @@ import TestimonialsSection from "../components/TestimonialsSection";
 const Index = () => {
   return (
     <div className="min-h-screen">
-      <Navbar />
+      {/* <Navbar /> */}
       <HeroSection />
 
       {/* Features Section */}

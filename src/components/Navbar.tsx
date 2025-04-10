@@ -129,7 +129,7 @@ const Navbar = () => {
           </NavigationMenu>
 
           <a
-            href="#"
+            href="/creators"
             className="text-gray-700 hover:text-pastel-pink transition-colors font-medium"
           >
             Artists
@@ -141,7 +141,7 @@ const Navbar = () => {
             Exhibitions
           </a>
           <a
-            href="#"
+            href="/about"
             className="text-gray-700 hover:text-pastel-pink transition-colors font-medium"
           >
             About
