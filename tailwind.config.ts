@@ -73,8 +73,9 @@ export default {
 				}
 			},
 			fontFamily: {
-				'playfair': ['Playfair Display', 'serif'],
-				'nunito': ['Nunito', 'sans-serif']
+				'playfair': ['Playfair Display', 'sans-serif'],
+				'nunito': ['Nunito', 'sans-serif'],
+				'poppins' : ['Poppins', 'sans-serif']
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
