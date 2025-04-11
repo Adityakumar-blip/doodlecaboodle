@@ -8,6 +8,7 @@ import {
   User,
   ChevronDown,
   MapPin,
+  EllipsisVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Cart from "./Cart";
@@ -212,8 +213,8 @@ const Navbar = () => {
         className={cn(
           "fixed top-0 left-0 right-0 z-40 transition-all duration-300",
           scrolled
-            ? "bg-white/90 backdrop-blur-md shadow-sm py-2"
-            : "bg-white py-4"
+            ? "bg-[#101014]/90 backdrop-blur-md shadow-sm py-2"
+            : "bg-[#101014] py-4 "
         )}
       >
         <div className="container mx-auto px-4 flex items-center justify-between">
@@ -228,35 +229,35 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
+          {/* <nav className="hidden md:flex items-center space-x-6">
             <a
               href="/"
-              className="text-gray-700 hover:text-pastel-pink transition-colors font-medium"
+              className="text-white hover:text-pastel-pink transition-colors font-medium"
             >
               Home
             </a>
 
             <a
-              href="/all-artists"
-              className="text-gray-700 hover:text-pastel-pink transition-colors font-medium"
+              href="/creators"
+              className="text-white hover:text-pastel-pink transition-colors font-medium"
             >
               Artists
             </a>
             <a
-              href="#"
-              className="text-gray-700 hover:text-pastel-pink transition-colors font-medium"
+              href="/about"
+              className="text-white hover:text-pastel-pink transition-colors font-medium"
             >
               About
             </a>
-          </nav>
+          </nav> */}
 
           {/* Desktop Action Icons */}
           <div className="hidden md:flex items-center space-x-4">
-            <button className="text-gray-700 hover:text-pastel-pink transition-colors">
+            <button className="text-white hover:text-pastel-pink transition-colors">
               <Search size={20} />
             </button>
             <button
-              className="text-gray-700 hover:text-pastel-pink transition-colors relative"
+              className="text-white hover:text-pastel-pink transition-colors relative"
               onClick={toggleLocationModal}
               aria-label="Set location"
             >
@@ -267,11 +268,11 @@ const Navbar = () => {
                 </span>
               )}
             </button>
-            <button className="text-gray-700 hover:text-pastel-pink transition-colors">
+            <button className="text-white hover:text-pastel-pink transition-colors">
               <User size={20} />
             </button>
             <button
-              className="text-gray-700 hover:text-pastel-pink transition-colors relative"
+              className="text-white hover:text-pastel-pink transition-colors relative"
               onClick={toggleCart}
               aria-label="Open cart"
             >
@@ -280,12 +281,15 @@ const Navbar = () => {
                 {cartItems.length}
               </span>
             </button>
+            <button className="text-white">
+              <EllipsisVertical size={20} />
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
             <button
-              className="text-gray-700 hover:text-pastel-pink transition-colors relative mr-4"
+              className="text-white hover:text-pastel-pink transition-colors relative mr-4"
               onClick={toggleLocationModal}
               aria-label="Set location"
             >
@@ -297,7 +301,7 @@ const Navbar = () => {
               )}
             </button>
             <button
-              className="text-gray-700 hover:text-pastel-pink transition-colors relative mr-4"
+              className="text-white hover:text-pastel-pink transition-colors relative mr-4"
               onClick={toggleCart}
               aria-label="Open cart"
             >
@@ -308,7 +312,7 @@ const Navbar = () => {
             </button>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-700 focus:outline-none"
+              className="text-white focus:outline-none"
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -324,12 +328,12 @@ const Navbar = () => {
           <nav className="flex flex-col space-y-4">
             <a
               href="#"
-              className="text-gray-700 hover:text-pastel-pink transition-colors font-medium py-2"
+              className="text-white hover:text-pastel-pink transition-colors font-medium py-2"
             >
               Home
             </a>
             <div className="relative py-2">
-              <button className="flex items-center text-gray-700 hover:text-pastel-pink transition-colors font-medium">
+              <button className="flex items-center text-white hover:text-pastel-pink transition-colors font-medium">
                 Shop by Category <ChevronDown size={16} className="ml-1" />
               </button>
               <div className="pl-4 mt-2 space-y-2">
@@ -337,7 +341,7 @@ const Navbar = () => {
                   <div key={index} className="py-1">
                     <a
                       href="#"
-                      className="block text-gray-700 hover:text-pastel-pink transition-colors"
+                      className="block text-white hover:text-pastel-pink transition-colors"
                     >
                       {category.name}
                     </a>
@@ -358,21 +362,21 @@ const Navbar = () => {
             </div>
             <a
               href="#"
-              className="text-gray-700 hover:text-pastel-pink transition-colors font-medium py-2"
+              className="text-white hover:text-pastel-pink transition-colors font-medium py-2"
             >
               Artists
             </a>
             <a
               href="#"
-              className="text-gray-700 hover:text-pastel-pink transition-colors font-medium py-2"
+              className="text-white hover:text-pastel-pink transition-colors font-medium py-2"
             >
               About
             </a>
             <div className="flex space-x-4 pt-2">
-              <button className="text-gray-700 hover:text-pastel-pink transition-colors">
+              <button className="text-white hover:text-pastel-pink transition-colors">
                 <Search size={20} />
               </button>
-              <button className="text-gray-700 hover:text-pastel-pink transition-colors">
+              <button className="text-white hover:text-pastel-pink transition-colors">
                 <User size={20} />
               </button>
             </div>
@@ -385,7 +389,7 @@ const Navbar = () => {
             {categories.map((category, index) => (
               <div key={index} className="relative group px-4">
                 <div className="flex items-center gap-2">
-                  <button className="text-gray-700 hover:text-pastel-pink py-2 transition-colors font-medium">
+                  <button className="text-white hover:text-pastel-pink py-2 transition-colors font-medium">
                     {category.name}
                   </button>
                   <ChevronDown
@@ -406,7 +410,7 @@ const Navbar = () => {
                         <li key={subIndex}>
                           <a
                             href="#"
-                            className="block text-gray-700 hover:text-pastel-pink hover:bg-pastel-pink/10 rounded px-2 py-1 transition-colors"
+                            className="block text-white hover:text-pastel-pink hover:bg-pastel-pink/10 rounded px-2 py-1 transition-colors"
                           >
                             {subcat}
                           </a>
@@ -441,7 +445,7 @@ const Navbar = () => {
               <h3 className="text-lg font-medium">Set Your Location</h3>
               <button
                 onClick={() => setIsLocationModalOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-white"
               >
                 <X size={20} />
               </button>
@@ -451,7 +455,7 @@ const Navbar = () => {
               <div className="mb-4">
                 <label
                   htmlFor="pincode"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-white mb-1"
                 >
                   Enter your pincode for delivery information
                 </label>
@@ -477,7 +481,7 @@ const Navbar = () => {
                   type="button"
                   onClick={() => setIsLocationModalOpen(false)}
                   variant="outline"
-                  className="border-gray-300 text-gray-700"
+                  className="border-gray-300 text-white"
                 >
                   Cancel
                 </Button>

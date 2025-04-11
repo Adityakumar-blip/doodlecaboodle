@@ -8,6 +8,9 @@ import NotFound from "./pages/NotFound";
 import ArtworkBrowse from "./components/ArtworkBrowse";
 import Navbar from "./components/Navbar";
 import AllArtists from "./components/AllArtist";
+import Artist from "./pages/Artist";
+import ArtistDetail from "./components/ArtistDetail";
+import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +26,9 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/artwork-browse" element={<ArtworkBrowse />} />
             <Route path="/all-artists" element={<AllArtists />} />
+            <Route path="/creators" element={<Artist />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/artists/:id" element={<ArtistDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

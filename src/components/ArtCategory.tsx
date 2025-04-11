@@ -2,6 +2,7 @@ import React from "react";
 import { ArrowRight, CircleDollarSign, IndianRupee } from "lucide-react";
 
 const ArtCategorySection = () => {
+  // jost font
   const categories = [
     {
       title: "Abstract",
@@ -84,9 +85,9 @@ const ArtCategorySection = () => {
       <div className="mb-16">
         <div className="flex items-center justify-between">
           <h3 className="text-2xl font-medium mb-6">Explore by Style</h3>
-          <p className="text-xs text-gray-600 hover:underline hover:cursor-pointer">
+          <p className="text-md text-gray-600 hover:underline hover:cursor-pointer">
             Explore more{" "}
-            <span className=" text-pastel-blue font-semibold">styles</span>
+            <span className=" text-blue-500 font-semibold">styles</span>
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -123,12 +124,12 @@ const ArtCategorySection = () => {
       </div>
 
       {/* Price Range Section */}
-      <div className="mb-16">
+      {/* <div className="mb-16">
         <div className="flex items-center justify-between">
           <h3 className="text-2xl font-medium mb-6">Shop by Price</h3>
-          <p className="text-xs text-gray-600 hover:underline hover:cursor-pointer">
+          <p className="text-md text-gray-600 hover:underline hover:cursor-pointer">
             View all{" "}
-            <span className="text-pastel-blue font-semibold">price points</span>
+            <span className="text-blue-500 font-semibold">price points</span>
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -141,15 +142,6 @@ const ArtCategorySection = () => {
                 className={`bg-gradient-to-r ${price.color} p-6 h-full flex flex-col justify-between text-black`}
               >
                 <div>
-                  {/* <div className="flex mb-2">
-                    {[...Array(price.dots)].map((_, i) => (
-                      <IndianRupee
-                        key={i}
-                        size={16}
-                        className="mr-1 text-black/80"
-                      />
-                    ))}
-                  </div> */}
                   <h4 className="text-xl font-semibold mb-1 font-poppins">
                     {price.range}
                   </h4>
@@ -164,15 +156,15 @@ const ArtCategorySection = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Occasions Section */}
       <div>
         <div className="flex items-center justify-between">
           <h3 className="text-2xl font-medium mb-6">Shop by Occasion</h3>
-          <p className="text-xs text-gray-600 hover:underline hover:cursor-pointer">
+          <p className="text-md text-gray-600 hover:underline hover:cursor-pointer">
             Explore more{" "}
-            <span className=" text-pastel-blue font-semibold">occasions</span>
+            <span className=" text-blue-500 font-semibold">occasions</span>
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

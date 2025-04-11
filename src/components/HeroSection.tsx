@@ -96,9 +96,14 @@ const HeroSection: React.FC = () => {
               <p className="mb-8 text-lg md:text-xl text-white/90">
                 {image.subtitle}
               </p>
-              <button className="px-6 py-3 text-sm font-medium text-black bg-white rounded-md hover:bg-white/90 transition-colors">
-                Explore Collection
-              </button>
+              <div className="flex items-center gap-4">
+                <button className="px-6 py-3 text-sm font-medium text-black bg-white rounded-md hover:bg-white/90 transition-colors">
+                  Explore Collection
+                </button>
+                <button className="px-6 py-3 text-sm font-medium text-black bg-transparent text-white border border-white rounded-md hover:bg-white/90 hover:text-black transition-colors">
+                  Meet the artist
+                </button>
+              </div>
             </div>
           </div>
         </div>
