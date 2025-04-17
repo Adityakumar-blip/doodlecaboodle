@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Cart from "./Cart";
+// import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -248,7 +249,9 @@ const Navbar = () => {
               )}
             </button>
             <button className="text-gray-700 hover:text-pastel-pink transition-colors">
-              <User size={20} />
+              <a href="/profile">
+                <User size={20} />
+              </a>
             </button>
             <button
               className="text-gray-700 hover:text-pastel-pink transition-colors relative"
