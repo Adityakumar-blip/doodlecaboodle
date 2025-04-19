@@ -100,9 +100,9 @@ const ArtworkGrid = () => {
       : artworkData.filter((artwork) => artwork.category === activeCategory);
 
   return (
-    <section className="py-16 bg-[#101014] ">
+    <section className="py-16 bg-white ">
       <div className="container mx-auto px-4">
-        <h2 className="section-title text-white">Explore Our Collection</h2>
+        <h2 className="section-title text-black">Explore Our Collection</h2>
 
         {/* Category Filter */}
         <div className="mb-8">

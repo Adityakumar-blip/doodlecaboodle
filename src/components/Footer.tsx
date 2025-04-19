@@ -1,6 +1,8 @@
 import React from "react";
 import { Facebook, Instagram, Twitter } from "lucide-react";
 
+import logo from "@/assets/logomark1.svg";
+
 const Footer = () => {
   return (
     <footer className="bg-white pt-16 pb-8">
@@ -12,7 +14,8 @@ const Footer = () => {
               href="/"
               className="text-2xl font-playfair font-bold text-gray-900 mb-4 inline-block"
             >
-              Doodle<span className="text-pastel-blue">Caboodle</span>
+              {/* Doodle<span className="text-pastel-blue">Caboodle</span> */}
+              <img src={logo} className="w-10 h-10" alt="doodlecaboodle" />
             </a>
             <p className="text-gray-600 mb-4 max-w-xs">
               Discover unique artwork from independent artists around the world.
@@ -42,7 +45,7 @@ const Footer = () => {
           </div>
 
           {/* Shop */}
-          <div className="mb-6 md:mb-0">
+          <div className="mb-6 pl-20 md:mb-0">
             <h3 className="font-playfair font-bold text-lg mb-4">Shop</h3>
             <ul className="space-y-3">
               <li>
@@ -74,7 +77,7 @@ const Footer = () => {
           </div>
 
           {/* About */}
-          <div className="mb-6 md:mb-0">
+          <div className="mb-6  md:mb-0">
             <h3 className="font-playfair font-bold text-lg mb-4">About</h3>
             <ul className="space-y-3">
               <li>

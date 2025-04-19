@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 const GalleryShowcase = () => {
   return (
-    <section className="py-16 bg-[#101014] md:py-24">
+    <section className="py-16 bg-white md:py-24">
       <div className="container mx-auto px-4">
         <h2 className="section-title mb-12 text-white">Trending Artworks</h2>
 

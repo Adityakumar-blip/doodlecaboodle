@@ -8,16 +8,20 @@ import {
   User,
   ChevronDown,
   MapPin,
-  EllipsisVertical,
+  MoreVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Cart from "./Cart";
+
+import logo from "@/assets/logomark1.svg";
+import logo2 from "@/assets/doodle.png";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [isMenuDropdownOpen, setIsMenuDropdownOpen] = useState(false);
   const [pincode, setPincode] = useState<string>("");
   const [userLocation, setUserLocation] = useState("");
   const [coordinates, setCoordinates] = useState({ lat: null, lng: null });
@@ -158,9 +162,36 @@ const Navbar = () => {
     };
   }, [scrolled]);
 
+  // Close dropdown menu when clicking outside
+  useEffect(() => {
+    const closeDropdown = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (
+        isMenuDropdownOpen &&
+        target &&
+        !document.querySelector(".menu-dropdown-container")?.contains(target)
+      ) {
+        setIsMenuDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("click", closeDropdown);
+    return () => document.removeEventListener("click", closeDropdown);
+  }, [isMenuDropdownOpen]);
+
   // Function to toggle cart visibility
   const toggleCart = () => {
     setIsCartOpen(!isCartOpen);
+  };
+
+  // Function to toggle menu dropdown
+  const toggleMenuDropdown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMenuDropdownOpen(!isMenuDropdownOpen);
+    // Close other open menus if any
+    if (!isMenuDropdownOpen) {
+      setIsOpen(false);
+    }
   };
 
   // Function to toggle location modal
@@ -169,7 +200,7 @@ const Navbar = () => {
   };
 
   // Function to handle pincode submission
-  const handlePincodeSubmit = (e) => {
+  const handlePincodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Here you would normally validate the pincode
     if (pincode.trim().length === 6) {
@@ -181,40 +212,14 @@ const Navbar = () => {
     }
   };
 
-  // useEffect(() => {
-  //   const getCurrentLocation = () => {
-  //     if (navigator.geolocation) {
-  //       navigator.geolocation.getCurrentPosition(
-  //         (position) => {
-  //           const { latitude, longitude } = position.coords;
-  //           setCoordinates({ lat: latitude, lng: longitude });
-  //           // fetchLocationDetails(latitude, longitude);
-  //         },
-  //         (err) => {
-  //           setError(`Error getting location: ${err.message}`);
-  //         }
-  //       );
-  //     } else {
-  //       setError("Geolocation is not supported by this browser.");
-  //     }
-  //   };
-  //   getCurrentLocation();
-  // }, []);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setIsLocationModalOpen(true);
-    }, 5000);
-  }, []);
-
   return (
     <>
       <header
         className={cn(
           "fixed top-0 left-0 right-0 z-40 transition-all duration-300",
           scrolled
-            ? "bg-[#101014]/90 backdrop-blur-md shadow-sm py-2"
-            : "bg-[#101014] py-4 "
+            ? "bg-white/90 backdrop-blur-md shadow-sm py-2"
+            : "bg-white py-4 "
         )}
       >
         <div className="container mx-auto px-4 flex items-center justify-between">
@@ -224,40 +229,22 @@ const Navbar = () => {
               href="/"
               className="text-2xl md:text-3xl font-playfair font-bold text-gray-900"
             >
-              Doodle<span className="text-pastel-pink">Caboodle</span>
+              {/* Doodle<span className="text-pastel-pink">Caboodle</span> */}
+              <img src={logo} className="w-10 h-10" alt="doodlecaboodle" />
             </a>
           </div>
 
-          {/* Desktop Navigation */}
-          {/* <nav className="hidden md:flex items-center space-x-6">
-            <a
-              href="/"
-              className="text-white hover:text-pastel-pink transition-colors font-medium"
-            >
-              Home
-            </a>
+          <div>
+            <img src={logo2} className="w-20 h-30" alt="doodlecaboodle" />
+          </div>
 
-            <a
-              href="/creators"
-              className="text-white hover:text-pastel-pink transition-colors font-medium"
-            >
-              Artists
-            </a>
-            <a
-              href="/about"
-              className="text-white hover:text-pastel-pink transition-colors font-medium"
-            >
-              About
-            </a>
-          </nav> */}
-
-          {/* Desktop Action Icons */}
-          <div className="hidden md:flex items-center space-x-4">
-            <button className="text-white hover:text-pastel-pink transition-colors">
+          {/* Action Icons */}
+          <div className="flex items-center space-x-4">
+            <button className="text-gray-700 hover:text-pastel-pink transition-colors">
               <Search size={20} />
             </button>
             <button
-              className="text-white hover:text-pastel-pink transition-colors relative"
+              className="text-blackhover:text-pastel-pink transition-colors relative"
               onClick={toggleLocationModal}
               aria-label="Set location"
             >
@@ -268,11 +255,11 @@ const Navbar = () => {
                 </span>
               )}
             </button>
-            <button className="text-white hover:text-pastel-pink transition-colors">
+            <button className="text-blackhover:text-pastel-pink transition-colors">
               <User size={20} />
             </button>
             <button
-              className="text-white hover:text-pastel-pink transition-colors relative"
+              className="text-blackhover:text-pastel-pink transition-colors relative"
               onClick={toggleCart}
               aria-label="Open cart"
             >
@@ -281,38 +268,48 @@ const Navbar = () => {
                 {cartItems.length}
               </span>
             </button>
-            <button className="text-white">
-              <EllipsisVertical size={20} />
-            </button>
-          </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
-            <button
-              className="text-white hover:text-pastel-pink transition-colors relative mr-4"
-              onClick={toggleLocationModal}
-              aria-label="Set location"
-            >
-              <MapPin size={20} />
-              {userLocation && (
-                <span className="absolute -top-1 -right-1 bg-pastel-blue text-xs w-4 h-4 rounded-full flex items-center justify-center">
-                  ✓
-                </span>
+            {/* Three Dot Menu - Both desktop and mobile */}
+            <div className="menu-dropdown-container relative">
+              <button
+                className="text-gray-700 hover:text-pastel-pink transition-colors"
+                onClick={toggleMenuDropdown}
+                aria-label="Menu options"
+              >
+                <MoreVertical size={20} />
+              </button>
+
+              {/* Menu Dropdown */}
+              {isMenuDropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white shadow-lg rounded-md z-50">
+                  <div className="py-2">
+                    <a
+                      href="/"
+                      className="block px-4 py-2 text-gray-700 hover:text-pastel-pink hover:bg-pastel-pink/10"
+                    >
+                      Home
+                    </a>
+                    <a
+                      href="/artists"
+                      className="block px-4 py-2 text-gray-700 hover:text-pastel-pink hover:bg-pastel-pink/10"
+                    >
+                      Artists
+                    </a>
+                    <a
+                      href="/about"
+                      className="block px-4 py-2 text-gray-700 hover:text-pastel-pink hover:bg-pastel-pink/10"
+                    >
+                      About
+                    </a>
+                  </div>
+                </div>
               )}
-            </button>
-            <button
-              className="text-white hover:text-pastel-pink transition-colors relative mr-4"
-              onClick={toggleCart}
-              aria-label="Open cart"
-            >
-              <ShoppingBag size={20} />
-              <span className="absolute -top-1 -right-1 bg-pastel-pink text-xs w-4 h-4 rounded-full flex items-center justify-center">
-                {cartItems.length}
-              </span>
-            </button>
+            </div>
+
+            {/* Mobile Menu Button - Now only visible on very small screens */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-white focus:outline-none"
+              className="ml-2 text-gray-700 focus:outline-none md:hidden"
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -326,14 +323,8 @@ const Navbar = () => {
           } bg-white py-4 px-4 shadow-md`}
         >
           <nav className="flex flex-col space-y-4">
-            <a
-              href="#"
-              className="text-white hover:text-pastel-pink transition-colors font-medium py-2"
-            >
-              Home
-            </a>
             <div className="relative py-2">
-              <button className="flex items-center text-white hover:text-pastel-pink transition-colors font-medium">
+              <button className="flex items-center text-blackhover:text-pastel-pink transition-colors font-medium">
                 Shop by Category <ChevronDown size={16} className="ml-1" />
               </button>
               <div className="pl-4 mt-2 space-y-2">
@@ -341,7 +332,7 @@ const Navbar = () => {
                   <div key={index} className="py-1">
                     <a
                       href="#"
-                      className="block text-white hover:text-pastel-pink transition-colors"
+                      className="block text-blackhover:text-pastel-pink transition-colors"
                     >
                       {category.name}
                     </a>
@@ -360,36 +351,16 @@ const Navbar = () => {
                 ))}
               </div>
             </div>
-            <a
-              href="#"
-              className="text-white hover:text-pastel-pink transition-colors font-medium py-2"
-            >
-              Artists
-            </a>
-            <a
-              href="#"
-              className="text-white hover:text-pastel-pink transition-colors font-medium py-2"
-            >
-              About
-            </a>
-            <div className="flex space-x-4 pt-2">
-              <button className="text-white hover:text-pastel-pink transition-colors">
-                <Search size={20} />
-              </button>
-              <button className="text-white hover:text-pastel-pink transition-colors">
-                <User size={20} />
-              </button>
-            </div>
           </nav>
         </div>
 
         {/* Category Navigation Menu - Desktop */}
         <div className="hidden md:block container pl-0 pt-4">
-          <div className="flex ">
+          <div className="flex">
             {categories.map((category, index) => (
               <div key={index} className="relative group px-4">
                 <div className="flex items-center gap-2">
-                  <button className="text-white hover:text-pastel-pink py-2 transition-colors font-medium">
+                  <button className="text-blackhover:text-pastel-pink py-2 transition-colors font-medium">
                     {category.name}
                   </button>
                   <ChevronDown
@@ -405,12 +376,12 @@ const Navbar = () => {
                       ></span>
                       <span className="font-medium">{category.name}</span>
                     </div>
-                    <ul className="space-y-2 ">
+                    <ul className="space-y-2">
                       {category.subcategories.map((subcat, subIndex) => (
                         <li key={subIndex}>
                           <a
                             href="#"
-                            className="block text-white hover:text-pastel-pink hover:bg-pastel-pink/10 rounded px-2 py-1 transition-colors"
+                            className="block text-blackhover:text-pastel-pink hover:bg-pastel-pink/10 rounded px-2 py-1 transition-colors"
                           >
                             {subcat}
                           </a>
@@ -455,7 +426,7 @@ const Navbar = () => {
               <div className="mb-4">
                 <label
                   htmlFor="pincode"
-                  className="block text-sm font-medium text-white mb-1"
+                  className="block text-sm font-medium text-blackmb-1"
                 >
                   Enter your pincode for delivery information
                 </label>

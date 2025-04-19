@@ -25,10 +25,9 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/artwork-browse" element={<ArtworkBrowse />} />
-            <Route path="/all-artists" element={<AllArtists />} />
-            <Route path="/creators" element={<Artist />} />
-            <Route path="/about" element={<About />} />
+            <Route path="/artists" element={<Artist />} />
             <Route path="/artists/:id" element={<ArtistDetail />} />
+            <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

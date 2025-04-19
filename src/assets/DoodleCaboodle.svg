@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2286.69 1092.51">
+  <defs>
+    <style>
+      .cls-1 {
+        letter-spacing: -.06em;
+      }
+
+      .cls-2 {
+        font-size: 654.45px;
+      }
+
+      .cls-2, .cls-3 {
+        font-family: Bajurie, Bajurie;
+      }
+
+      .cls-3 {
+        font-size: 720.34px;
+      }
+    </style>
+  </defs>
+  <text class="cls-3" transform="translate(0 612.29)"><tspan class="cls-1" x="0" y="0">D</tspan><tspan x="419.24" y="0">oodle</tspan></text>
+  <text class="cls-2" transform="translate(456.89 944.6)"><tspan x="0" y="0">caboodle</tspan></text>
+</svg>
