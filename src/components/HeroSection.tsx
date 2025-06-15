@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import image1 from "@/assets/01.jpg";
+import image2 from "@/assets/02.png";
+import image3 from "@/assets/03.png";
 
 interface HeroImage {
   url: string;
@@ -10,21 +14,21 @@ interface HeroImage {
 
 const heroImages = [
   {
-    url: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80",
+    url: image1, //https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80
     title: "Discover Unique Artworks",
     subtitle:
       "Explore our curated collection of handpicked paintings, illustrations, and sculptures from emerging and established artists across the globe.",
     tag: "New Collection: Summer Abstracts",
   },
   {
-    url: "https://images.unsplash.com/photo-1545033131-485ea67fd7c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80",
+    url: image2, //https://images.unsplash.com/photo-1545033131-485ea67fd7c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80
     title: "Limited Edition Prints",
     subtitle:
       "Own a piece of exclusive artwork with our limited edition prints, each one numbered and signed by the artist.",
     tag: "Limited Time: Free Shipping",
   },
   {
-    url: "https://images.unsplash.com/photo-1536924940846-227afb31e2a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80",
+    url: image3, //https://images.unsplash.com/photo-1536924940846-227afb31e2a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80
     title: "Art That Speaks To You",
     subtitle:
       "Find pieces that resonate with your personal style and transform your space into a reflection of your unique taste.",
@@ -33,6 +37,7 @@ const heroImages = [
 ];
 
 const HeroSection: React.FC = () => {
+  const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
@@ -97,12 +102,18 @@ const HeroSection: React.FC = () => {
                 {image.subtitle}
               </p>
               <div className="flex items-center gap-4">
-                <button className="px-6 py-3 text-sm font-medium text-black bg-white rounded-md hover:bg-white/90 transition-colors">
+                <button
+                  onClick={() => navigate("/collections/abstract-art")}
+                  className="px-6 py-3 text-sm font-medium text-black bg-white rounded-md hover:bg-white/90 transition-colors"
+                >
                   Explore Collection
                 </button>
-                <button className="px-6 py-3 text-sm font-medium text-black bg-transparent text-white border border-white rounded-md hover:bg-white/90 hover:text-black transition-colors">
+                {/* <button
+                  onClick={() => navigate("/artists")}
+                  className="px-6 py-3 text-sm font-medium text-black bg-transparent text-white border border-white rounded-md hover:bg-white/90 hover:text-black transition-colors"
+                >
                   Meet the artist
-                </button>
+                </button> */}
               </div>
             </div>
           </div>

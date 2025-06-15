@@ -463,7 +463,7 @@ const ArtworkBrowse = () => {
         </div>
       </header> */}
 
-      <section className="bg-gradient-to-b  from-white to-pastel-blue/5 py-16">
+      <section className="bg-gradient-to-b  from-white to-pastel-blue/5 py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center flex flex-col items-center justify-center">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
@@ -577,11 +577,11 @@ const ArtworkBrowse = () => {
                 </div>
 
                 {/* Artist Filter */}
-                <FilterSection
+                {/* <FilterSection
                   title="Artist"
                   options={filterOptions.artist}
                   type="artist"
-                />
+                /> */}
 
                 {/* Medium Filter */}
                 <FilterSection
@@ -591,11 +591,11 @@ const ArtworkBrowse = () => {
                 />
 
                 {/* Year Filter */}
-                <FilterSection
+                {/* <FilterSection
                   title="Year"
                   options={filterOptions.year}
                   type="year"
-                />
+                /> */}
               </div>
             </div>
           </aside>
@@ -717,6 +717,7 @@ const ArtworkBrowse = () => {
                   {artworks.slice(0, displayCount).map((artwork) => (
                     <ArtworkCard
                       key={artwork.id}
+                      id={artwork.id}
                       imageUrl={artwork.imageUrl}
                       title={artwork.title}
                       artistName={artwork.artistName}
