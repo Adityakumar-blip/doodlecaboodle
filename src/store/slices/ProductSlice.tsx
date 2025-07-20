@@ -43,6 +43,24 @@ export const fetchProducts = createAsyncThunk(
   }
 );
 
+export const fetchWroks = createAsyncThunk(
+  "products/fetchWroks",
+  async (_, { rejectWithValue }) => {
+    try {
+      const productsRef = collection(db, "ourworks");
+      const snapshot = await getDocs(productsRef);
+      const products: Product[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Product[];
+      console.log("products", products)
+      return products;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Failed to fetch products");
+    }
+  }
+);
+
 // Product slice
 const productSlice = createSlice({
   name: "products",

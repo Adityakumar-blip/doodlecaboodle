@@ -54,11 +54,11 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				pastel: {
-					pink: "#FFDEE2",
+					pink: "#5e503f",
 					blue: "#D3E4FD",
 					green: "#F2FCE2",
 					yellow: "#FEF7CD",
-					peach: "#FDE1D3",
+					peach: "#c6ac8f",
 					purple: "#E5DEFF",
 				},
 				sidebar: {
@@ -75,7 +75,9 @@ export default {
 			fontFamily: {
 				'playfair': ['Playfair Display', 'sans-serif'],
 				'nunito': ['Nunito', 'sans-serif'],
-				'poppins' : ['Poppins', 'sans-serif']
+				'poppins' : ['Poppins', 'sans-serif'],
+				'lora': ['Lora', 'sans-serif'],
+				'cormorant' : ['Cormorant', 'sans-serif']
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

@@ -11,6 +11,8 @@ import ArtCategorySection from "@/components/ArtCategory";
 import FeaturedArtistCarousel from "@/components/FeaturedArtistCarousel";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "@/firebase/firebaseconfig";
+import OurWorks from "@/components/OurWorks";
+import FAQPage from "@/components/Faq";
 
 const Index = () => {
   const [collections, setCollections] = useState([]);
@@ -44,39 +46,20 @@ const Index = () => {
     <div className="min-h-screen">
       <HeroSection />
 
-      <GalleryShowcase />
+      {/* <GalleryShowcase /> */}
       <QuoteSection />
 
-      <ArtworkGrid />
+      {/* <ArtworkGrid /> */}
 
-      <ArtCategorySection collections={collections} />
+      <OurWorks />
+
+      {/* <ArtCategorySection collections={collections} /> */}
 
       <FeaturedArtistCarousel />
 
       {/* <TestimonialsSection /> */}
 
-      {/* Newsletter Section */}
-      {/* <section className="py-16 bg-gradient-to-r from-pastel-pink to-pastel-purple">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="font-playfair font-bold text-3xl mb-4">
-              Are You an Artist Looking to Showcase Your Work?
-            </h2>
-
-            <p className="text-gray-700 mb-8">
-              Join our community of talented artists. Create your own store,
-              showcase your artwork, and connect with art lovers around the
-              world.
-            </p>
-
-            <button className="px-6 py-3 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors">
-              Join as an Artist
-            </button>
-          </div>
-        </div>
-      </section> */}
-
-      {/* <Footer /> */}
+      <FAQPage />
     </div>
   );
 };

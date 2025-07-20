@@ -1,13 +1,13 @@
 import React from "react";
-import { Facebook, Instagram, Twitter } from "lucide-react";
+import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
 
-import logo from "@/assets/logomark1.svg";
+import logo from "@/assets/logo-doodle.svg";
 
 const Footer = () => {
   return (
     <footer className="bg-white pt-16 pb-8">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-20">
           {/* Brand */}
           <div className="mb-6 md:mb-0">
             <a
@@ -18,34 +18,44 @@ const Footer = () => {
               <img src={logo} className="w-10 h-10" alt="doodlecaboodle" />
             </a>
             <p className="text-gray-600 mb-4 max-w-xs">
-              Discover unique artwork from independent artists around the world.
-              Our curated collection features original paintings, prints,
-              sculptures and more.
+              We’d love to be a small part of your big moments. Whether it’s a
+              gift, a story, or just a hello — our inbox is always open, and our
+              hearts always full.
             </p>
             <div className="flex space-x-4">
               <a
-                href="#"
+                target="_blank"
+                href="https://www.facebook.com/doodlecaboodle.in"
                 className="bg-pastel-blue hover:bg-pastel-purple transition-colors p-2 rounded-full"
               >
                 <Facebook size={18} className="text-gray-700" />
               </a>
               <a
-                href="#"
+                target="_blank"
+                href="https://www.instagram.com/doodlecaboodle.in/"
                 className="bg-pastel-blue hover:bg-pastel-purple transition-colors p-2 rounded-full"
               >
                 <Instagram size={18} className="text-gray-700" />
               </a>
               <a
-                href="#"
+                target="_blank"
+                href="https://x.com/doodle_cabo0dle"
                 className="bg-pastel-blue hover:bg-pastel-purple transition-colors p-2 rounded-full"
               >
                 <Twitter size={18} className="text-gray-700" />
+              </a>
+              <a
+                target="_blank"
+                href="https://www.linkedin.com/company/doodle-caboodle/"
+                className="bg-pastel-blue hover:bg-pastel-purple transition-colors p-2 rounded-full"
+              >
+                <Linkedin size={18} className="text-gray-700" />
               </a>
             </div>
           </div>
 
           {/* Shop */}
-          <div className="mb-6 pl-20 md:mb-0">
+          {/* <div className="mb-6 pl-20 md:mb-0">
             <h3 className="font-playfair font-bold text-lg mb-4">Shop</h3>
             <ul className="space-y-3">
               <li>
@@ -74,37 +84,40 @@ const Footer = () => {
                 </a>
               </li>
             </ul>
-          </div>
+          </div> */}
 
           {/* About */}
           <div className="mb-6  md:mb-0">
             <h3 className="font-playfair font-bold text-lg mb-4">About</h3>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-gray-600 hover:text-pastel-pink">
+                <a
+                  href="/about"
+                  className="text-gray-600 hover:text-pastel-pink"
+                >
                   Our Story
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <a href="#" className="text-gray-600 hover:text-pastel-pink">
                   Artists
                 </a>
-              </li>
-              <li>
+              </li> */}
+              {/* <li>
                 <a href="#" className="text-gray-600 hover:text-pastel-pink">
                   Exhibitions
                 </a>
-              </li>
-              <li>
+              </li> */}
+              {/* <li>
                 <a href="#" className="text-gray-600 hover:text-pastel-pink">
                   Gift Cards
                 </a>
-              </li>
-              <li>
+              </li> */}
+              {/* <li>
                 <a href="#" className="text-gray-600 hover:text-pastel-pink">
                   Become an Artist
                 </a>
-              </li>
+              </li> */}
             </ul>
           </div>
 
@@ -113,27 +126,39 @@ const Footer = () => {
             <h3 className="font-playfair font-bold text-lg mb-4">Help</h3>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-gray-600 hover:text-pastel-pink">
+                <a href="/faq" className="text-gray-600 hover:text-pastel-pink">
                   FAQ
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-pastel-pink">
-                  Shipping & Returns
+                <a
+                  href="/shipping-and-refund"
+                  className="text-gray-600 hover:text-pastel-pink"
+                >
+                  Shipping & Refund
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-pastel-pink">
+                <a
+                  href="/contact-us"
+                  className="text-gray-600 hover:text-pastel-pink"
+                >
                   Contact Us
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-pastel-pink">
+                <a
+                  href="/privacy-policy"
+                  className="text-gray-600 hover:text-pastel-pink"
+                >
                   Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-pastel-pink">
+                <a
+                  href="/service-terms"
+                  className="text-gray-600 hover:text-pastel-pink"
+                >
                   Terms of Service
                 </a>
               </li>
@@ -147,7 +172,7 @@ const Footer = () => {
               © 2025 Doodlecaboodle. All rights reserved.
             </p>
             <div className="flex items-center">
-              <img
+              {/* <img
                 src="https://cdn.visa.com/v2/assets/images/logos/visa/blue/logo.png"
                 alt="Visa"
                 className="h-6 mr-4"
@@ -161,7 +186,7 @@ const Footer = () => {
                 src="https://www.paypalobjects.com/webstatic/mktg/Logo/pp-logo-100px.png"
                 alt="PayPal"
                 className="h-6"
-              />
+              /> */}
             </div>
           </div>
         </div>

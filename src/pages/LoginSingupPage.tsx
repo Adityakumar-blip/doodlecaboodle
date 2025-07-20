@@ -21,7 +21,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "@/firebase/firebaseconfig"; // Make sure to export db from your config
+import { auth, db } from "@/firebase/firebaseconfig";
 
 const LoginSignupPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -30,11 +30,8 @@ const LoginSignupPage = () => {
   const [serverError, setServerError] = useState("");
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  // Navigation hooks
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Get the intended route from location state or search params
   const from =
     location.state?.from ||
     new URLSearchParams(location.search).get("redirect") ||
@@ -48,7 +45,6 @@ const LoginSignupPage = () => {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  // Function to create user document in Firestore
   const createUserDocument = async (user, additionalData) => {
     if (!user) return;
 
@@ -135,42 +131,29 @@ const LoginSignupPage = () => {
       setServerError("");
       try {
         if (isLogin) {
-          // Sign in existing user
           const userCredential = await signInWithEmailAndPassword(
             auth,
             values.email,
             values.password
           );
-
           localStorage.setItem("user", JSON.stringify(userCredential));
-
           console.log("User signed in:", userCredential.user);
-
-          // Navigate to intended route after successful login
           navigate(from, { replace: true });
         } else {
-          // Create new user
           const userCredential = await createUserWithEmailAndPassword(
             auth,
             values.email,
             values.password
           );
-
-          // Update the user's display name
           await updateProfile(userCredential.user, {
             displayName: values.name,
           });
-
-          // Create user document in Firestore
           await createUserDocument(userCredential.user, {
             name: values.name,
             phone: values.phone,
             birthDate: values.birthDate,
           });
-
           console.log("New user created:", userCredential.user);
-
-          // Navigate to intended route after successful signup
           navigate(from, { replace: true });
         }
       } catch (error) {
@@ -189,10 +172,30 @@ const LoginSignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--primary))] via-[hsl(var(--secondary))] to-[hsl(var(--accent))] relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="min-h-screen bg-white relative overflow-hidden">
+      {/* Doodly background with hand-drawn SVG elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <svg className="w-full h-full opacity-20">
+          <path
+            d="M0,100 C150,300 350,0 500,200 S650,300 800,100 T1000,300 1200,200 V600 H0 Z"
+            fill="none"
+            stroke="#3C2F2F"
+            strokeWidth="2"
+            strokeDasharray="10,5"
+            className="animate-pulse"
+          />
+          <path
+            d="M1200,500 C1050,200 850,600 700,400 S550,200 400,400 T200,300 0,400 V600 H1200 Z"
+            fill="none"
+            stroke="#4A3728"
+            strokeWidth="2"
+            strokeDasharray="8,8"
+            className="animate-pulse"
+            style={{ animationDelay: "1s" }}
+          />
+        </svg>
         <div
-          className="absolute opacity-20 transition-transform duration-1000 ease-out"
+          className="absolute opacity-30 transition-transform duration-1000 ease-out"
           style={{
             transform: `translate(${mousePosition.x * 0.02}px, ${
               mousePosition.y * 0.02
@@ -201,13 +204,10 @@ const LoginSignupPage = () => {
             left: "5%",
           }}
         >
-          <Palette
-            size={60}
-            className="text-[hsl(var(--primary))] animate-pulse"
-          />
+          <Palette size={60} className="text-brown-700 animate-pulse" />
         </div>
         <div
-          className="absolute opacity-20 transition-transform duration-1000 ease-out"
+          className="absolute opacity-30 transition-transform duration-1000 ease-out"
           style={{
             transform: `translate(${mousePosition.x * -0.015}px, ${
               mousePosition.y * -0.015
@@ -216,13 +216,10 @@ const LoginSignupPage = () => {
             right: "10%",
           }}
         >
-          <Heart
-            size={45}
-            className="text-[hsl(var(--secondary))] animate-bounce"
-          />
+          <Heart size={45} className="text-black animate-bounce" />
         </div>
         <div
-          className="absolute opacity-20 transition-transform duration-1000 ease-out"
+          className="absolute opacity-30 transition-transform duration-1000 ease-out"
           style={{
             transform: `translate(${mousePosition.x * 0.01}px, ${
               mousePosition.y * 0.01
@@ -233,45 +230,42 @@ const LoginSignupPage = () => {
         >
           <Star
             size={40}
-            className="text-[hsl(var(--accent))] animate-spin"
+            className="text-brown-800 animate-spin"
             style={{ animationDuration: "8s" }}
           />
         </div>
-        <div className="absolute top-0 left-0 w-72 h-72 bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--secondary))] rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-r from-[hsl(var(--secondary))] to-[hsl(var(--accent))] rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--primary))] rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--accent))] rounded-full mb-4 shadow-lg">
+            {/* <div className="inline-flex items-center justify-center w-16 h-16 bg-brown-700 rounded-full mb-4 shadow-lg">
               <Sparkles className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-3xl font-bold text-[hsl(var(--foreground))] mb-2">
-              {isLogin ? "Welcome Back!" : "Join Our Art Community"}
+            </div> */}
+            <h1 className="text-3xl font-bold text-black font-handwritten">
+              {isLogin ? "Welcome Back!" : "Join Our Doodle Crew!"}
             </h1>
-            <p className="text-[hsl(var(--muted-foreground))]">
+            <p className="text-brown-600 font-handwritten">
               {isLogin
-                ? "Sign in to discover amazing artworks"
-                : "Create your account and start your art journey"}
+                ? "Sign in to sketch your masterpiece"
+                : "Start your doodly adventure today"}
             </p>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-[hsl(var(--border))] p-8 transition-all duration-300 hover:shadow-2xl">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-brown-300 p-8 transition-all duration-300 hover:shadow-2xl">
             {serverError && (
               <p
-                className="text-[hsl(var(--destructive))] text-sm mb-4"
+                className="text-red-600 text-sm mb-4 font-handwritten"
                 role="alert"
               >
                 {serverError}
               </p>
             )}
-            <form onSubmit={formik.handleSubmit} className="space-y-6">
+            <div className="space-y-6">
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[hsl(var(--foreground))] flex items-center gap-2">
-                    <User size={16} /> Full Name
+                  <label className="text-sm font-medium text-black font-handwritten flex items-center gap-2">
+                    <User size={16} className="text-brown-700" /> Full Name
                   </label>
                   <input
                     type="text"
@@ -279,17 +273,17 @@ const LoginSignupPage = () => {
                     value={formik.values.name}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent transition-all duration-200 ${
+                    className={`w-full px-4 py-3 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-handwritten ${
                       formik.touched.name && formik.errors.name
-                        ? "border-[hsl(var(--destructive))]"
-                        : "border-[hsl(var(--border))]"
+                        ? "border-red-600"
+                        : ""
                     }`}
-                    placeholder="Enter your full name"
+                    placeholder="Your doodly name"
                     aria-label="Full Name"
                   />
                   {formik.touched.name && formik.errors.name && (
                     <p
-                      className="text-[hsl(var(--destructive))] text-sm"
+                      className="text-red-600 text-sm font-handwritten"
                       role="alert"
                     >
                       {formik.errors.name}
@@ -299,8 +293,8 @@ const LoginSignupPage = () => {
               )}
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-[hsl(var(--foreground))] flex items-center gap-2">
-                  <Mail size={16} /> Email Address
+                <label className="text-sm font-medium text-black font-handwritten flex items-center gap-2">
+                  <Mail size={16} className="text-brown-700" /> Email Address
                 </label>
                 <input
                   type="email"
@@ -308,17 +302,17 @@ const LoginSignupPage = () => {
                   value={formik.values.email}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent transition-all duration-200 ${
+                  className={`w-full px-4 py-3 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-handwritten ${
                     formik.touched.email && formik.errors.email
-                      ? "border-[hsl(var(--destructive))]"
-                      : "border-[hsl(var(--border))]"
+                      ? "border-red-600"
+                      : ""
                   }`}
-                  placeholder="Enter your email"
+                  placeholder="Your email sketch"
                   aria-label="Email Address"
                 />
                 {formik.touched.email && formik.errors.email && (
                   <p
-                    className="text-[hsl(var(--destructive))] text-sm"
+                    className="text-red-600 text-sm font-handwritten"
                     role="alert"
                   >
                     {formik.errors.email}
@@ -328,8 +322,8 @@ const LoginSignupPage = () => {
 
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[hsl(var(--foreground))] flex items-center gap-2">
-                    <Phone size={16} /> Phone Number
+                  <label className="text-sm font-medium text-black font-handwritten flex items-center gap-2">
+                    <Phone size={16} className="text-brown-700" /> Phone Number
                   </label>
                   <input
                     type="tel"
@@ -337,17 +331,17 @@ const LoginSignupPage = () => {
                     value={formik.values.phone}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent transition-all duration-200 ${
+                    className={`w-full px-4 py-3 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-handwritten ${
                       formik.touched.phone && formik.errors.phone
-                        ? "border-[hsl(var(--destructive))]"
-                        : "border-[hsl(var(--border))]"
+                        ? "border-red-600"
+                        : ""
                     }`}
-                    placeholder="Enter your phone number"
+                    placeholder="Your digits"
                     aria-label="Phone Number"
                   />
                   {formik.touched.phone && formik.errors.phone && (
                     <p
-                      className="text-[hsl(var(--destructive))] text-sm"
+                      className="text-red-600 text-sm font-handwritten"
                       role="alert"
                     >
                       {formik.errors.phone}
@@ -358,8 +352,9 @@ const LoginSignupPage = () => {
 
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[hsl(var(--foreground))] flex items-center gap-2">
-                    <Calendar size={16} /> Date of Birth
+                  <label className="text-sm font-medium text-black font-handwritten flex items-center gap-2">
+                    <Calendar size={16} className="text-brown-700" /> Date of
+                    Birth
                   </label>
                   <input
                     type="date"
@@ -367,16 +362,16 @@ const LoginSignupPage = () => {
                     value={formik.values.birthDate}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent transition-all duration-200 ${
+                    className={`w-full px-4 py-3 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-handwritten ${
                       formik.touched.birthDate && formik.errors.birthDate
-                        ? "border-[hsl(var(--destructive))]"
-                        : "border-[hsl(var(--border))]"
+                        ? "border-red-600"
+                        : ""
                     }`}
                     aria-label="Date of Birth"
                   />
                   {formik.touched.birthDate && formik.errors.birthDate && (
                     <p
-                      className="text-[hsl(var(--destructive))] text-sm"
+                      className="text-red-600 text-sm font-handwritten"
                       role="alert"
                     >
                       {formik.errors.birthDate}
@@ -386,8 +381,8 @@ const LoginSignupPage = () => {
               )}
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-[hsl(var(--foreground))] flex items-center gap-2">
-                  <Lock size={16} /> Password
+                <label className="text-sm font-medium text-black font-handwritten flex items-center gap-2">
+                  <Lock size={16} className="text-brown-700" /> Password
                 </label>
                 <div className="relative">
                   <input
@@ -396,18 +391,18 @@ const LoginSignupPage = () => {
                     value={formik.values.password}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent transition-all duration-200 ${
+                    className={`w-full px-4 py-3 pr-12 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-handwritten ${
                       formik.touched.password && formik.errors.password
-                        ? "border-[hsl(var(--destructive))]"
-                        : "border-[hsl(var(--border))]"
+                        ? "border-red-600"
+                        : ""
                     }`}
-                    placeholder="Enter your password"
+                    placeholder="Your secret code"
                     aria-label="Password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-brown-600 hover:text-brown-800"
                     aria-label="Toggle password visibility"
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -415,7 +410,7 @@ const LoginSignupPage = () => {
                 </div>
                 {formik.touched.password && formik.errors.password && (
                   <p
-                    className="text-[hsl(var(--destructive))] text-sm"
+                    className="text-red-600 text-sm font-handwritten"
                     role="alert"
                   >
                     {formik.errors.password}
@@ -425,8 +420,9 @@ const LoginSignupPage = () => {
 
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[hsl(var(--foreground))] flex items-center gap-2">
-                    <Lock size={16} /> Confirm Password
+                  <label className="text-sm font-medium text-black font-handwritten flex items-center gap-2">
+                    <Lock size={16} className="text-brown-700" /> Confirm
+                    Password
                   </label>
                   <div className="relative">
                     <input
@@ -435,13 +431,13 @@ const LoginSignupPage = () => {
                       value={formik.values.confirmPassword}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent transition-all duration-200 ${
+                      className={`w-full px-4 py-3 pr-12 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-handwritten ${
                         formik.touched.confirmPassword &&
                         formik.errors.confirmPassword
-                          ? "border-[hsl(var(--destructive))]"
-                          : "border-[hsl(var(--border))]"
+                          ? "border-red-600"
+                          : ""
                       }`}
-                      placeholder="Confirm your password"
+                      placeholder="Confirm your secret code"
                       aria-label="Confirm Password"
                     />
                     <button
@@ -449,7 +445,7 @@ const LoginSignupPage = () => {
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-brown-600 hover:text-brown-800"
                       aria-label="Toggle confirm password visibility"
                     >
                       {showConfirmPassword ? (
@@ -462,7 +458,7 @@ const LoginSignupPage = () => {
                   {formik.touched.confirmPassword &&
                     formik.errors.confirmPassword && (
                       <p
-                        className="text-[hsl(var(--destructive))] text-sm"
+                        className="text-red-600 text-sm font-handwritten"
                         role="alert"
                       >
                         {formik.errors.confirmPassword}
@@ -480,20 +476,20 @@ const LoginSignupPage = () => {
                       checked={formik.values.agreeToTerms}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      className="mt-1 w-4 h-4 text-[hsl(var(--primary))] border-[hsl(var(--border))] rounded focus:ring-[hsl(var(--primary))]"
+                      className="mt-1 w-4 h-4 text-brown-700 border-brown-300 rounded focus:ring-brown-500"
                     />
-                    <span className="text-sm text-[hsl(var(--muted-foreground))]">
+                    <span className="text-sm text-brown-600 font-handwritten">
                       I agree to the{" "}
                       <a
-                        href="#"
-                        className="text-[hsl(var(--primary))] hover:underline"
+                        href="/service-terms"
+                        className="text-brown-800 hover:underline"
                       >
                         Terms of Service
                       </a>{" "}
                       and{" "}
                       <a
-                        href="#"
-                        className="text-[hsl(var(--primary))] hover:underline"
+                        href="/privacy-policy"
+                        className="text-brown-800 hover:underline"
                       >
                         Privacy Policy
                       </a>
@@ -502,7 +498,7 @@ const LoginSignupPage = () => {
                   {formik.touched.agreeToTerms &&
                     formik.errors.agreeToTerms && (
                       <p
-                        className="text-[hsl(var(--destructive))] text-sm"
+                        className="text-red-600 text-sm font-handwritten"
                         role="alert"
                       >
                         {formik.errors.agreeToTerms}
@@ -516,25 +512,20 @@ const LoginSignupPage = () => {
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
-                      className="w-4 h-4 text-[hsl(var(--primary))] border-[hsl(var(--border))] rounded focus:ring-[hsl(var(--primary))]"
+                      className="w-4 h-4 text-brown-700 border-brown-300 rounded focus:ring-brown-500"
                     />
-                    <span className="text-sm text-[hsl(var(--muted-foreground))]">
+                    <span className="text-sm text-brown-600 font-handwritten">
                       Remember me
                     </span>
                   </label>
-                  <a
-                    href="#"
-                    className="text-sm text-[hsl(var(--primary))] hover:underline"
-                  >
-                    Forgot password?
-                  </a>
                 </div>
               )}
 
               <button
-                type="submit"
+                type="button"
+                onClick={formik.handleSubmit}
                 disabled={formik.isSubmitting}
-                className={`w-full bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--accent))] text-[hsl(var(--primary-foreground))] py-3 px-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2 ${
+                className={`w-full bg-pastel-peach text-black py-3 px-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2 font-handwritten ${
                   formik.isSubmitting ? "opacity-75 cursor-not-allowed" : ""
                 }`}
               >
@@ -550,74 +541,50 @@ const LoginSignupPage = () => {
                   </>
                 )}
               </button>
-            </form>
+            </div>
 
             <div className="mt-6 text-center">
-              <p className="text-[hsl(var(--muted-foreground))]">
-                {isLogin
-                  ? "Don't have an account?"
-                  : "Already have an account?"}
+              <p className="text-brown-600 font-handwritten">
+                {isLogin ? "New to the doodle crew?" : "Already a doodler?"}
                 <button
                   onClick={toggleMode}
-                  className="ml-2 text-[hsl(var(--primary))] hover:underline font-medium transition-colors"
+                  className="ml-2 text-brown-800 hover:underline font-medium transition-colors font-handwritten"
                 >
                   {isLogin ? "Sign up" : "Sign in"}
                 </button>
               </p>
             </div>
-
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-[hsl(var(--border))]"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-[hsl(var(--muted-foreground))]">
-                    Or continue with
-                  </span>
-                </div>
-              </div>
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <button className="flex items-center justify-center px-4 py-2 border border-[hsl(var(--border))] rounded-lg text-sm font-medium text-[hsl(var(--foreground))] bg-white hover:bg-[hsl(var(--muted))] transition-colors">
-                  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                    <path
-                      fill="#4285F4"
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    />
-                    <path
-                      fill="#34A853"
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    />
-                    <path
-                      fill="#EA4335"
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    />
-                  </svg>
-                  Google
-                </button>
-                <button className="flex items-center justify-center px-4 py-2 border border-[hsl(var(--border))] rounded-lg text-sm font-medium text-[hsl(var(--foreground))] bg-white hover:bg-[hsl(var(--muted))] transition-colors">
-                  <svg
-                    className="w-5 h-5 mr-2"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                  </svg>
-                  Facebook
-                </button>
-              </div>
-            </div>
           </div>
 
-          <div className="text-center mt-6 text-sm text-[hsl(var(--muted-foreground))]">
+          <div className="text-center mt-6 text-sm text-brown-600 font-handwritten">
             <p>© 2025 DoodleCaboodle. All rights reserved.</p>
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes pulse {
+          0% {
+            opacity: 0.2;
+          }
+          50% {
+            opacity: 0.4;
+          }
+          100% {
+            opacity: 0.2;
+          }
+        }
+        .animate-pulse {
+          animation: pulse 3s infinite;
+        }
+        @font-face {
+          font-family: "Handwritten";
+          src: url("https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap");
+        }
+        .font-handwritten {
+          font-family: "Caveat", cursive;
+        }
+      `}</style>
     </div>
   );
 };

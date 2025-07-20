@@ -1,38 +1,44 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import image1 from "@/assets/01.jpg";
+import image1 from "@/assets/06.png";
 import image2 from "@/assets/02.png";
 import image3 from "@/assets/03.png";
+import mobile1 from "@/assets/04.png";
+import mobile2 from "@/assets/mobile-02.png";
+import mobile3 from "@/assets/mobile-01.png";
+import { Button } from "./ui/button";
 
 interface HeroImage {
-  url: string;
+  desktopUrl: string;
+  mobileUrl: string;
   title: string;
   subtitle: string;
   tag: string;
 }
 
-const heroImages = [
+const heroImages: HeroImage[] = [
   {
-    url: image1, //https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80
-    title: "Discover Unique Artworks",
-    subtitle:
-      "Explore our curated collection of handpicked paintings, illustrations, and sculptures from emerging and established artists across the globe.",
-    tag: "New Collection: Summer Abstracts",
-  },
-  {
-    url: image2, //https://images.unsplash.com/photo-1545033131-485ea67fd7c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80
-    title: "Limited Edition Prints",
-    subtitle:
-      "Own a piece of exclusive artwork with our limited edition prints, each one numbered and signed by the artist.",
+    desktopUrl: image2,
+    mobileUrl: mobile2,
+    title: "Your Gift, Their Smile",
+    subtitle: "Customized portraits and art gifts that truly connect.",
     tag: "Limited Time: Free Shipping",
   },
   {
-    url: image3, //https://images.unsplash.com/photo-1536924940846-227afb31e2a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80
-    title: "Art That Speaks To You",
-    subtitle:
-      "Find pieces that resonate with your personal style and transform your space into a reflection of your unique taste.",
+    desktopUrl: image3,
+    mobileUrl: mobile3,
+    title: "Make Moments Memorable",
+    subtitle: "Thoughtfully handcrafted gifts for every occasion",
     tag: "Featured: Abstract Expressionism",
+  },
+  {
+    desktopUrl: image1,
+    mobileUrl: mobile1,
+    title: "Gift, That Stands Out",
+    subtitle:
+      "Explore our curated collection of handpicked paintings, illustrations, and sculptures from emerging and established artists across the globe.",
+    tag: "New Collection: Summer Abstracts",
   },
 ];
 
@@ -40,6 +46,18 @@ const HeroSection: React.FC = () => {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile device based on window width
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768); // Assuming 768px as the mobile breakpoint
+    };
+
+    handleResize(); // Initial check
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const nextSlide = () => {
     if (isTransitioning) return;
@@ -84,18 +102,15 @@ const HeroSection: React.FC = () => {
         >
           <div className="absolute inset-0 bg-black/30 z-10" />
           <img
-            src={image.url}
+            src={isMobile ? image.mobileUrl : image.desktopUrl}
             alt={image.title}
             className="object-cover w-full h-full"
           />
 
           {/* Content overlay */}
-          <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-16 lg:px-24 z-20">
+          <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-16 lg:px-24 z-20 items-start">
             <div className="max-w-2xl">
-              <span className="inline-block px-4 py-1 mb-4 text-xs font-medium tracking-wider text-white uppercase bg-black/60 rounded-full">
-                {image.tag}
-              </span>
-              <h2 className="mb-4 text-4xl md:text-5xl lg:text-6xl font-bold text-white">
+              <h2 className="mb-4 text-4xl  md:text-5xl lg:text-6xl font-bold text-white">
                 {image.title}
               </h2>
               <p className="mb-8 text-lg md:text-xl text-white/90">
@@ -103,17 +118,17 @@ const HeroSection: React.FC = () => {
               </p>
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => navigate("/collections/abstract-art")}
-                  className="px-6 py-3 text-sm font-medium text-black bg-white rounded-md hover:bg-white/90 transition-colors"
+                  onClick={() => navigate("/artwork-browse")}
+                  className="px-6 py-3 text-sm font-semibold text-black bg-white rounded-md hover:bg-white/90 transition-colors"
                 >
                   Explore Collection
                 </button>
-                {/* <button
-                  onClick={() => navigate("/artists")}
-                  className="px-6 py-3 text-sm font-medium text-black bg-transparent text-white border border-white rounded-md hover:bg-white/90 hover:text-black transition-colors"
+                <Button
+                  onClick={() => navigate("/get-yours")}
+                  className="px-8 py-4 text-sm font-medium text-black bg-transparent text-white border border-white rounded-md hover:bg-white/90 hover:text-black transition-colors"
                 >
-                  Meet the artist
-                </button> */}
+                  Get Yours
+                </Button>
               </div>
             </div>
           </div>
@@ -123,14 +138,14 @@ const HeroSection: React.FC = () => {
       {/* Navigation buttons */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 z-30 -translate-y-1/2 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm transition-all"
+        className="absolute hidden md:block left-4 top-1/2 z-30 -translate-y-1/2 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm transition-all"
         aria-label="Previous slide"
       >
         <ChevronLeft size={24} />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 z-30 -translate-y-1/2 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm transition-all"
+        className="absolute hidden md:block right-4 top-1/2 z-30 -translate-y-1/2 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm transition-all"
         aria-label="Next slide"
       >
         <ChevronRight size={24} />

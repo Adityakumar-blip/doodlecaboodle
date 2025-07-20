@@ -1,13 +1,107 @@
-import { Artist, getArtistById } from "@/data/dummyArtist";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
+import { db } from "@/firebase/firebaseconfig";
+import WorkCard from "./Ourworkcard";
+
+// Define interfaces
+interface Artist {
+  id: string;
+  bio: string;
+  createdAt: { seconds: number; nanoseconds: number };
+  email: string;
+  name: string;
+  phone: string;
+  socialLinks: string[];
+  status: string;
+  updatedAt: { seconds: number; nanoseconds: number };
+  artType?: string;
+  bannerImage?: string;
+  profileImage?: string;
+  location?: string;
+  services?: string[];
+  specializesIn?: string;
+}
+
+interface Work {
+  id: string;
+  imageUrl: string;
+  title: string;
+  artistName: string;
+  price: number;
+  category: string;
+  // Add other fields as needed
+}
+
+// Placeholder WorkCard component (update as per your actual WorkCard implementation)
+interface WorkCardProps extends Work {
+  props: Work;
+}
 
 const ArtistDetail: React.FC = () => {
+  const [artist, setArtist] = useState<Artist | null>(null);
+  const [works, setWorks] = useState<Work[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const artist = getArtistById(id || "");
+
+  // Fetch artist data and their works from Firestore
+  useEffect(() => {
+    const fetchArtistAndWorks = async () => {
+      if (!id) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        // Fetch artist data
+        const artistDoc = doc(db, "artists", id);
+        const artistSnapshot = await getDoc(artistDoc);
+
+        if (artistSnapshot.exists()) {
+          setArtist({ id, ...artistSnapshot.data() } as Artist);
+        } else {
+          setArtist(null);
+        }
+
+        // Fetch works from ourworks collection where artistId matches
+        const worksQuery = query(
+          collection(db, "ourworks"),
+          where("artistId", "==", id)
+        );
+        const worksSnapshot = await getDocs(worksQuery);
+        const worksData = worksSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Work[];
+
+        setWorks(worksData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setArtist(null);
+        setWorks([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchArtistAndWorks();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   if (!artist) {
     return (
@@ -22,22 +116,6 @@ const ArtistDetail: React.FC = () => {
       </div>
     );
   }
-
-  // if (isLoading) {
-  //   return (
-  //     <div className="flex justify-center items-center h-screen">
-  //       <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-  //     </div>
-  //   );
-  // }
-
-  // if (!artist) {
-  //   return (
-  //     <div className="container mx-auto px-4 py-10 text-center">
-  //       <h1 className="text-2xl font-bold">Artist not found</h1>
-  //     </div>
-  //   );
-  // }
 
   // Determine the background style based on artist type
   const getArtistBackground = () => {
@@ -55,48 +133,32 @@ const ArtistDetail: React.FC = () => {
     }
   };
 
+  const Specializes = artist?.specializesIn.split(",");
+
   return (
     <div className={`min-h-screen ${getArtistBackground()}`}>
       {/* Header/Banner */}
       <div
         className="h-64 bg-cover bg-center"
-        style={{ backgroundImage: `url(${artist.bannerImage})` }}
+        style={{
+          backgroundImage: `url(${
+            artist.bannerImage ||
+            "https://images.unsplash.com/photo-1541663097887-ae5703cf56d3?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NTZ8fGJhY2tncm91bmQlMjBpbWFnZXxlbnwwfHwwfHx8MA%3D%3D"
+          })`,
+        }}
       >
         <div className="bg-black bg-opacity-40 h-full flex items-end">
           <div className="container mx-auto px-4 pb-8">
-            <div className="flex items-end">
-              <div className="h-24 w-24 rounded-full bg-white p-1">
+            <div className="flex  items-center">
+              <div className="h-32 w-32 rounded-full bg-transparent p-1">
                 <img
-                  src={artist.profileImage}
+                  src={artist.profileImage || "https://via.placeholder.com/150"}
                   alt={`${artist.name} profile`}
                   className="w-full h-full object-cover rounded-full"
                 />
               </div>
               <div className="ml-4 text-white">
                 <h1 className="text-3xl font-bold">{artist.name}</h1>
-                <p className="flex items-center mt-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 mr-1"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                  {artist.location}
-                </p>
               </div>
             </div>
           </div>
@@ -108,7 +170,7 @@ const ArtistDetail: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Left Column - Artist Info */}
           <div className="md:col-span-1">
-            <div className=" rounded-xl p-6">
+            <div className="rounded-xl p-6">
               <h2 className="text-xl font-bold mb-4">About the Artist</h2>
               <p className="text-gray-700 mb-4">{artist.bio}</p>
 
@@ -117,135 +179,57 @@ const ArtistDetail: React.FC = () => {
                   Specializes in:
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {artist.services.map((service, index) => (
+                  {Specializes?.map((service, index) => (
                     <span
                       key={index}
-                      className=" border border-gray-500 px-3 py-1 rounded-full text-sm"
+                      className="border border-gray-500 px-3 py-1 rounded-full text-sm"
                     >
                       {service}
                     </span>
-                  ))}
+                  )) || (
+                    <span className="text-gray-500">No services listed</span>
+                  )}
                 </div>
               </div>
 
-              {/* <div className="mb-4">
-                <h3 className="font-semibold text-gray-800 mb-2">Contact:</h3>
-                <p className="text-gray-700">{artist.email}</p>
-                {artist.phone && (
-                  <p className="text-gray-700">{artist.phone}</p>
-                )}
-              </div>
-
-              <button className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors">
-                Get a Quote
-              </button> */}
+              <button className="w-full bg-pastel-peach text-black py-2 px-4 rounded transition-colors">
+                Message Artist
+              </button>
             </div>
           </div>
 
           {/* Right Column - Portfolio */}
           <div className="md:col-span-2">
-            <div className=" rounded-xl p-6">
+            <div className="rounded-xl p-6">
               <h2 className="text-xl font-bold mb-4">Portfolio</h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {artist.portfolio?.map((work, index) => (
-                  <div
-                    key={index}
-                    className="rounded-lg bg-white overflow-hidden shadow-md hover:shadow-lg transition-shadow"
-                  >
-                    <img
-                      src={work.imageUrl}
-                      alt={work.title}
-                      className="w-full h-48 object-cover"
+                {works.length > 0 ? (
+                  works.map((work) => (
+                    <WorkCard
+                      key={work.id}
+                      id={work.id}
+                      imageUrl={work.imageUrl}
+                      title={work.title}
+                      artistName={work.artistName}
+                      price={work.price}
+                      category={work.category}
+                      props={work}
                     />
-                    <div className="p-3">
-                      <h3 className="font-semibold">{work.title}</h3>
-                      <p className="text-sm text-gray-600">{work.category}</p>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-gray-500">No portfolio items available</p>
+                )}
               </div>
 
-              {artist.portfolio && artist.portfolio.length > 0 && (
+              {/* {works.length > 0 && (
                 <div className="mt-6 text-center">
                   <button className="text-blue-600 hover:text-blue-800 font-medium">
                     View All Works
                   </button>
                 </div>
-              )}
+              )} */}
             </div>
-
-            {/* Reviews Section */}
-            {/* <div className="bg-white rounded-lg shadow-md p-6 mt-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Reviews</h2>
-                <span className="flex items-center text-yellow-500">
-                  {[...Array(5)].map((_, i) => (
-                    <svg
-                      key={i}
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      viewBox="0 0 20 20"
-                      fill={
-                        i < Math.floor(artist.rating || 0)
-                          ? "currentColor"
-                          : "none"
-                      }
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                  <span className="ml-2 text-gray-700">
-                    {artist.rating?.toFixed(1)}
-                  </span>
-                </span>
-              </div>
-
-              {artist.reviews?.map((review, index) => (
-                <div
-                  key={index}
-                  className={`${
-                    index > 0 ? "border-t border-gray-200 pt-4" : ""
-                  } mb-4`}
-                >
-                  <div className="flex justify-between">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 rounded-full overflow-hidden">
-                        <img
-                          src={review.userImage}
-                          alt={review.userName}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="ml-3">
-                        <p className="font-medium">{review.userName}</p>
-                        <p className="text-sm text-gray-500">{review.date}</p>
-                      </div>
-                    </div>
-                    <div className="flex text-yellow-500">
-                      {[...Array(5)].map((_, i) => (
-                        <svg
-                          key={i}
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4"
-                          viewBox="0 0 20 20"
-                          fill={i < review.rating ? "currentColor" : "none"}
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                  </div>
-                  <p className="mt-2 text-gray-700">{review.comment}</p>
-                </div>
-              ))}
-
-              <div className="mt-6 text-center">
-                <button className="text-blue-600 hover:text-blue-800 font-medium">
-                  See All Reviews
-                </button>
-              </div>
-            </div> */}
           </div>
         </div>
       </div>

@@ -1,45 +1,33 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ArrowRight } from "lucide-react";
 
+import navya from "../assets/navyaTiwari.png";
+import shivam from "../assets/shivam.png";
+
 const artists = [
   {
     id: 1,
-    name: "Sophia Nguyen",
-    photoUrl:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
+    name: "Navya Tiwari",
+    photoUrl: navya,
     artStyle: "Contemporary Aesthetic",
     location: "San Francisco, CA",
     artworks: 24,
     featuredArt:
-      "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80",
-    artTitle: "CURATION",
+      "https://res.cloudinary.com/dwmrrgaxd/image/upload/v1750393747/asgowoblwpqzwnkirf4o.png",
+    artTitle: "Napolean Bonaparte",
     artSubtitle: "FALL IN LOVE WITH ART",
   },
   {
     id: 2,
-    name: "Marcus Bennett",
-    photoUrl:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
+    name: "Shivam Patel",
+    photoUrl: shivam,
     artStyle: "Contemporary Aesthetic",
     location: "New York, NY",
     artworks: 18,
     featuredArt:
-      "https://images.unsplash.com/photo-1486718448742-163732cd1544?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80",
-    artTitle: "EXPRESSION",
+      "https://res.cloudinary.com/dwmrrgaxd/image/upload/v1750393917/ggfypdxfgyiesoiukp3j.png",
+    artTitle: "Dog with Fur",
     artSubtitle: "DISCOVER NEW PERSPECTIVES",
-  },
-  {
-    id: 3,
-    name: "Amara Wilson",
-    photoUrl:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-    artStyle: "Contemporary Aesthetic",
-    location: "Portland, OR",
-    artworks: 31,
-    featuredArt:
-      "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80",
-    artTitle: "MOVEMENT",
-    artSubtitle: "FEEL THE EMOTION",
   },
 ];
 
@@ -96,16 +84,12 @@ const FeaturedArtistCarousel = () => {
     };
   }, [currentIndex]);
 
-  // Add scroll-based text rotation
   useEffect(() => {
-    // Initial position on mount
     const initialScrollY = window.scrollY;
     setTextOffset((initialScrollY * 0.1) % 100);
 
     const handleScroll = () => {
-      // Calculate text offset based on scroll position
       const scrollY = window.scrollY;
-      // Use modulo to keep the value between 0-100 for startOffset
       const newOffset = (scrollY * 0.1) % 100;
       setTextOffset(newOffset);
     };
@@ -154,7 +138,6 @@ const FeaturedArtistCarousel = () => {
                   </div>
                 </div>
 
-                {/* Artist name on the left side */}
                 <div className="absolute left-0 bottom-0 p-6">
                   <div
                     className={`transition-all duration-500 ${
@@ -195,57 +178,27 @@ const FeaturedArtistCarousel = () => {
                 Prev
               </button>
               <div
-                className="relative w-[410px] h-[520px] mb-8 group cursor-pointer"
+                className="relative w-[360px] h-[460px] sm:w-[400px] sm:h-[500px] md:w-[480px] md:h-[600px] lg:w-[500px] lg:h-[640px] mb-8 group cursor-pointer"
                 onMouseEnter={() => setIsHovering(true)}
                 onMouseLeave={() => setIsHovering(false)}
               >
-                {/* SVG with rotating text on elliptical path - now controlled by scroll */}
-                <div className="absolute inset-0">
-                  <svg viewBox="0 0 410 120" className="w-full h-full">
-                    <defs>
-                      <path
-                        id="ellipticalPath"
-                        d="M205,260 a160,200 0 1,1 0.1,0"
-                        fill="none"
-                      />
-                    </defs>
-
-                    {/* Text that follows the elliptical path with scroll-controlled offset */}
-                    <text fontSize="16.5" fill="gray">
-                      <textPath
-                        href="#ellipticalPath"
-                        startOffset={`${textOffset}%`}
-                        className="tracking-wider uppercase"
-                      >
-                        {currentArtist.artStyle} • {currentArtist.location} •{" "}
-                        {currentArtist.artworks} Artworks •{" "}
-                        {currentArtist.artStyle} • {currentArtist.location} •{" "}
-                        {currentArtist.artworks} Artworks •
-                      </textPath>
-                    </text>
-                  </svg>
-                </div>
-
-                {/* Artist image container */}
-                <div className="absolute inset-[15%] rounded-[50%] overflow-hidden bg-pastel-purple/20 border-4 border-pastel-pink/20">
-                  <div className="relative w-full h-full">
+                <div className="relative w-full h-full overflow-hidden">
+                  <img
+                    src={currentArtist.photoUrl}
+                    alt={currentArtist.name}
+                    className={`w-full h-full object-contain transition-all duration-700 ${
+                      isAnimating ? "scale-110 blur-sm" : "scale-100"
+                    }`}
+                  />
+                  {previousArtist && (
                     <img
-                      src={currentArtist.photoUrl}
-                      alt={currentArtist.name}
-                      className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${
-                        isAnimating ? "scale-110 blur-sm" : "scale-100"
+                      src={previousArtist.photoUrl}
+                      alt={previousArtist.name}
+                      className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-700 ${
+                        isAnimating ? "opacity-0" : "opacity-0"
                       }`}
                     />
-                    {previousArtist && (
-                      <img
-                        src={previousArtist.photoUrl}
-                        alt={previousArtist.name}
-                        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
-                          isAnimating ? "opacity-0" : "opacity-0"
-                        }`}
-                      />
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
               <button
