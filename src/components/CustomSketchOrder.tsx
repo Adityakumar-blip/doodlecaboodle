@@ -258,7 +258,7 @@ const CustomSketchOrder: React.FC = () => {
       const selectedSize = paperSizes.find(
         (p) => p.value === orderDetails.paperSize
       );
-      let basePrice = selectedSize ? selectedSize.offerPrice : 0;
+      let basePrice = selectedSize ? selectedSize.price : 0;
       if (orderDetails.numberOfFaces === 2) {
         basePrice += orderDetails.paperSize === "A5" ? 500 : 700;
       } else if (orderDetails.numberOfFaces > 2) {
@@ -286,7 +286,7 @@ const CustomSketchOrder: React.FC = () => {
         size: {
           value: orderDetails.paperSize,
           label: selectedSize?.label || orderDetails.paperSize,
-          priceAdjustment: selectedSize ? selectedSize.offerPrice - 1000 : 0,
+          priceAdjustment: selectedSize.price,
         },
         uploadedImageUrl: imageUrl,
         timestamp: Date.now(),

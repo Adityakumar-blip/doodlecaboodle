@@ -89,8 +89,6 @@ const Cart = ({
   const auth = getAuth();
   const navigate = useNavigate();
 
-  console.log("cart items", cartItems);
-
   // Check authentication status, fetch user details, and sync local storage cart
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -196,7 +194,16 @@ const Cart = ({
     if (isAuthenticated && auth.currentUser) {
       // Remove from Firebase
       try {
-        await deleteDoc(doc(db, "users", auth.currentUser.uid, "cart", id));
+        const cartRef = collection(db, "users", auth.currentUser.uid, "cart");
+        const q = query(cartRef, where("id", "==", id));
+
+        const querySnapshot = await getDocs(q);
+
+        querySnapshot.forEach(async (docSnapshot) => {
+          await deleteDoc(
+            doc(db, "users", auth.currentUser.uid, "cart", docSnapshot.id)
+          );
+        });
         setCartItems(cartItems.filter((item) => item.id !== id));
         toast.success("Item removed from cart");
       } catch (error) {
@@ -445,8 +452,6 @@ const Cart = ({
               },
               { timeout: 8000 }
             );
-
-            console.log("cart", cartItems);
 
             if (verifyResponse.data.success) {
               const order: Order = {

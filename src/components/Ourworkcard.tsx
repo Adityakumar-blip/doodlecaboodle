@@ -10,6 +10,7 @@ interface WorkCardProps {
   price?: any;
   category: string;
   props: any;
+  isClickable?: boolean;
   onAddToCart?: (e: React.MouseEvent) => void;
 }
 
@@ -22,6 +23,7 @@ const WorkCard = ({
   category,
   onAddToCart,
   props,
+  isClickable = true,
 }: WorkCardProps) => {
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
@@ -55,12 +57,12 @@ const WorkCard = ({
   return (
     <div
       className="art-card group relative cursor-pointer"
-      onClick={handleCardClick}
+      onClick={isClickable && handleCardClick}
     >
       {/* Image Container */}
       <div
         className="art-card group relative cursor-pointer"
-        onClick={handleCardClick}
+        onClick={isClickable && handleCardClick}
       >
         {/* Image Container with hover effect */}
         <div className="relative overflow-hidden aspect-[3/4]">

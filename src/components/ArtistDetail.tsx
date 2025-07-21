@@ -8,8 +8,10 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "@/firebase/firebaseconfig";
 import WorkCard from "./Ourworkcard";
+import axios from "axios";
 
 // Define interfaces
 interface Artist {
@@ -37,10 +39,9 @@ interface Work {
   artistName: string;
   price: number;
   category: string;
-  // Add other fields as needed
 }
 
-// Placeholder WorkCard component (update as per your actual WorkCard implementation)
+// Placeholder WorkCard component
 interface WorkCardProps extends Work {
   props: Work;
 }
@@ -49,8 +50,13 @@ const ArtistDetail: React.FC = () => {
   const [artist, setArtist] = useState<Artist | null>(null);
   const [works, setWorks] = useState<Work[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [showMessageModal, setShowMessageModal] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
+  const [isSending, setIsSending] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const auth = getAuth();
 
   // Fetch artist data and their works from Firestore
   useEffect(() => {
@@ -95,6 +101,75 @@ const ArtistDetail: React.FC = () => {
     fetchArtistAndWorks();
   }, [id]);
 
+  // Handle message sending
+  const handleSendMessage = async () => {
+    const user = auth.currentUser;
+
+    if (!user) {
+      setError("Please log in to send a message");
+      return;
+    }
+
+    if (!message.trim()) {
+      setError("Message cannot be empty");
+      return;
+    }
+
+    setIsSending(true);
+    setError("");
+
+    // Create HTML message template
+    const htmlMessage = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #f8f8f8; padding: 20px; text-align: center; }
+          .content { padding: 20px; background-color: #ffffff; border: 1px solid #e0e0e0; }
+          .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h2>New Message from DoodleCaboodle</h2>
+          </div>
+          <div class="content">
+            <h3>Hello ${artist?.name || "Artist"},</h3>
+            <p>You have received a new message from ${
+              user.displayName || user.email
+            }:</p>
+            <p style="background-color: #f8f8f8; padding: 15px; border-left: 4px solid #4a90e2;">
+              ${message}
+            </p>
+            <p>Please respond to the user directly at ${user.email}.</p>
+          </div>
+          <div class="footer">
+            <p>This is an automated message from the Art Platform</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    try {
+      await axios.post("https://email-service-app.onrender.com/email/send", {
+        to: "doodlecaboodle08@gmail.com",
+        subject: `New Message from ${user.displayName || user.email}`,
+        html: htmlMessage,
+      });
+      setShowMessageModal(false);
+      setMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setError("Failed to send message. Please try again.");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -133,7 +208,7 @@ const ArtistDetail: React.FC = () => {
     }
   };
 
-  const Specializes = artist?.specializesIn.split(",");
+  const Specializes = artist?.specializesIn?.split(",");
 
   return (
     <div className={`min-h-screen ${getArtistBackground()}`}>
@@ -149,7 +224,7 @@ const ArtistDetail: React.FC = () => {
       >
         <div className="bg-black bg-opacity-40 h-full flex items-end">
           <div className="container mx-auto px-4 pb-8">
-            <div className="flex  items-center">
+            <div className="flex items-center">
               <div className="h-32 w-32 rounded-full bg-transparent p-1">
                 <img
                   src={artist.profileImage || "https://via.placeholder.com/150"}
@@ -192,7 +267,10 @@ const ArtistDetail: React.FC = () => {
                 </div>
               </div>
 
-              <button className="w-full bg-pastel-peach text-black py-2 px-4 rounded transition-colors">
+              <button
+                className="w-full bg-pastel-peach text-black py-2 px-4 rounded transition-colors"
+                onClick={() => setShowMessageModal(true)}
+              >
                 Message Artist
               </button>
             </div>
@@ -215,24 +293,54 @@ const ArtistDetail: React.FC = () => {
                       price={work.price}
                       category={work.category}
                       props={work}
+                      isClickable={false}
                     />
                   ))
                 ) : (
                   <p className="text-gray-500">No portfolio items available</p>
                 )}
               </div>
-
-              {/* {works.length > 0 && (
-                <div className="mt-6 text-center">
-                  <button className="text-blue-600 hover:text-blue-800 font-medium">
-                    View All Works
-                  </button>
-                </div>
-              )} */}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Message Modal */}
+      {showMessageModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Message {artist.name}</h2>
+            {error && <p className="text-red-500 mb-4">{error}</p>}
+            <textarea
+              className="w-full p-2 border rounded mb-4"
+              rows={5}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Type your message here..."
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                onClick={() => {
+                  setShowMessageModal(false);
+                  setMessage("");
+                  setError("");
+                }}
+                disabled={isSending}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-pastel-peach text-black rounded hover:bg-opacity-80"
+                onClick={handleSendMessage}
+                disabled={isSending}
+              >
+                {isSending ? "Sending..." : "Send"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
