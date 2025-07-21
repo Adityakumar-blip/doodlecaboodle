@@ -481,11 +481,14 @@ const Cart = ({
                 updatedAt: Date.now(),
               });
 
-              await axios.post("http://localhost:3000/email/send", {
-                to: "doodlecaboodle08@gmail.com",
-                subject: `New Order Received - ${order.orderId}`,
-                html: generateOrderEmailHTML(order, userDetails),
-              });
+              await axios.post(
+                "https://email-service-app.onrender.com/email/send",
+                {
+                  to: "doodlecaboodle08@gmail.com",
+                  subject: `New Order Received - ${order.orderId}`,
+                  html: generateOrderEmailHTML(order, userDetails),
+                }
+              );
 
               console.log("heree");
 
