@@ -33,6 +33,7 @@ import GalleryShowcase from "./components/GalleryShowcase";
 import TermsAndConditions from "./components/TermsConditions";
 import ShippingAndRefundPolicy from "./components/ShippingRefund";
 import PhotoGuidelines from "./components/Photoguide";
+import OrderDetails from "./components/OrderDetail";
 
 const queryClient = new QueryClient();
 
@@ -134,6 +135,8 @@ const AppContent = () => {
             element={<TermsAndConditions />}
           />
           <Route path="/get-yours" element={<CustomSketchOrder />} />
+          <Route path="/order/:orderId" element={<OrderDetails />} />
+
           <Route path="/occasions/:id" element={<OccasionDetail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

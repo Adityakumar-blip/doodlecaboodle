@@ -2,9 +2,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
+import { CartContext } from "@/context/CartContext";
+import { useContext } from "react";
 
 const EmptyCart = () => {
   const navigate = useNavigate();
+  const { toggleCart } = useContext(CartContext);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -21,7 +24,10 @@ const EmptyCart = () => {
         Looks like you haven't added any artwork to your cart yet.
       </p>
       <Button
-        onClick={() => navigate("/")}
+        onClick={() => {
+          navigate("/artwork-browse");
+          toggleCart();
+        }}
         className="bg-pastel-pink hover:bg-pastel-pink/90 text-white"
       >
         Explore Artwork

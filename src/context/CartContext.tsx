@@ -131,7 +131,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         // Add to Firebase under user-specific cart
         const cartItemWithUser = {
           ...item,
-          title: item?.artistName,
           userId: currentUser.uid,
           timestamp: Date.now(),
         };

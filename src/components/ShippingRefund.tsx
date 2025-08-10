@@ -120,8 +120,7 @@ const ShippingAndRefundPolicy = () => {
               </h3>
               <p className="text-gray-600 text-sm leading-relaxed">
                 Orders are packed and handed over to trusted delivery partners
-                (e.g., ShipRocket) who deliver the package to the provided
-                address.
+                who deliver the package to the provided address.
               </p>
               <h3 className="text-lg text-gray-700 mt-4 mb-2">
                 Shipping Charges
@@ -136,8 +135,7 @@ const ShippingAndRefundPolicy = () => {
                 <li>
                   <strong>Non-Refundable Fees:</strong> A non-refundable
                   shipping fee is charged for all prepaid orders. If a customer
-                  rejects delivery, the fee will not be refunded. We rely solely
-                  on ShipRocket tracking details for verification.
+                  rejects delivery, the fee will not be refunded.
                 </li>
                 <li>
                   <strong>Additional Charges:</strong> Some areas, particularly
@@ -206,9 +204,7 @@ const ShippingAndRefundPolicy = () => {
               </p>
               <ul className="text-gray-600 text-sm leading-relaxed list-disc pl-5 space-y-2">
                 <li>You must notify us within 24 hours of delivery.</li>
-                <li>
-                  Share clear photos or unboxing videos of the damage or issue.
-                </li>
+                <li>Share clear unboxing videos of the damage or issue.</li>
                 <li>
                   The product must be unused and in its original packaging.
                 </li>
@@ -249,7 +245,7 @@ const ShippingAndRefundPolicy = () => {
               <ul className="text-gray-600 text-sm leading-relaxed list-disc pl-5 space-y-2">
                 <li>Your order ID.</li>
                 <li>A brief description of the issue.</li>
-                <li>Clear photos or video proof of damage or mismatch.</li>
+                <li>Clear video proof of damage or mismatch.</li>
               </ul>
               <p className="text-gray-600 text-sm leading-relaxed">
                 We respond within 1–2 business days.

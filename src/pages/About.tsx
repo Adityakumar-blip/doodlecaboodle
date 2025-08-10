@@ -1,192 +1,174 @@
-import { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import { Heart, Brush, Gift, Sparkles } from "lucide-react";
-import Navbar from "@/components/Navbar";
-import BrushStroke from "@/components/BrushStroke";
+import boyDrawing from "@/assets/doodle1.png";
+import girlFlowers from "@/assets/doodle2.png";
+import boyCrafting from "@/assets/doodle3.png";
+import childrenCrafting from "@/assets/doodle4.png";
+import founder from "@/assets/founder.png";
 
 const About = () => {
-  const containerRef = useRef(null);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   return (
-    <div
-      className="min-h-screen bg-gradient-to-b from-white to-gray-50 overflow-hidden"
-      ref={containerRef}
-    >
-      <Navbar />
-
-      <div className="relative pt-24 pb-20">
-        {/* Subtle decorative brush stroke */}
-        {/* <BrushStroke className="absolute top-0 left-0 w-full opacity-10" /> */}
-
-        {/* Floating luxurious elements */}
-        <div className="fixed top-[15%] right-[5%] animate-float opacity-20">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-700"></div>
-        </div>
-        <div
-          className="fixed top-[50%] left-[5%] animate-float opacity-20"
-          style={{ animationDelay: "1.5s" }}
-        >
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700"></div>
-        </div>
-        <div
-          className="fixed bottom-[10%] right-[10%] animate-rotate-slow opacity-15"
-          style={{ animationDelay: "3s" }}
-        >
-          <Sparkles size={30} className="text-amber-600" />
+    <div className="min-h-screen doodle-background font-kalam font-story text-foreground">
+      <div className="max-w-6xl mx-auto px-6 py-12">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h1 className="text-5xl font-bold text-story-accent mb-8 font-handwritten">
+            Our Story
+          </h1>
         </div>
 
-        {/* Hero Section */}
-        <section className="relative max-w-5xl mx-auto px-6 py-20 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-          >
-            <h1 className="text-5xl md:text-7xl font-serif font-bold text-gray-900 mb-6">
-              A Timeless Craft
-              <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-24 h-1 bg-amber-600"></div>
-            </h1>
-            <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-              At DoodleCaboodle, every creation is a heartfelt story,
-              handcrafted with love and care.
+        {/* First Story Section */}
+        <div className="flex items-center justify-between mb-20 flex-wrap lg:flex-nowrap">
+          <div className="w-full lg:w-1/3 mb-8 lg:mb-0">
+            <img
+              src={boyDrawing}
+              alt="Boy drawing at desk"
+              className="w-64 h-64 object-contain mx-auto"
+            />
+          </div>
+          <div className="w-full  lg:w-2/3 lg:pl-12 text-center lg:text-center">
+            <p className="text-lg leading-relaxed text-story-accent">
+              At DoodleCaboodle, our story begins with a feeling,
             </p>
-          </motion.div>
-        </section>
+            <p className="text-lg leading-relaxed text-story-accent mt-2">
+              the kind you had as a child,
+            </p>
+            <p className="text-lg leading-relaxed text-story-accent mt-2">
+              making something by hand for someone you love.
+            </p>
+            <p className="text-lg leading-relaxed text-story-accent mt-2">
+              A card for Maa. A sketch for Papa.
+            </p>
+          </div>
+        </div>
 
-        {/* Story Section */}
-        <section className="relative bg-white py-20">
-          <div className="max-w-5xl mx-auto px-6">
-            <div className="flex flex-col md:flex-row gap-12 items-center">
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                viewport={{ once: true }}
-                className="md:w-1/2"
-              >
-                <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-100">
-                  <div className="bg-gradient-to-br from-emerald-50 to-amber-50 h-80 flex items-center justify-center">
-                    <Heart size={120} className="text-amber-600 opacity-80" />
-                  </div>
-                </div>
-              </motion.div>
+        {/* Second Story Section */}
+        <div className="flex items-center justify-between mb-20 flex-wrap lg:flex-nowrap">
+          <div className="w-full lg:w-2/3 lg:pr-12 text-center lg:text-center order-2 lg:order-1">
+            <p className="text-lg leading-relaxed text-story-accent">
+              A tiny bunch of flowers,
+            </p>
+            <p className="text-lg leading-relaxed text-story-accent mt-2">
+              passed to a friend in school — with care and joy.
+            </p>
+            <p className="text-lg leading-relaxed text-story-accent mt-2">
+              We never forgot that feeling.
+            </p>
+            <p className="text-lg leading-relaxed text-story-accent mt-2">
+              We just grew up — and found a way to keep it blooming.
+            </p>
+          </div>
+          <div className="w-full lg:w-1/3 mb-8 lg:mb-0 order-1 lg:order-2">
+            <img
+              src={girlFlowers}
+              alt="Girl with flowers"
+              className="w-64 h-64 object-contain mx-auto"
+            />
+          </div>
+        </div>
 
-              <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-                viewport={{ once: true }}
-                className="md:w-1/2"
-              >
-                <div className="relative">
-                  <h2 className="text-4xl font-serif font-bold text-gray-900 mb-6">
-                    Our Story
-                  </h2>
-                  <p className="text-lg text-gray-700 leading-relaxed mb-4">
-                    At DoodleCaboodle, our story begins with a feeling — the
-                    kind you had as a child, making something by hand for
-                    someone you love. A card for Maa. A sketch for Papa. A tiny
-                    doodle passed to a friend in school, folded with care and
-                    joy.
-                  </p>
-                  <p className="text-lg text-gray-700 leading-relaxed mb-4">
-                    We never forgot that feeling. We just grew up — and found a
-                    way to keep it alive.
-                  </p>
-                  <p className="text-lg text-gray-700 leading-relaxed mb-4">
-                    DoodleCaboodle was founded to bring that handmade warmth
-                    into today’s world. A space where every creation is
-                    thoughtful, handcrafted, and full of emotion.
-                  </p>
-                  <p className="text-lg text-gray-700 leading-relaxed">
-                    From pencil portraits to personalized gifts, every piece we
-                    make is a little reminder that effort still matters, that
-                    love can be felt in paper and paint, and that handmade gifts
-                    still speak the loudest. This is more than art. It’s a piece
-                    of heart — from our hands to yours.
-                  </p>
-                </div>
-              </motion.div>
+        {/* Third Story Section */}
+        <div className="flex items-center justify-between mb-20 flex-wrap lg:flex-nowrap">
+          <div className="w-full lg:w-1/3 mb-8 lg:mb-0">
+            <img
+              src={boyCrafting}
+              alt="Boy crafting"
+              className="w-64 h-64 object-contain mx-auto"
+            />
+          </div>
+          <div className="w-full lg:w-2/3 lg:pl-12 text-center lg:text-center">
+            <p className="text-lg leading-relaxed text-story-accent">
+              DoodleCaboodle was founded
+            </p>
+            <p className="text-lg leading-relaxed text-story-accent mt-2">
+              to bring that handmade warmth into today's world.
+            </p>
+            <p className="text-lg leading-relaxed text-story-accent mt-2">
+              A space where every creation
+            </p>
+            <p className="text-lg leading-relaxed text-story-accent mt-2">
+              is thoughtful, handcrafted, and full of emotion.
+            </p>
+          </div>
+        </div>
+
+        {/* Fourth Story Section */}
+        <div className="flex items-center justify-between mb-20 flex-wrap lg:flex-nowrap">
+          <div className="w-full lg:w-2/3 lg:pr-12 text-center lg:text-center order-2 lg:order-1">
+            <p className="text-lg leading-relaxed text-story-accent">
+              From pencil portraits to personalized gifts, every piece
+            </p>
+            <p className="text-lg leading-relaxed text-story-accent mt-2">
+              we make is a little reminder that effort still matters,
+            </p>
+            <p className="text-lg leading-relaxed text-story-accent mt-2">
+              that love can be felt in paper and paint,
+            </p>
+            <p className="text-lg leading-relaxed text-story-accent mt-2">
+              and that handmade gifts still speak the loudest. ❤
+            </p>
+            <p className="text-lg leading-relaxed text-story-accent mt-4 font-medium">
+              Art is more than art. It's a piece of heart — from our hands to
+              yours.
+            </p>
+          </div>
+          <div className="w-full lg:w-1/3 mb-8 lg:mb-0 order-1 lg:order-2">
+            <img
+              src={childrenCrafting}
+              alt="Children crafting together"
+              className="w-64 h-64 object-contain mx-auto"
+            />
+          </div>
+        </div>
+
+        {/* Founder Section */}
+        <div className="bg-neutral-300 rounded-2xl p-8 mt-16">
+          <div className="flex items-start justify-between flex-wrap lg:flex-nowrap gap-8">
+            <div className="w-full lg:w-2/3">
+              <p className="text-base leading-relaxed text-story-accent mb-2">
+                <strong>Hey, I'm Gaurav Kamal,</strong>
+              </p>
+              <p className="text-base leading-relaxed text-story-accent mb-4">
+                the person behind Doodle Caboodle.
+              </p>
+              <p className="text-base leading-relaxed text-story-accent mb-2">
+                I've been into sketching since college - especially portraits.
+              </p>
+              <p className="text-base leading-relaxed text-story-accent mb-2">
+                I've always loved making handmade gifts, even as a kid.
+              </p>
+              <p className="text-base leading-relaxed text-story-accent mb-2">
+                Along the way, I explored different creative paths
+              </p>
+              <p className="text-base leading-relaxed text-story-accent mb-2">
+                and ended up working as a VFX artist on big time
+              </p>
+              <p className="text-base leading-relaxed text-story-accent mb-2">
+                Bollywood and South Indian projects, including Disney and DC.
+              </p>
+              <p className="text-base leading-relaxed text-story-accent mb-2">
+                I keep exploring new things,
+              </p>
+              <p className="text-base leading-relaxed text-story-accent mb-2">
+                but one thing stays constant: my love for art, crafts, and
+                meaningful gifting.
+              </p>
+              <p className="text-base leading-relaxed text-story-accent mb-2">
+                Doodle Caboodle is my way of turning emotions
+              </p>
+              <p className="text-base leading-relaxed text-story-accent">
+                into something you can hold close forever."
+              </p>
+            </div>
+            <div className="w-full lg:w-1/3 flex justify-center">
+              <div className="w-48 h-56 bg-gray-200 rounded-lg flex items-center justify-center">
+                <img
+                  src={founder}
+                  alt="Gaurav Kamal - Founder"
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              </div>
             </div>
           </div>
-        </section>
-
-        {/* Leadership Section */}
-        <section className="relative bg-gray-50 py-20">
-          <div className="max-w-5xl mx-auto px-6">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
-            >
-              <h2 className="text-4xl font-serif font-bold text-gray-900 mb-4">
-                Our Team
-              </h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Gaurav continues to lead the brand with heart, imagination, and
-                a deep belief that every meaningful gift deserves to be created
-                — and remembered — with love.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              viewport={{ once: true }}
-              className="max-w-md mx-auto"
-            >
-              <div className="relative rounded-full overflow-hidden shadow-2xl border-4 border-amber-100">
-                <div className="bg-gradient-to-br from-emerald-50 to-amber-50 h-80 w-full flex items-center justify-center">
-                  <Brush size={100} className="text-amber-600" />
-                </div>
-              </div>
-              <div className="text-center mt-6">
-                <h3 className="text-2xl font-serif font-bold text-gray-900">
-                  Gaurav
-                </h3>
-                <p className="text-sm text-amber-600 font-medium">
-                  Founder & Creative Director
-                </p>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Call to Action Section */}
-        <section className="relative py-20 bg-gradient-to-r from-amber-50 to-emerald-50">
-          <div className="max-w-4xl mx-auto px-6 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              viewport={{ once: true }}
-              className="bg-white p-1 rounded-xl shadow-lg"
-            >
-              <div className="bg-gradient-to-r from-amber-600 to-emerald-600 p-8 rounded-lg">
-                <h2 className="text-3xl font-serif font-bold text-white mb-4">
-                  Discover the Art of Gifting
-                </h2>
-                <p className="text-lg text-white/90 mb-6">
-                  Explore our collection of handcrafted artworks and
-                  personalized gifts, each created with love and care.
-                </p>
-                <a
-                  href="https://doodlecaboodle.netlify.app/shop"
-                  className="inline-block bg-white text-amber-600 font-medium px-8 py-4 rounded-full shadow-md hover:shadow-xl hover:bg-amber-100 transition-all duration-300"
-                >
-                  Explore Artworks
-                </a>
-              </div>
-            </motion.div>
-          </div>
-        </section>
+        </div>
       </div>
     </div>
   );

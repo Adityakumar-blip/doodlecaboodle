@@ -25,7 +25,10 @@ import SignupForm from "./SignupForm";
 import CheckoutForm from "./CheckoutForm";
 import EmptyCart from "./EmptyCart";
 import CartItem from "./CartItem";
-import { generateOrderEmailHTML } from "@/lib/SendOrderEmail";
+import {
+  generateOrderEmailHTML,
+  generateThankYouEmailHTML,
+} from "@/lib/SendOrderEmail";
 
 interface CartItem {
   id: string;
@@ -76,7 +79,8 @@ const Cart = ({
   const [userDetails, setUserDetails] = useState<any>({
     name: "",
     email: "",
-    phone: "",
+    senderPhone: "",
+    receiverPhone: "",
     address: {
       line1: "",
       city: "",
@@ -88,6 +92,35 @@ const Cart = ({
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const auth = getAuth();
   const navigate = useNavigate();
+
+  // Load confetti script dynamically
+  const loadConfettiScript = () => {
+    return new Promise((resolve, reject) => {
+      if ((window as any).confetti) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src =
+        "https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js";
+      script.onload = () => resolve(true);
+      script.onerror = () =>
+        reject(new Error("Failed to load confetti script"));
+      document.body.appendChild(script);
+    });
+  };
+
+  // Trigger confetti animation
+  const triggerConfetti = () => {
+    if ((window as any).confetti) {
+      (window as any).confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ["#F472B6", "#4ADE80", "#60A5FA"],
+      });
+    }
+  };
 
   // Check authentication status, fetch user details, and sync local storage cart
   useEffect(() => {
@@ -105,7 +138,7 @@ const Cart = ({
           const data = userDoc.data();
           setUserDetails((prev: any) => ({
             ...prev,
-            phone: data.phone || "",
+            senderPhone: data.senderPhone || "",
             address: data.address || {
               line1: "",
               city: "",
@@ -224,9 +257,10 @@ const Cart = ({
     }
   };
 
-  // Validate and apply coupon
+  // Validate and apply coupon with confetti animation
   const applyCoupon = async () => {
     try {
+      await loadConfettiScript(); // Ensure confetti script is loaded
       const couponsRef = collection(db, "coupons");
       const q = query(couponsRef, where("code", "==", couponCode));
       const querySnapshot = await getDocs(q);
@@ -259,6 +293,7 @@ const Cart = ({
           validUntil: new Date(validUntil),
         });
         toast.success(`Coupon "${couponCode}" applied successfully!`);
+        triggerConfetti(); // Trigger confetti animation on successful coupon application
       } else {
         setAppliedCoupon(null);
         toast.error("Invalid or expired coupon");
@@ -301,7 +336,7 @@ const Cart = ({
       (total, item) => total + item.price * item.quantity,
       0
     );
-    let deliveryCharges = subtotal > 1500 ? 0 : 100;
+    let deliveryCharges = 0;
     let packagingCharges = 50;
     let discount = 0;
 
@@ -406,12 +441,13 @@ const Cart = ({
     if (!auth.currentUser) return;
     setLoading(true);
     try {
+      axios.get("https://email-service-app.onrender.com/");
       await loadRazorpayScript();
 
       const charges = calculateCharges();
 
       const response = await axios.post(
-        `${checkoutBaseUrlLocal}/api/payment/create-order`,
+        `${checkoutBaseUrl}/api/payment/create-order`,
         {
           amount: parseFloat(charges.total),
           receipt: `order_${Date.now()}`,
@@ -444,7 +480,7 @@ const Cart = ({
         handler: async (response: any) => {
           try {
             const verifyResponse = await axios.post(
-              `${checkoutBaseUrlLocal}/api/payment/verify`,
+              `${checkoutBaseUrl}/api/payment/verify`,
               {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
@@ -452,6 +488,8 @@ const Cart = ({
               },
               { timeout: 8000 }
             );
+
+            console.log("response razorpay", verifyResponse);
 
             if (verifyResponse.data.success) {
               const order: Order = {
@@ -464,10 +502,10 @@ const Cart = ({
                 personalNote,
               };
 
-              await setDoc(
-                doc(db, "users", auth.currentUser.uid, "orders", order.orderId),
-                order
-              );
+              // await setDoc(
+              //   doc(db, "users", auth.currentUser.uid, "orders", order.orderId),
+              //   order
+              // );
 
               const cartRef = collection(
                 db,
@@ -486,16 +524,25 @@ const Cart = ({
                 updatedAt: Date.now(),
               });
 
-              await axios.post(
-                "https://email-service-app.onrender.com/email/send",
-                {
-                  to: "doodlecaboodle08@gmail.com",
-                  subject: `New Order Received - ${order.orderId}`,
-                  html: generateOrderEmailHTML(order, userDetails),
-                }
-              );
+              // await axios.post(
+              //   "https://email-service-app.onrender.com/email/send",
+              //   {
+              //     to: "doodlecaboodle08@gmail.com",
+              //     subject: `New Order Received - ${order.orderId}`,
+              //     html: generateOrderEmailHTML(order, userDetails),
+              //   }
+              // );
 
-              console.log("heree");
+              // await axios.post(
+              //   "https://email-service-app.onrender.com/email/send",
+              //   {
+              //     to: "doodlecaboodle08@gmail.com",
+              //     subject: `Thank you for your order - ${order.orderId}`,
+              //     html: generateThankYouEmailHTML(order, userDetails),
+              //   }
+              // );
+
+              navigate(`/order/${verifyResponse?.data?.custom_order_id}`);
 
               setCartItems([]);
               setCouponCode("");
@@ -519,7 +566,7 @@ const Cart = ({
           contact: userDetails.phone,
         },
         theme: {
-          color: "#F472B6",
+          color: "#2222",
         },
         modal: {
           ondismiss: () => {

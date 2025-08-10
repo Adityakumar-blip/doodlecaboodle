@@ -6,7 +6,8 @@ import { useState, useEffect } from "react";
 interface UserDetails {
   name: string;
   email: string;
-  phone: string;
+  senderPhone: string;
+  receiverPhone: string;
   address: {
     line1: string;
     city: string;
@@ -28,7 +29,7 @@ const CheckoutForm = ({
   loading: boolean;
 }) => {
   const [error, setError] = useState<string | null>(null);
-
+  console.log("user details", userDetails);
   // Debounce function to limit API calls
   const debounce = (func: (...args: any[]) => void, delay: number) => {
     let timeoutId: NodeJS.Timeout;
@@ -92,7 +93,7 @@ const CheckoutForm = ({
     return (
       userDetails.name.trim().length >= 2 &&
       emailRegex.test(userDetails.email) &&
-      phoneRegex.test(userDetails.phone) &&
+      phoneRegex.test(userDetails.senderPhone) &&
       userDetails.address.line1.trim().length >= 5 &&
       userDetails.address.city.trim().length >= 2 &&
       userDetails.address.state.trim().length >= 2 &&
@@ -112,7 +113,7 @@ const CheckoutForm = ({
           onChange={handlePincodeChange}
           placeholder="400001"
         />
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {/* {error && <p className="text-red-500 text-sm">{error}</p>} */}
       </div>
       <div className="space-y-2">
         <Label htmlFor="city">City</Label>
@@ -180,14 +181,25 @@ const CheckoutForm = ({
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="phone">Phone</Label>
+        <Label htmlFor="senderPhone">Sender Phone</Label>
         <Input
-          id="phone"
-          value={userDetails.phone}
+          id="senderPhone"
+          value={userDetails.senderPhone}
           onChange={(e) =>
-            setUserDetails({ ...userDetails, phone: e.target.value })
+            setUserDetails({ ...userDetails, senderPhone: e.target.value })
           }
-          placeholder="9876543210"
+          placeholder="Enter Sender's Phone"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="receiverPhone">Receiver Phone</Label>
+        <Input
+          id="receiverPhone"
+          value={userDetails.receiverPhone}
+          onChange={(e) =>
+            setUserDetails({ ...userDetails, receiverPhone: e.target.value })
+          }
+          placeholder="Enter Receiver's Phone"
         />
       </div>
       <Button

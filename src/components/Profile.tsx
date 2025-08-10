@@ -17,7 +17,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { auth, db } from "@/firebase/firebaseconfig";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  orderBy,
+  query,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { collection, getDocs } from "firebase/firestore";
 import {
   onAuthStateChanged,
@@ -145,17 +152,17 @@ const UserProfile = () => {
           }
 
           // Fetch orders from subcollection
-          const ordersCollectionRef = collection(
-            db,
-            "users",
-            user.uid,
-            "orders"
+          const ordersCollectionRef = query(
+            collection(db, "users", user.uid, "orders")
+            // orderBy("timestamp", "desc")
           );
+
           const ordersSnapshot = await getDocs(ordersCollectionRef);
           const ordersData = ordersSnapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
           }));
+          console.log("order data", ordersData);
           setOrders(ordersData);
         } catch (err) {
           console.error("Error fetching user data:", err);
@@ -800,17 +807,17 @@ const UserProfile = () => {
                         >
                           <div className="flex justify-between items-start mb-4">
                             <div>
-                              <h4 className="font-medium text-gray-900">
+                              <h4 className="font-medium font-poppins text-gray-900">
                                 Order #{order.id}
                               </h4>
-                              <p className="text-sm text-gray-600">
+                              {/* <p className="text-sm text-gray-600">
                                 Placed on{" "}
                                 {convertFirebaseTimestampToDate(
                                   order?.timestamp
                                 )}
-                              </p>
+                              </p> */}
                             </div>
-                            <div>
+                            {/* <div>
                               <span
                                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                   order.status === "Delivered"
@@ -822,10 +829,10 @@ const UserProfile = () => {
                               >
                                 {order.status}
                               </span>
-                            </div>
+                            </div> */}
                           </div>
                           <div className="space-y-4">
-                            {order.items.map((item, idx) => (
+                            {order?.items.map((item, idx) => (
                               <div
                                 key={idx}
                                 className="flex items-center space-x-4"
@@ -865,9 +872,9 @@ const UserProfile = () => {
                               <Button
                                 className="bg-pastel-pink hover:bg-pastel-pink/90 text-white"
                                 size="sm"
-                                onClick={() => navigate("/get-yours")}
+                                onClick={() => navigate(`/order/${order.id}`)}
                               >
-                                Buy Again
+                                Order Details
                               </Button>
                             </div>
                           </div>

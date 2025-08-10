@@ -38,6 +38,7 @@ interface PaperSize {
   description: string;
   processingTime: string;
   image?: any;
+  deliveryNote?: any;
 }
 
 interface BackgroundOption {
@@ -84,6 +85,7 @@ interface CartItem {
   uploadedImageUrl: string;
   timestamp: number;
   frame: string | null;
+  deliveryNote?: any;
 }
 
 const CustomSketchOrder: React.FC = () => {
@@ -115,32 +117,41 @@ const CustomSketchOrder: React.FC = () => {
     {
       value: "A5",
       label: "A5",
-      price: 1500,
-      originalPrice: 2000,
-      offerPrice: 1000,
+      price: 1499,
+      originalPrice: 1999,
+      offerPrice: 999,
       description: "148×210mm (5.8×8.3in)",
       processingTime: "2-3 days",
       image: A5,
+      deliveryNote: `Custom sketches are hand-drawn by our artists.
+Processing time is 2-3 days (excluding shipping).
+We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
     },
     {
       value: "A4",
       label: "A4",
-      price: 2500,
-      originalPrice: 3000,
-      offerPrice: 2000,
+      price: 2499,
+      originalPrice: 2999,
+      offerPrice: 1999,
       description: "210×297mm (8.3×11.7in)",
       processingTime: "3-4 days",
       image: A4,
+      deliveryNote: `Custom sketches are hand-drawn by our artists.
+Processing time is 3–4 days (excluding shipping).
+We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
     },
     {
       value: "A3",
       label: "A3",
-      price: 3500,
-      originalPrice: 4200,
-      offerPrice: 3000,
+      price: 3499,
+      originalPrice: 4199,
+      offerPrice: 2999,
       description: "297×420mm (11.7×16.5in)",
       processingTime: "4-5 days",
       image: "",
+      deliveryNote: `Custom sketches are hand-drawn by our artists.
+Processing time is 4-5 days (excluding shipping).
+We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
     },
   ];
 
@@ -276,6 +287,10 @@ const CustomSketchOrder: React.FC = () => {
           : 0;
       const adjustedPrice = basePrice + framePrice;
 
+      const deliveryNote = paperSizes.filter(
+        (paper) => paper.value === orderDetails.paperSize
+      );
+
       const cartItem: CartItem = {
         id: `${artworkId}-${Date.now()}`,
         artworkId,
@@ -291,7 +306,10 @@ const CustomSketchOrder: React.FC = () => {
         uploadedImageUrl: imageUrl,
         timestamp: Date.now(),
         frame: orderDetails.frame,
+        deliveryNote: deliveryNote[0].deliveryNote,
       };
+
+      console.log("cart item", cartItem);
 
       await addToCart(cartItem as any);
       setCartItems([cartItem as any]);
@@ -300,6 +318,7 @@ const CustomSketchOrder: React.FC = () => {
       setOrderDetails((prev) => ({ ...prev, image: null, frame: null }));
       setQuantity(1);
       setIsAddedToCart(true);
+      toggleCart();
     } catch (error) {
       console.error("Error adding to cart:", error);
       setUploadError("Failed to add item to cart. Please try again.");
@@ -322,7 +341,7 @@ const CustomSketchOrder: React.FC = () => {
     {
       icon: <Palette className="w-4 h-4" />,
       title: "Good Lighting",
-      description: "Well-lit with English",
+      description: "Well-lit area",
     },
     {
       icon: <Users className="w-4 h-4" />,

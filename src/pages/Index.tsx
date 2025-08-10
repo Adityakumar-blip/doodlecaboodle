@@ -13,6 +13,7 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "@/firebase/firebaseconfig";
 import OurWorks from "@/components/OurWorks";
 import FAQPage from "@/components/Faq";
+import DiscountModal from "@/components/DiscountModal";
 
 const Index = () => {
   const [collections, setCollections] = useState([]);
@@ -44,6 +45,7 @@ const Index = () => {
   }, []);
   return (
     <div className="min-h-screen">
+      <DiscountModal />
       <HeroSection />
 
       {/* <GalleryShowcase /> */}
