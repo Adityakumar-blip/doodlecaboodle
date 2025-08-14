@@ -137,7 +137,6 @@ const LoginSignupPage = () => {
             values.password
           );
           localStorage.setItem("user", JSON.stringify(userCredential));
-          console.log("User signed in:", userCredential.user);
           navigate(from, { replace: true });
         } else {
           const userCredential = await createUserWithEmailAndPassword(
@@ -153,7 +152,6 @@ const LoginSignupPage = () => {
             phone: values.phone,
             birthDate: values.birthDate,
           });
-          console.log("New user created:", userCredential.user);
           navigate(from, { replace: true });
         }
       } catch (error) {

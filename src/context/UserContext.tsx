@@ -75,7 +75,6 @@ const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         const storedUser = storage.getItem("user");
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser) as User;
-          console.log("parsed user", parsedUser);
           setUser(parsedUser);
         }
       } catch (error) {

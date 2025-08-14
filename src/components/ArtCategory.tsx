@@ -98,7 +98,6 @@ const ArtCategorySection = ({ collections }) => {
     },
   ];
 
-  console.log("collection", collections);
   return (
     <section className="py-16 px-4 max-w-7xl mx-auto">
       {/* Header */}

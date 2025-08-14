@@ -53,7 +53,6 @@ export const fetchWroks = createAsyncThunk(
         id: doc.id,
         ...doc.data(),
       })) as Product[];
-      console.log("products", products)
       return products;
     } catch (error: any) {
       return rejectWithValue(error.message || "Failed to fetch products");
