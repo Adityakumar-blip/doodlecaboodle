@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import image1 from "@/assets/06.png";
-import image2 from "@/assets/02.png";
-import image3 from "@/assets/03.png";
-import mobile1 from "@/assets/04.png";
-import mobile2 from "@/assets/mobile-02.png";
-import mobile3 from "@/assets/mobile-01.png";
 import { Button } from "./ui/button";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/firebase/firebaseconfig";
 
 interface HeroImage {
   desktopUrl: string;
@@ -17,56 +13,52 @@ interface HeroImage {
   tag: string;
 }
 
-const heroImages: HeroImage[] = [
-  {
-    desktopUrl: image2,
-    mobileUrl: mobile2,
-    title: "Your Gift, Their Smile",
-    subtitle: "Customized portraits and art gifts that truly connect.",
-    tag: "Limited Time: Free Shipping",
-  },
-  {
-    desktopUrl: image3,
-    mobileUrl: mobile3,
-    title: "Make Moments Memorable",
-    subtitle: "Thoughtfully handcrafted gifts for every occasion",
-    tag: "Featured: Abstract Expressionism",
-  },
-  {
-    desktopUrl: image1,
-    mobileUrl: mobile1,
-    title: "Gift, That Stands Out",
-    subtitle:
-      "Explore our curated collection of handpicked paintings, illustrations, and sculptures from emerging and established artists across the globe.",
-    tag: "New Collection: Summer Abstracts",
-  },
-];
-
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
+  const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
+  // Fetch banners from Firestore
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "banners"));
+        const bannersData: HeroImage[] = querySnapshot.docs.map((doc) => ({
+          desktopUrl: doc.data().desktopImage,
+          mobileUrl: doc.data().mobileImage,
+          title: doc.data().title,
+          subtitle: doc.data().description,
+          tag: doc.data().tag,
+        }));
+        setHeroImages(bannersData);
+      } catch (error) {
+        console.error("Error fetching banners:", error);
+      }
+    };
+
+    fetchBanners();
+  }, []);
+
   // Detect mobile device based on window width
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768); // Assuming 768px as the mobile breakpoint
+      setIsMobile(window.innerWidth < 768);
     };
-
-    handleResize(); // Initial check
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const nextSlide = () => {
-    if (isTransitioning) return;
+    if (isTransitioning || heroImages.length === 0) return;
     setIsTransitioning(true);
     setCurrentIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
   };
 
   const prevSlide = () => {
-    if (isTransitioning) return;
+    if (isTransitioning || heroImages.length === 0) return;
     setIsTransitioning(true);
     setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? heroImages.length - 1 : prevIndex - 1
@@ -74,25 +66,21 @@ const HeroSection: React.FC = () => {
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsTransitioning(false);
-    }, 500);
-
+    const timer = setTimeout(() => setIsTransitioning(false), 500);
     return () => clearTimeout(timer);
   }, [currentIndex]);
 
   // Auto-advance carousel
   useEffect(() => {
-    const interval = setInterval(() => {
-      nextSlide();
-    }, 5000);
-
+    if (heroImages.length === 0) return;
+    const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
-  }, [currentIndex, isTransitioning]);
+  }, [currentIndex, isTransitioning, heroImages.length]);
+
+  console.log("herom", heroImages);
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
-      {/* Images */}
       {heroImages.map((image, index) => (
         <div
           key={index}
@@ -107,10 +95,9 @@ const HeroSection: React.FC = () => {
             className="object-cover w-full h-full"
           />
 
-          {/* Content overlay */}
           <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-16 lg:px-24 z-20 items-start">
             <div className="max-w-2xl">
-              <h2 className="mb-4 text-4xl  md:text-5xl lg:text-6xl font-bold text-white">
+              <h2 className="mb-4 text-4xl md:text-5xl lg:text-6xl font-bold text-white">
                 {image.title}
               </h2>
               <p className="mb-8 text-lg md:text-xl text-white/90">

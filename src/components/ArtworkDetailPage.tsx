@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Heart,
   ShoppingCart,
@@ -8,6 +8,7 @@ import {
   Minus,
 } from "lucide-react";
 import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
+import { CartContext } from "@/context/CartContext";
 
 interface SizeOption {
   name: string;
@@ -34,6 +35,8 @@ interface ArtworkDetailProps {
 }
 
 const ArtworkDetailPage = () => {
+  const { cartItems, addToCart, setCartItems, toggleCart } =
+    useContext(CartContext);
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -48,6 +51,8 @@ const ArtworkDetailPage = () => {
   useEffect(() => {
     const fetchArtwork = async () => {
       setIsLoading(true);
+
+      console.log("state", state);
 
       setArtwork(state);
       setActiveImage(state?.images?.[0]?.url);
@@ -66,6 +71,24 @@ const ArtworkDetailPage = () => {
 
   const handleAddToCart = () => {
     if (artwork && selectedSize) {
+      console.log(artwork);
+      // const cartItem: CartItem = {
+      //   id: `${artwork?.id}-${Date.now()}`,
+      //   artworkId: artwork?.id,
+      //   title: artwork?.name,
+      //   price: artwork?.price,
+      //   quantity,
+      //   artistName: artwork?.artistName,
+      //   size: {
+      //     value: orderDetails.paperSize,
+      //     label: selectedSize?.label || orderDetails.paperSize,
+      //     priceAdjustment: selectedSize.price,
+      //   },
+      //   uploadedImageUrl: imageUrl,
+      //   timestamp: Date.now(),
+      //   frame: orderDetails.frame,
+      //   deliveryNote: deliveryNote[0].deliveryNote,
+      // };
       console.log(
         `Added ${quantity} of ${artwork.title} (Size: ${selectedSize.name}) to cart`
       );
@@ -187,15 +210,12 @@ const ArtworkDetailPage = () => {
             {/* Add to Cart Button */}
             <button
               onClick={handleAddToCart}
-              disabled={!artwork.inStock || !selectedSize}
-              className={`flex-1 py-2 px-4 rounded-md flex items-center justify-center gap-2 font-medium ${
-                artwork.inStock && selectedSize
-                  ? "bg-gray-900 hover:bg-gray-800 text-white"
-                  : "bg-gray-200 text-gray-500 cursor-not-allowed"
+              // disabled={!artwork.inStock || !selectedSize}
+              className={`flex-1 py-2 px-4 rounded-md flex items-center justify-center gap-2 font-medium text-white bg-gray-900 hover:bg-gray-800 text-white"
               }`}
             >
               <ShoppingCart size={18} />
-              <span>{artwork.inStock ? "Add to Cart" : "Out of Stock"}</span>
+              <span>{"Add to Cart"}</span>
             </button>
 
             {/* Wishlist Button */}
@@ -228,7 +248,7 @@ const ArtworkDetailPage = () => {
                   >
                     <div className="font-medium">{size.name}</div>
                     <div className="text-sm text-gray-500">
-                      {size.width}" × {size.height}"
+                      {size.length}" × {size.width}"
                     </div>
                     <div className="text-sm font-medium text-gray-900 mt-1">
                       {size.priceAdjustment > 0
@@ -254,7 +274,7 @@ const ArtworkDetailPage = () => {
               <div className="text-gray-600">Dimensions</div>
               <div>
                 {selectedSize
-                  ? `${selectedSize.width}" × ${selectedSize.height}" × ${selectedSize.length}"`
+                  ? `${selectedSize.length}" × ${selectedSize.width}"`
                   : "Select a size"}
               </div>
 
@@ -282,7 +302,7 @@ const ArtworkDetailPage = () => {
       </div>
 
       {/* You may also like section */}
-      <div className="mt-16">
+      {/* <div className="mt-16">
         <h2 className="font-playfair text-2xl font-medium mb-6">
           You may also like
         </h2>
@@ -292,7 +312,7 @@ const ArtworkDetailPage = () => {
           <div className="bg-gray-100 aspect-[3/4] rounded-lg animate-pulse"></div>
           <div className="bg-gray-100 aspect-[3/4] rounded-lg animate-pulse hidden lg:block"></div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

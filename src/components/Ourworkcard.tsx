@@ -41,7 +41,7 @@ const WorkCard = ({
   }, []);
 
   const handleCardClick = () => {
-    navigate(`/work-detail/${id}`, {
+    navigate(`/product-detail/${id}`, {
       state: props,
     });
   };

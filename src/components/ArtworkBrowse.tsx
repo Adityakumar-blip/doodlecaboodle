@@ -50,7 +50,7 @@ const ArtworkBrowse = () => {
   useEffect(() => {
     const fetchWorks = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "ourworks"));
+        const querySnapshot = await getDocs(collection(db, "products")); //ourworks
         const worksData: WorkItem[] = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
