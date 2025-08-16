@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebase/firebaseconfig";
-
+//hero section
 interface HeroImage {
   desktopUrl: string;
   mobileUrl: string;

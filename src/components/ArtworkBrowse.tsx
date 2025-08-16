@@ -1,14 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import WorkCard from "./Ourworkcard"; // Changed to match OurWorks.tsx
+import WorkCard from "./Ourworkcard";
 import { Button } from "@/components/ui/button";
-import {
-  Filter,
-  Search,
-  ChevronDown,
-  SlidersHorizontal,
-  X,
-} from "lucide-react";
+import { Search, ChevronDown, SlidersHorizontal, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { db } from "@/firebase/firebaseconfig";
@@ -23,6 +17,8 @@ interface WorkItem {
   medium: string;
   size: string;
   year: number;
+  sales?: number;
+  materials?: string[];
   [key: string]: any;
 }
 
@@ -32,11 +28,11 @@ const ArtworkBrowse = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState({
-    category: [],
-    priceRange: [0, 5000],
-    year: [],
-    artist: [],
-    medium: [],
+    category: [] as string[],
+    priceRange: [0, 20000] as [number, number],
+    year: [] as string[],
+    artist: [] as string[],
+    medium: [] as string[],
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -46,13 +42,31 @@ const ArtworkBrowse = () => {
     string | null
   >(null);
 
+  // Helper function to safely extract price as number
+  const getPriceAsNumber = (price: any): number => {
+    if (typeof price === "number") return price;
+    if (typeof price === "string") {
+      const cleanPrice = price.replace(/[^0-9.]/g, "");
+      return parseFloat(cleanPrice) || 0;
+    }
+    return 0;
+  };
+
+  // Calculate max price from works data
+  const maxPrice = useMemo(() => {
+    if (works.length === 0) return 20000;
+    const prices = works.map((work) => getPriceAsNumber(work.price));
+    return Math.max(...prices, 20000);
+  }, [works]);
+
   // Fetch artworks from Firestore
   useEffect(() => {
     const fetchWorks = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "products")); //ourworks
+        const querySnapshot = await getDocs(collection(db, "products"));
         const worksData: WorkItem[] = querySnapshot.docs.map((doc) => ({
           id: doc.id,
+          sales: doc.data()?.sales || 0,
           ...doc.data(),
         })) as WorkItem[];
         setWorks(worksData);
@@ -68,70 +82,129 @@ const ArtworkBrowse = () => {
     fetchWorks();
   }, []);
 
-  // Extract filter options dynamically from fetched data
-  const filterOptions = {
-    category: [...new Set(works.map((a) => a.category))].filter(Boolean),
-    artist: [...new Set(works.map((a) => a.artistName))].filter(Boolean),
-    medium: [...new Set(works.map((a) => a.materials[0]))].filter(Boolean),
-    year: [...new Set(works.map((a) => a.year?.toString()))]
-      .filter(Boolean)
-      .sort((a, b) => parseInt(b) - parseInt(a)),
-  };
+  // Update price range when works data changes
+  useEffect(() => {
+    if (works.length > 0 && activeFilters.priceRange[1] === 20000) {
+      setActiveFilters((prev) => ({
+        ...prev,
+        priceRange: [0, maxPrice],
+      }));
+    }
+  }, [works, maxPrice]);
 
-  // Filter and sort artworks
+  // Extract filter options dynamically from fetched data
+  const filterOptions = useMemo(
+    () => ({
+      category: [...new Set(works.map((a) => a.category))]
+        .filter(Boolean)
+        .sort(),
+      artist: [...new Set(works.map((a) => a.artistName))]
+        .filter(Boolean)
+        .sort(),
+      medium: [...new Set(works.map((a) => a.materials?.[0] || a.medium))]
+        .filter(Boolean)
+        .sort(),
+      year: [...new Set(works.map((a) => a.year?.toString()))]
+        .filter(Boolean)
+        .sort((a, b) => parseInt(b) - parseInt(a)),
+    }),
+    [works]
+  );
+
+  // Filter & sort artworks
   useEffect(() => {
     let filtered = [...works];
 
-    // Apply artist filter
+    // Category filter
+    if (activeFilters.category.length > 0) {
+      filtered = filtered.filter((artwork) =>
+        activeFilters.category.includes(artwork.category)
+      );
+    }
+
+    // Artist filter
     if (activeFilters.artist.length > 0) {
       filtered = filtered.filter((artwork) =>
         activeFilters.artist.includes(artwork.artistName)
       );
     }
 
-    // Apply medium filter
+    // Medium filter
     if (activeFilters.medium.length > 0) {
       filtered = filtered.filter((artwork) =>
-        activeFilters.medium.includes(artwork.materials[0])
+        activeFilters.medium.includes(artwork.materials?.[0] || artwork.medium)
       );
     }
 
-    // Apply search query
+    // Year filter
+    if (activeFilters.year.length > 0) {
+      filtered = filtered.filter((artwork) =>
+        activeFilters.year.includes(artwork.year?.toString())
+      );
+    }
+
+    // Price range filter
+    filtered = filtered.filter((artwork) => {
+      const priceNum = getPriceAsNumber(artwork.price);
+      return (
+        priceNum >= activeFilters.priceRange[0] &&
+        priceNum <= activeFilters.priceRange[1]
+      );
+    });
+
+    // Search filter
     if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (artwork) =>
-          artwork.name.toLowerCase().includes(query) ||
-          artwork.artistName.toLowerCase().includes(query)
+          artwork.title?.toLowerCase().includes(query) ||
+          artwork.artistName?.toLowerCase().includes(query) ||
+          artwork.category?.toLowerCase().includes(query) ||
+          artwork.medium?.toLowerCase().includes(query)
       );
     }
 
-    // Apply sorting
+    // Sorting
     switch (sortBy) {
       case "price-low-high":
-        filtered.sort(
-          (a, b) =>
-            parseFloat(a.price.replace("$", "").replace(",", "")) -
-            parseFloat(b.price.replace("$", "").replace(",", ""))
-        );
+        filtered.sort((a, b) => {
+          const priceA = getPriceAsNumber(a.price);
+          const priceB = getPriceAsNumber(b.price);
+          return priceA - priceB;
+        });
         break;
       case "price-high-low":
-        filtered.sort(
-          (a, b) =>
-            parseFloat(b.price.replace("$", "").replace(",", "")) -
-            parseFloat(a.price.replace("$", "").replace(",", ""))
-        );
+        filtered.sort((a, b) => {
+          const priceA = getPriceAsNumber(a.price);
+          const priceB = getPriceAsNumber(b.price);
+          return priceB - priceA;
+        });
         break;
       case "newest":
-        filtered.sort((a, b) => b.year - a.year);
+        filtered.sort((a, b) => (b.year || 0) - (a.year || 0));
         break;
-      case "title":
-        filtered.sort((a, b) => a.title.localeCompare(b.title));
+      case "oldest":
+        filtered.sort((a, b) => (a.year || 0) - (b.year || 0));
         break;
-      // featured is default, no sorting needed
+      case "best-sellers":
+        filtered.sort((a, b) => (b.sales || 0) - (a.sales || 0));
+        break;
+      case "alphabetical":
+        filtered.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+        break;
+      case "artist-name":
+        filtered.sort((a, b) =>
+          (a.artistName || "").localeCompare(b.artistName || "")
+        );
+        break;
+      default:
+        // Featured - keep original order or sort by sales
+        filtered.sort((a, b) => (b.sales || 0) - (a.sales || 0));
+        break;
     }
 
     setFilteredWorks(filtered);
+    setDisplayCount(12); // Reset display count when filters change
   }, [activeFilters, searchQuery, sortBy, works]);
 
   const loadMore = () => {
@@ -141,17 +214,21 @@ const ArtworkBrowse = () => {
   const clearFilters = () => {
     setActiveFilters({
       category: [],
-      priceRange: [0, 5000],
+      priceRange: [0, maxPrice],
       year: [],
       artist: [],
       medium: [],
     });
     setSearchQuery("");
+    setSortBy("featured");
   };
 
-  const toggleFilterItem = (type: string, value: string) => {
+  const toggleFilterItem = (
+    type: keyof typeof activeFilters,
+    value: string
+  ) => {
     setActiveFilters((prev) => {
-      const current = [...prev[type]];
+      const current = [...(prev[type] as string[])];
       if (current.includes(value)) {
         return { ...prev, [type]: current.filter((item) => item !== value) };
       } else {
@@ -162,8 +239,13 @@ const ArtworkBrowse = () => {
 
   const countActiveFilters = () => {
     return (
+      (activeFilters.category.length > 0 ? 1 : 0) +
       (activeFilters.artist.length > 0 ? 1 : 0) +
-      (activeFilters.medium.length > 0 ? 1 : 0)
+      (activeFilters.medium.length > 0 ? 1 : 0) +
+      (activeFilters.year.length > 0 ? 1 : 0) +
+      (activeFilters.priceRange[0] > 0 || activeFilters.priceRange[1] < maxPrice
+        ? 1
+        : 0)
     );
   };
 
@@ -173,6 +255,10 @@ const ArtworkBrowse = () => {
     );
   };
 
+  const handlePriceRangeChange = (value: [number, number]) => {
+    setActiveFilters((prev) => ({ ...prev, priceRange: value }));
+  };
+
   // Filter section component
   const FilterSection = ({
     title,
@@ -180,48 +266,115 @@ const ArtworkBrowse = () => {
     type,
   }: {
     title: string;
-    options: string[];
+    options?: string[];
     type: string;
   }) => (
     <div className="border-b border-gray-200 py-4 px-4">
       <button
         onClick={() => toggleFilterSection(type)}
-        className="flex w-full items-center justify-between text-left font-medium text-gray-800"
+        className="flex w-full items-center justify-between text-left font-medium text-gray-800 hover:text-blue-600 transition-colors"
       >
         {title}
         <ChevronDown
           size={18}
-          className={`transition-transform ${
-            expandedFilterSection === type ? "transform rotate-180" : ""
+          className={`transition-transform duration-200 ${
+            expandedFilterSection === type ? "rotate-180" : ""
           }`}
         />
       </button>
 
       {expandedFilterSection === type && (
         <div className="mt-3 space-y-2 pl-1 max-h-[240px] overflow-y-auto pr-1">
-          {options.map((option) => (
-            <div key={option} className="flex items-center">
-              <Checkbox
-                id={`${type}-${option}`}
-                checked={activeFilters[type].includes(option)}
-                onCheckedChange={() => toggleFilterItem(type, option)}
-                className="h-4 w-4 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
-              />
-              <label
-                htmlFor={`${type}-${option}`}
-                className="ml-2 text-sm text-gray-700 cursor-pointer"
-              >
-                {option}
-              </label>
+          {type === "priceRange" ? (
+            <div className="space-y-4">
+              <div className="px-2">
+                <Slider
+                  min={0}
+                  max={maxPrice}
+                  step={100}
+                  value={activeFilters.priceRange}
+                  onValueChange={handlePriceRangeChange}
+                  className="w-full"
+                />
+              </div>
+              <div className="flex justify-between text-sm text-gray-600">
+                <span>₹{activeFilters.priceRange[0].toLocaleString()}</span>
+                <span>₹{activeFilters.priceRange[1].toLocaleString()}</span>
+              </div>
+              <div className="flex gap-2 text-xs">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  value={activeFilters.priceRange[0]}
+                  onChange={(e) => {
+                    const value = Math.max(0, Number(e.target.value));
+                    handlePriceRangeChange([
+                      value,
+                      activeFilters.priceRange[1],
+                    ]);
+                  }}
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-center"
+                />
+                <input
+                  type="number"
+                  placeholder="Max"
+                  value={activeFilters.priceRange[1]}
+                  onChange={(e) => {
+                    const value = Math.min(maxPrice, Number(e.target.value));
+                    handlePriceRangeChange([
+                      activeFilters.priceRange[0],
+                      value,
+                    ]);
+                  }}
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-center"
+                />
+              </div>
             </div>
-          ))}
+          ) : (
+            options?.map((option) => (
+              <div
+                key={option}
+                className="flex items-center hover:bg-gray-50 rounded p-1"
+              >
+                <Checkbox
+                  id={`${type}-${option}`}
+                  checked={activeFilters[
+                    type as keyof typeof activeFilters
+                  ].includes(option)}
+                  onCheckedChange={() =>
+                    toggleFilterItem(type as keyof typeof activeFilters, option)
+                  }
+                  className="h-4 w-4 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                />
+                <label
+                  htmlFor={`${type}-${option}`}
+                  className="ml-2 text-sm text-gray-700 cursor-pointer flex-1 py-1"
+                >
+                  {option}
+                </label>
+              </div>
+            ))
+          )}
         </div>
       )}
     </div>
   );
 
+  // Sort options for the dropdown
+  const sortOptions = [
+    { value: "featured", label: "Featured" },
+    { value: "price-low-high", label: "Price: Low to High" },
+    { value: "price-high-low", label: "Price: High to Low" },
+    { value: "newest", label: "Year: Newest First" },
+    { value: "oldest", label: "Year: Oldest First" },
+    { value: "alphabetical", label: "Title: A to Z" },
+    { value: "artist-name", label: "Artist: A to Z" },
+    { value: "best-sellers", label: "Best Sellers" },
+  ];
+
   return (
     <div className="min-h-screen bg-white">
+      {/* Hero Section */}
       <section className="bg-gradient-to-b from-white to-blue-50/30 py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center flex flex-col items-center justify-center">
@@ -243,12 +396,12 @@ const ArtworkBrowse = () => {
                 placeholder="Search artworks or artists..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-colors"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <X size={16} />
                 </button>
@@ -262,20 +415,25 @@ const ArtworkBrowse = () => {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar Filters - Desktop */}
           <aside className="hidden md:block w-64 flex-shrink-0">
-            <div className="sticky top-28 bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="sticky top-28 bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
               <div className="p-4 border-b border-gray-200 flex justify-between items-center">
                 <h2 className="font-medium text-gray-800">Filters</h2>
                 {countActiveFilters() > 0 && (
                   <button
                     onClick={clearFilters}
-                    className="text-xs text-blue-500 hover:underline"
+                    className="text-xs text-blue-500 hover:text-blue-700 hover:underline transition-colors"
                   >
-                    Clear all
+                    Clear all ({countActiveFilters()})
                   </button>
                 )}
               </div>
 
               <div className="divide-y divide-gray-200">
+                {/* <FilterSection
+                  title="Category"
+                  options={filterOptions.category}
+                  type="category"
+                /> */}
                 <FilterSection
                   title="Artist"
                   options={filterOptions.artist}
@@ -286,6 +444,12 @@ const ArtworkBrowse = () => {
                   options={filterOptions.medium}
                   type="medium"
                 />
+                {/* <FilterSection
+                  title="Year"
+                  options={filterOptions.year}
+                  type="year"
+                /> */}
+                <FilterSection title="Price Range" type="priceRange" />
               </div>
             </div>
           </aside>
@@ -293,7 +457,7 @@ const ArtworkBrowse = () => {
           {/* Main Content */}
           <main className="flex-1">
             {/* Mobile Toolbar */}
-            <div className="md:hidden flex items-center justify-between mb-6">
+            <div className="md:hidden flex items-center justify-between mb-6 gap-4">
               <Button
                 onClick={() => setShowMobileFilters(true)}
                 variant="outline"
@@ -302,23 +466,23 @@ const ArtworkBrowse = () => {
                 <SlidersHorizontal size={16} />
                 Filters
                 {countActiveFilters() > 0 && (
-                  <span className="ml-1 bg-pink-100 text-xs font-semibold h-5 min-w-5 rounded-full flex items-center justify-center">
+                  <span className="ml-1 bg-blue-100 text-blue-800 text-xs font-semibold h-5 min-w-5 rounded-full flex items-center justify-center">
                     {countActiveFilters()}
                   </span>
                 )}
               </Button>
 
-              <div className="relative">
+              <div className="relative flex-1 max-w-48">
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none pl-3 pr-8 py-2 border border-gray-200 rounded-lg bg-white text-sm"
+                  className="appearance-none w-full pl-3 pr-8 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
                 >
-                  <option value="featured">Featured</option>
-                  <option value="price-low-high">Price: Low-High</option>
-                  <option value="price-high-low">Price: High-Low</option>
-                  <option value="newest">Newest</option>
-                  <option value="title">A-Z</option>
+                  {sortOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDown
                   className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
@@ -327,46 +491,110 @@ const ArtworkBrowse = () => {
               </div>
             </div>
 
-            {/* Results Count */}
+            {/* Desktop Sort Dropdown */}
+            <div className="hidden md:flex justify-between items-center mb-6">
+              <h2 className="text-lg font-medium text-gray-800">
+                Browse Artworks
+              </h2>
+              <div className="flex items-center gap-4">
+                <div className="text-sm text-gray-600">
+                  Showing {Math.min(displayCount, filteredWorks.length)} of{" "}
+                  {filteredWorks.length} results
+                </div>
+                <div className="relative">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="appearance-none pl-3 pr-8 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 min-w-44"
+                  >
+                    {sortOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                    size={16}
+                  />
+                </div>
+              </div>
+            </div>
+
             {loading ? (
-              <div className="text-center text-gray-600">
-                Loading artworks...
+              <div className="flex items-center justify-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                <span className="ml-3 text-gray-600">Loading artworks...</span>
               </div>
             ) : error ? (
-              <div className="text-center text-red-500">{error}</div>
+              <div className="text-center py-20">
+                <div className="text-red-500 mb-4">{error}</div>
+                <Button onClick={() => window.location.reload()}>
+                  Try Again
+                </Button>
+              </div>
             ) : (
               <>
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-lg font-medium text-gray-800">
-                    Browse Artworks
-                  </h2>
-                  <div className="text-sm text-gray-600">
-                    Showing {Math.min(displayCount, filteredWorks.length)} of{" "}
-                    {filteredWorks.length} results
-                  </div>
-                </div>
-
                 {/* Active Filters Pills */}
                 {countActiveFilters() > 0 && (
                   <div className="flex flex-wrap gap-2 mb-6">
+                    {/* Category pills */}
+                    {activeFilters.category.map((item) => (
+                      <button
+                        key={`category-${item}`}
+                        onClick={() => toggleFilterItem("category", item)}
+                        className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm flex items-center hover:bg-blue-200 transition-colors"
+                      >
+                        Category: {item} <X size={14} className="ml-1" />
+                      </button>
+                    ))}
+                    {/* Artist pills */}
                     {activeFilters.artist.map((item) => (
                       <button
                         key={`artist-${item}`}
                         onClick={() => toggleFilterItem("artist", item)}
-                        className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm flex items-center"
+                        className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm flex items-center hover:bg-green-200 transition-colors"
                       >
-                        {item} <X size={14} className="ml-1" />
+                        Artist: {item} <X size={14} className="ml-1" />
                       </button>
                     ))}
+                    {/* Medium pills */}
                     {activeFilters.medium.map((item) => (
                       <button
                         key={`medium-${item}`}
                         onClick={() => toggleFilterItem("medium", item)}
-                        className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm flex items-center"
+                        className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm flex items-center hover:bg-purple-200 transition-colors"
                       >
-                        {item} <X size={14} className="ml-1" />
+                        Medium: {item} <X size={14} className="ml-1" />
                       </button>
                     ))}
+                    {/* Year pills */}
+                    {activeFilters.year.map((item) => (
+                      <button
+                        key={`year-${item}`}
+                        onClick={() => toggleFilterItem("year", item)}
+                        className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm flex items-center hover:bg-orange-200 transition-colors"
+                      >
+                        Year: {item} <X size={14} className="ml-1" />
+                      </button>
+                    ))}
+                    {/* Price range pill */}
+                    {(activeFilters.priceRange[0] > 0 ||
+                      activeFilters.priceRange[1] < maxPrice) && (
+                      <button
+                        onClick={() =>
+                          setActiveFilters((prev) => ({
+                            ...prev,
+                            priceRange: [0, maxPrice],
+                          }))
+                        }
+                        className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm flex items-center hover:bg-red-200 transition-colors"
+                      >
+                        Price: ₹{activeFilters.priceRange[0].toLocaleString()} -
+                        ₹{activeFilters.priceRange[1].toLocaleString()}
+                        <X size={14} className="ml-1" />
+                      </button>
+                    )}
                   </div>
                 )}
 
@@ -390,12 +618,13 @@ const ArtworkBrowse = () => {
 
                     {/* Load More Button */}
                     {displayCount < filteredWorks.length && (
-                      <div className="mt-10 text-center">
+                      <div className="mt-12 text-center">
                         <Button
                           onClick={loadMore}
-                          className="bg-transparent border border-gray-300 text-gray-700 hover:bg-blue-100 px-8 py-3 rounded-md transition-colors duration-300"
+                          className="bg-transparent border border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-300 px-8 py-3 rounded-md transition-colors duration-300"
                         >
-                          Load More Artworks
+                          Load More Artworks (
+                          {filteredWorks.length - displayCount} remaining)
                         </Button>
                       </div>
                     )}
@@ -410,11 +639,11 @@ const ArtworkBrowse = () => {
                     </h3>
                     <p className="text-gray-600 mb-6">
                       No artworks match your current filters. Try adjusting your
-                      search criteria.
+                      search criteria or clearing some filters.
                     </p>
                     <Button
                       onClick={clearFilters}
-                      className="bg-blue-500 hover:bg-blue-600 text-white"
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition-colors"
                     >
                       Clear All Filters
                     </Button>
@@ -429,15 +658,28 @@ const ArtworkBrowse = () => {
       {/* Mobile Filter Drawer */}
       {showMobileFilters && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex md:hidden">
-          <div className="bg-white w-full max-w-xs h-full overflow-y-auto ml-auto animate-slide-in-right">
-            <div className="sticky top-0 bg-white px-4 py-4 border-b border-gray-200 flex justify-between items-center">
+          <div
+            className="bg-white w-full max-w-xs h-full overflow-y-auto ml-auto transform transition-transform duration-300 ease-out"
+            style={{
+              animation: "slideInRight 0.3s ease-out",
+            }}
+          >
+            <div className="sticky top-0 bg-white px-4 py-4 border-b border-gray-200 flex justify-between items-center z-10">
               <h3 className="font-medium">Filter Options</h3>
-              <button onClick={() => setShowMobileFilters(false)}>
+              <button
+                onClick={() => setShowMobileFilters(false)}
+                className="p-1 hover:bg-gray-100 rounded transition-colors"
+              >
                 <X size={20} />
               </button>
             </div>
 
             <div className="divide-y divide-gray-200">
+              <FilterSection
+                title="Category"
+                options={filterOptions.category}
+                type="category"
+              />
               <FilterSection
                 title="Artist"
                 options={filterOptions.artist}
@@ -448,9 +690,15 @@ const ArtworkBrowse = () => {
                 options={filterOptions.medium}
                 type="medium"
               />
+              <FilterSection
+                title="Year"
+                options={filterOptions.year}
+                type="year"
+              />
+              <FilterSection title="Price Range" type="priceRange" />
             </div>
 
-            <div className="sticky bottom-0 bg-white p-4 border-t border-gray-200">
+            <div className="sticky bottom-0 bg-white p-4 border-t border-gray-200 z-10">
               <div className="flex gap-3">
                 <Button
                   variant="outline"
@@ -470,6 +718,17 @@ const ArtworkBrowse = () => {
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100%);
+          }
+          to {
+            transform: translateX(0);
+          }
+        }
+      `}</style>
     </div>
   );
 };

@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Heart, ShoppingCart } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { CartContext } from "@/context/CartContext";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/firebase/firebaseconfig";
 
 interface ArtworkCardProps {
   id: string | number; // Added ID prop for navigation
@@ -23,7 +26,13 @@ const ArtworkCard = ({
   onAddToCart,
   props,
 }: ArtworkCardProps) => {
+  const { cartItems, addToCart, setCartItems, toggleCart } =
+    useContext(CartContext);
   const [isMobile, setIsMobile] = useState(false);
+  const [artwork, setArtwork] = useState<any | null>(null);
+  const [selectedSize, setSelectedSize] = useState<any | null>(null);
+  const [artist, setArtist] = useState<any>({});
+
   const navigate = useNavigate();
 
   // Check for mobile device on mount and window resize
@@ -38,6 +47,32 @@ const ArtworkCard = ({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  useEffect(() => {
+    const fetchArtwork = async () => {
+      // setIsLoading(true);
+
+      setArtwork(props);
+      // setActiveImage(props?.images?.[0]?.url);
+      setSelectedSize(props.dimensions[0]);
+
+      if (props?.artistId) {
+        const artistRef = doc(db, "artists", props.artistId);
+        const artistSnap = await getDoc(artistRef);
+        if (artistSnap.exists()) {
+          setArtist({
+            id: artistSnap.id,
+            name: artistSnap.data().name || "Unknown Artist",
+            description: artistSnap.data().bio || "No description available.",
+          });
+        } else {
+          setArtist(null);
+        }
+      }
+    };
+
+    fetchArtwork();
+  }, [id, props]);
+
   const handleCardClick = () => {
     navigate(`/product-detail/${id}`, {
       state: props,
@@ -46,9 +81,26 @@ const ArtworkCard = ({
 
   // Modified to prevent event propagation
   const handleAddToCartClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent the click from bubbling up to the card
-    if (onAddToCart) {
-      onAddToCart(e);
+    e.stopPropagation();
+    if (artwork && selectedSize) {
+      const cartItem: any = {
+        id: `${artwork?.id}-${Date.now()}`,
+        artworkId: artwork?.id,
+        title: artwork?.name,
+        price: artwork?.price,
+        quantity: 1,
+        artistName: artwork?.artistName,
+        size: {
+          value: `${artwork?.dimensions[0]?.length}x${artwork?.dimensions[0]?.width}`,
+          label: artwork?.dimensions[0]?.name,
+          priceAdjustment: selectedSize.priceAdjustment || 0,
+        },
+        uploadedImageUrl: artwork?.images[0]?.url,
+        timestamp: Date.now(),
+        deliveryNote: "",
+        productCategory: artwork?.categoryName,
+      };
+      addToCart(cartItem);
     }
   };
 
@@ -83,7 +135,7 @@ const ArtworkCard = ({
 
         {/* Desktop Hover Add to Cart */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 hidden md:block">
-          <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+          <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10">
             <button
               onClick={handleAddToCartClick}
               aria-label="Add to cart"
@@ -107,7 +159,12 @@ const ArtworkCard = ({
               </h3>
               <p className="text-sm text-gray-600 mb-1">{props?.artistName}</p>
             </div>
-            <p className="font-medium text-gray-900">₹{price}</p>
+            <div className="flex justify-center gap-2">
+              <p className="font-medium text-gray-900">₹{price}</p>
+              <p className="text-sm text-gray-500 line-through">
+                ₹{props?.slashedPrice}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -122,12 +179,15 @@ const ArtworkCard = ({
             </div>
             <div className="text-right">
               <span className="font-medium text-gray-900">₹{price}</span>
+              <p className="text-sm text-gray-500 line-through">
+                ₹{props?.slashedPrice}
+              </p>
             </div>
           </div>
           <button
             onClick={handleAddToCartClick}
             aria-label="Add to cart"
-            className="w-full py-2 px-4 bg-gray-900 hover:bg-gray-800 text-white rounded-md flex items-center justify-center gap-2 transition-colors duration-200"
+            className="w-full py-2 px-4 bg-gray-900 hover:bg-gray-800 text-white rounded-md flex items-center justify-center gap-2 transition-colors duration-200 z-10"
           >
             <ShoppingCart size={16} />
             <span>Add to Cart</span>

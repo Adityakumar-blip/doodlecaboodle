@@ -447,7 +447,7 @@ const Cart = ({
       const charges = calculateCharges();
 
       const response = await axios.post(
-        `${checkoutBaseUrl}/api/payment/create-order`,
+        `${checkoutBaseUrlLocal}/api/payment/create-order`,
         {
           amount: parseFloat(charges.total),
           receipt: `order_${Date.now()}`,
@@ -480,7 +480,7 @@ const Cart = ({
         handler: async (response: any) => {
           try {
             const verifyResponse = await axios.post(
-              `${checkoutBaseUrl}/api/payment/verify`,
+              `${checkoutBaseUrlLocal}/api/payment/verify`,
               {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,

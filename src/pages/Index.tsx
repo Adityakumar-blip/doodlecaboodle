@@ -51,9 +51,9 @@ const Index = () => {
       {/* <GalleryShowcase /> */}
       <QuoteSection />
 
-      {/* <ArtworkGrid /> */}
+      <ArtworkGrid />
 
-      <OurWorks />
+      {/* <OurWorks /> */}
 
       {/* <ArtCategorySection collections={collections} /> */}
 

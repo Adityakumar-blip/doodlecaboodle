@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { CartContext } from "@/context/CartContext";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/firebase/firebaseconfig";
 
 interface SizeOption {
   name: string;
@@ -41,23 +43,37 @@ const ArtworkDetailPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const state = location.state;
-  const [artwork, setArtwork] = useState<ArtworkDetailProps | null>(null);
+  const [artwork, setArtwork] = useState<any | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState<SizeOption | null>(null);
+  const [artist, setArtist] = useState<any>({});
 
   // Fetch artwork data (mock implementation)
   useEffect(() => {
     const fetchArtwork = async () => {
       setIsLoading(true);
 
-      console.log("state", state);
-
       setArtwork(state);
       setActiveImage(state?.images?.[0]?.url);
-      setSelectedSize(state.dimensions[0]); // Default to first size
+      setSelectedSize(state.dimensions[0]);
+
       setIsLoading(false);
+
+      if (state?.artistId) {
+        const artistRef = doc(db, "artists", state.artistId);
+        const artistSnap = await getDoc(artistRef);
+        if (artistSnap.exists()) {
+          setArtist({
+            id: artistSnap.id,
+            name: artistSnap.data().name || "Unknown Artist",
+            description: artistSnap.data().bio || "No description available.",
+          });
+        } else {
+          setArtist(null);
+        }
+      }
     };
 
     fetchArtwork();
@@ -69,34 +85,41 @@ const ArtworkDetailPage = () => {
     }
   };
 
+  function getYearFromCreatedAt(createdAt) {
+    if (!createdAt || typeof createdAt.seconds !== "number") {
+      throw new Error("Invalid createdAt object");
+    }
+
+    const { seconds, nanoseconds } = createdAt;
+    const date = new Date(seconds * 1000 + (nanoseconds || 0) / 1e6);
+    return date.getFullYear();
+  }
+
   const handleAddToCart = () => {
     if (artwork && selectedSize) {
-      console.log(artwork);
-      // const cartItem: CartItem = {
-      //   id: `${artwork?.id}-${Date.now()}`,
-      //   artworkId: artwork?.id,
-      //   title: artwork?.name,
-      //   price: artwork?.price,
-      //   quantity,
-      //   artistName: artwork?.artistName,
-      //   size: {
-      //     value: orderDetails.paperSize,
-      //     label: selectedSize?.label || orderDetails.paperSize,
-      //     priceAdjustment: selectedSize.price,
-      //   },
-      //   uploadedImageUrl: imageUrl,
-      //   timestamp: Date.now(),
-      //   frame: orderDetails.frame,
-      //   deliveryNote: deliveryNote[0].deliveryNote,
-      // };
-      console.log(
-        `Added ${quantity} of ${artwork.title} (Size: ${selectedSize.name}) to cart`
-      );
+      const cartItem: any = {
+        id: `${artwork?.id}-${Date.now()}`,
+        artworkId: artwork?.id,
+        title: artwork?.name,
+        price: artwork?.price,
+        quantity,
+        artistName: artwork?.artistName,
+        size: {
+          value: `${artwork?.dimensions[0]?.length}x${artwork?.dimensions[0]?.width}`,
+          label: artwork?.dimensions[0]?.name,
+          priceAdjustment: selectedSize.priceAdjustment || 0,
+        },
+        uploadedImageUrl: artwork?.images[0]?.url,
+        timestamp: Date.now(),
+        deliveryNote: "",
+        productCategory: artwork?.categoryName,
+      };
+      addToCart(cartItem);
     }
   };
 
   const calculatePrice = () => {
-    if (!artwork || !selectedSize) return artwork?.price || "$0";
+    if (!artwork || !selectedSize) return artwork?.price || "₹0";
     const basePrice = parseFloat(artwork.price);
     const adjustedPrice = basePrice + selectedSize.priceAdjustment;
     return `₹${adjustedPrice.toLocaleString()}`;
@@ -141,7 +164,7 @@ const ArtworkDetailPage = () => {
             />
             {/* Category Tag */}
             <div className="absolute top-3 left-3 bg-pastel-yellow px-2 py-0.5 rounded text-xs">
-              {artwork.category}
+              {artwork.categoryName}
             </div>
           </div>
 
@@ -180,9 +203,14 @@ const ArtworkDetailPage = () => {
             <h1 className="font-playfair text-2xl md:text-3xl font-medium text-gray-900 mb-2">
               {state?.name}
             </h1>
-            <p className="text-xl font-medium text-gray-900">
-              {calculatePrice()}
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-xl font-medium text-gray-900">
+                {calculatePrice()}
+              </p>
+              <p className="text-sm text-gray-500 line-through">
+                ₹{state?.slashedPrice}
+              </p>
+            </div>
           </div>
 
           {/* Actions */}
@@ -210,26 +238,32 @@ const ArtworkDetailPage = () => {
             {/* Add to Cart Button */}
             <button
               onClick={handleAddToCart}
-              // disabled={!artwork.inStock || !selectedSize}
-              className={`flex-1 py-2 px-4 rounded-md flex items-center justify-center gap-2 font-medium text-white bg-gray-900 hover:bg-gray-800 text-white"
+              disabled={artwork?.quantity === 0}
+              className={`flex-1 py-2 px-4 rounded-md flex items-center justify-center gap-2 font-medium text-white ${
+                artwork?.quantity === 0
+                  ? "bg-gray-500"
+                  : "bg-gray-900 hover:bg-gray-800"
+              }  text-white"
               }`}
             >
               <ShoppingCart size={18} />
-              <span>{"Add to Cart"}</span>
+              <span>
+                {artwork?.quantity === 0 ? "Out of Stock" : "Add to Cart"}
+              </span>
             </button>
 
             {/* Wishlist Button */}
-            <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-50">
+            {/* <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-50">
               <Heart
                 size={20}
                 className="text-gray-700 hover:text-pink-500 transition-colors"
               />
-            </button>
+            </button> */}
 
             {/* Share Button */}
-            <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-50">
+            {/* <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-50">
               <Share size={20} className="text-gray-700" />
-            </button>
+            </button> */}
           </div>
 
           <div>
@@ -282,21 +316,17 @@ const ArtworkDetailPage = () => {
               <div>{state?.materials[0]}</div>
 
               <div className="text-gray-600">Year</div>
-              <div>{artwork.yearCreated}</div>
+              <div>{getYearFromCreatedAt(state?.createdAt)}</div>
 
               <div className="text-gray-600">Category</div>
-              <div>{artwork.category}</div>
+              <div>{artwork.categoryName}</div>
             </div>
           </div>
 
           {/* Artist Note - optional section */}
           <div className="mt-auto py-4 border-t border-gray-200">
             <h2 className="font-medium text-lg mb-2">About the Artist</h2>
-            <p className="text-gray-600">
-              {artwork.artistName} is a renowned artist specializing in art.
-              Their unique style captures emotion and imagination through
-              expressive brushwork and thoughtful composition.
-            </p>
+            <p className="text-gray-600">{artist?.description}</p>
           </div>
         </div>
       </div>
