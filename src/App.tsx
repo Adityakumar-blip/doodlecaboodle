@@ -34,6 +34,7 @@ import TermsAndConditions from "./components/TermsConditions";
 import ShippingAndRefundPolicy from "./components/ShippingRefund";
 import PhotoGuidelines from "./components/Photoguide";
 import OrderDetails from "./components/OrderDetail";
+import NavDetailBrowse from "./components/NavDetailBrowse";
 
 const queryClient = new QueryClient();
 
@@ -113,6 +114,10 @@ const AppContent = () => {
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<LoginSignupPage />} />
           <Route path="/artwork-browse" element={<ArtworkBrowse />} />
+          <Route
+            path="/:categoryName/:categoryId"
+            element={<NavDetailBrowse />}
+          />
           <Route path="/product-detail/:id" element={<ArtworkDetailPage />} />
           <Route path="/work-detail/:id" element={<WorkDetail />} />
           <Route path="/artists" element={<Artist />} />

@@ -223,7 +223,12 @@ const ArtworkGrid = () => {
   }, [dispatch]);
 
   // Combine "All" with dynamic categories from Firestore
-  const allCategories = ["All", ...categories.map((cat) => cat.name)];
+  const allCategories = [
+    "All",
+    ...categories
+      .filter((item) => item?.name !== "Portrait")
+      .map((cat) => cat.name),
+  ];
 
   // Filter products based on active category
   const filteredProducts =
@@ -258,7 +263,7 @@ const ArtworkGrid = () => {
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <div className="hidden md:flex items-center space-x-2 overflow-x-auto pb-2">
-                  {allCategories.length > 2 &&
+                  {allCategories.length >= 2 &&
                     allCategories.map((category) => (
                       <button
                         key={category}

@@ -20,8 +20,10 @@ import { fetchCategories } from "@/store/slices/CategorySlice";
 import { AppDispatch, RootState } from "@/store/store";
 import { CartContext } from "@/context/CartContext";
 import logo from "@/assets/logo-doodle.svg";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { categories: categoryData } = useSelector(
     (state: RootState) => state.categories
@@ -404,13 +406,23 @@ const Navbar = () => {
               {categoryData?.map((category, index) => (
                 <div key={index} className="relative group px-4">
                   <div className="flex items-center gap-2">
-                    <button className="text-black hover:text-pastel-pink py-2 transition-colors font-medium">
+                    <button
+                      className="text-black hover:text-pastel-pink py-2 transition-colors font-medium"
+                      onClick={() => {
+                        category?.name === "Portrait"
+                          ? navigate("/artwork-browse")
+                          : navigate(`/${category?.name}/${category?.id}`);
+                      }}
+                    >
                       {category.name}
                     </button>
-                    <ChevronDown
-                      className="relative top-[1px] ml-1 h-3 w-3 transition duration-200 group-hover:rotate-180"
-                      aria-hidden="true"
-                    />
+                    {category?.parentId !== null ||
+                      (category?.parentId && (
+                        <ChevronDown
+                          className="relative top-[1px] ml-1 h-3 w-3 transition duration-200 group-hover:rotate-180"
+                          aria-hidden="true"
+                        />
+                      ))}
                   </div>
                 </div>
               ))}

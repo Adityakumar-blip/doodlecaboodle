@@ -1,6 +1,6 @@
 import { db } from "@/firebase/firebaseconfig";
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 // Product-related types
 interface Product {
@@ -31,11 +31,15 @@ export const fetchProducts = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const productsRef = collection(db, "products");
-      const snapshot = await getDocs(productsRef);
+      // filter only active products
+      const q = query(productsRef, where("status", "==", "active"));
+      const snapshot = await getDocs(q);
+
       const products: Product[] = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       })) as Product[];
+
       return products;
     } catch (error: any) {
       return rejectWithValue(error.message || "Failed to fetch products");
@@ -53,7 +57,6 @@ export const fetchWroks = createAsyncThunk(
         id: doc.id,
         ...doc.data(),
       })) as Product[];
-      console.log("products", products)
       return products;
     } catch (error: any) {
       return rejectWithValue(error.message || "Failed to fetch products");
