@@ -433,7 +433,8 @@ const Cart = ({
     setShowNoteModal(false);
   };
 
-  const checkoutBaseUrl = "https://paymentandshipping.onrender.com";
+  // const checkoutBaseUrl = "https://paymentandshipping.onrender.com";
+  const checkoutBaseUrl = "https://paymentandshipping-vke7.onrender.com";
   const checkoutBaseUrlLocal = "http://localhost:1990";
 
   // Handle checkout with Razorpay and save order history
