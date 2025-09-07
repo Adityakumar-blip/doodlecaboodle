@@ -215,6 +215,12 @@ const ArtworkGrid = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
   const displayLimit = 8;
+  const [likedArtworks, setLikedArtworks] = useState<string[]>([]);
+  const handleLike = (id: string) => {
+    setLikedArtworks((prev) =>
+      prev.includes(id) ? prev.filter((artId) => artId !== id) : [...prev, id]
+    );
+  };
 
   // Fetch products and categories on component mount
   useEffect(() => {
@@ -335,6 +341,8 @@ const ArtworkGrid = () => {
                 price={product.price}
                 category={product.category}
                 props={product}
+                liked={likedArtworks.includes(product.id)}
+                onLike={() => handleLike(product.id)}
               />
             ))}
           </div>

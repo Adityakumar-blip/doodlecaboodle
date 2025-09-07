@@ -39,9 +39,15 @@ const ArtworkBrowse = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [displayCount, setDisplayCount] = useState(12);
   const [sortBy, setSortBy] = useState("featured");
-  const [expandedFilterSection, setExpandedFilterSection] = useState<
-    string | null
-  >(null);
+  const [expandedFilterSection, setExpandedFilterSection] = useState<string | null>(null);
+
+  // Heart like feature state
+  const [likedArtworks, setLikedArtworks] = useState<string[]>([]);
+  const handleLike = (id: string) => {
+    setLikedArtworks((prev) =>
+      prev.includes(id) ? prev.filter((artId) => artId !== id) : [...prev, id]
+    );
+  };
 
   // Helper function to safely extract price as number
   const getPriceAsNumber = (price: any): number => {
@@ -613,6 +619,9 @@ const ArtworkBrowse = () => {
                           price={work.price}
                           category={work.category}
                           props={work}
+                          liked={likedArtworks.includes(work.id)}
+                          onLike={() => handleLike(work.id)}
+                          showDetails={false} // <-- Hide details here
                         />
                       ))}
                     </div>
