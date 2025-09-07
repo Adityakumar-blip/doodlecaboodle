@@ -156,7 +156,7 @@ const ArtworkDetailPage = () => {
         {/* Left Column - Images */}
         <div>
           {/* Main Image */}
-          <div className="relative overflow-hidden aspect-[3/4] mb-4 rounded-lg">
+          <div className="relative overflow-hidden aspect-square mb-4 rounded-lg">
             <img
               src={activeImage}
               alt={artwork.title}
@@ -215,7 +215,7 @@ const ArtworkDetailPage = () => {
 
           {/* Actions */}
           <div className="flex flex-col md:flex-row gap-3 my-6">
-            {/* Quantity Selector */}
+            {/* Quantity Selector
             <div className="flex items-center border border-gray-300 rounded-md">
               <button
                 onClick={() => handleQuantityChange(quantity - 1)}
@@ -233,7 +233,7 @@ const ArtworkDetailPage = () => {
               >
                 <Plus size={16} />
               </button>
-            </div>
+            </div> */}
 
             {/* Add to Cart Button */}
             <button
@@ -320,6 +320,16 @@ const ArtworkDetailPage = () => {
 
               <div className="text-gray-600">Category</div>
               <div>{artwork.categoryName}</div>
+
+              <div className="text-gray-600">Surface</div>
+              <div><p>Chitrapat ,440 gsm</p></div>
+
+              <div className="text-gray-600">Artwork</div>
+              <div><p>Original</p></div>
+
+              <div className="text-gray-600">To be Delivered in:</div>
+              <div><p>rolled</p></div>
+
             </div>
           </div>
 

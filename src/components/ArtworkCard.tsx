@@ -9,13 +9,16 @@ interface ArtworkCardProps {
   id: string | number; // Added ID prop for navigation
   imageUrl: string;
   title: string;
+  // name: string;
   artistName: string;
   price: string;
   category: string;
   props: any;
   isClickable?: boolean;
-
+  liked?: boolean;
+  onLike?: () => void;
   onAddToCart?: (e: React.MouseEvent) => void;
+  showDetails?: boolean; // <-- Add this line
 }
 
 const ArtworkCard = ({
@@ -25,9 +28,12 @@ const ArtworkCard = ({
   artistName,
   price,
   category,
+  liked = false,
+  onLike,
   onAddToCart,
   props,
   isClickable = true,
+  showDetails = true,
 }: ArtworkCardProps) => {
   const { cartItems, addToCart, setCartItems, toggleCart } =
     useContext(CartContext);
@@ -35,6 +41,8 @@ const ArtworkCard = ({
   const [artwork, setArtwork] = useState<any | null>(null);
   const [selectedSize, setSelectedSize] = useState<any | null>(null);
   const [artist, setArtist] = useState<any>({});
+  const artworkName = props?.name || name || ""; // fallback to prop or field
+
 
   const navigate = useNavigate();
 
@@ -107,18 +115,38 @@ const ArtworkCard = ({
     }
   };
 
+  // Heart click handler to prevent card navigation
+  const handleHeartClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onLike) onLike();
+  };
+
   return (
     <div
       className="art-card group relative cursor-pointer"
-      onClick={isClickable && handleCardClick}
+      onClick={isClickable ? handleCardClick : undefined}
     >
+      {/* Heart Icon */}
+      <button
+        className="absolute top-3 right-3 z-10  transition"
+        onClick={handleHeartClick}
+        aria-label={liked ? "Unlike" : "Like"}
+        type="button"
+      >
+        {liked ? (
+          <Heart size={28} fill="#e53e3e" color="#000000" strokeWidth={1.5} />
+        ) : (
+          <Heart size={28} color="#000000" strokeWidth={1.5} />
+        )}
+      </button>
+
       {/* Image Container */}
       <div
         className="art-card group relative cursor-pointer"
-        onClick={isClickable && handleCardClick}
+        onClick={isClickable ? handleCardClick : undefined}
       >
         {/* Image Container with hover effect */}
-        <div className="relative overflow-hidden aspect-[3/4]">
+        <div className="relative overflow-hidden aspect square">
           {/* Primary image */}
           <img
             src={props?.images?.[0]?.url}
@@ -138,6 +166,27 @@ const ArtworkCard = ({
           )}
         </div>
       </div>
+      {/* Card details */}
+      {/* <div className="p-4">
+        <h3 className="font-semibold">{title}</h3>
+        <p className="text-sm text-gray-500">{artistName}</p>
+        <p className="text-md text-gray-700">{price}</p>
+      </div> */}
+      {showDetails && (
+  <div className="p-4">
+    <h3 className="font-semibold">{artworkName}</h3>
+    <div className="flex items-center gap-2">
+      <p className="text-md text-gray-700 font-medium">
+        ₹{price}
+      </p>
+      {props?.slashedPrice && (
+        <p className="text-sm text-gray-500 line-through">
+          ₹{props.slashedPrice}
+        </p>
+      )}
+    </div>
+  </div>
+)}
     </div>
   );
 };
