@@ -126,8 +126,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       if (currentUser) {
-        console.log("current user", currentUser);
-        console.log("iteem", item);
         // Add to Firebase under user-specific cart
         const cartItemWithUser = {
           ...item,

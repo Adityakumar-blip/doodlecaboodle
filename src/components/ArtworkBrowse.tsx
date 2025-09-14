@@ -39,7 +39,9 @@ const ArtworkBrowse = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [displayCount, setDisplayCount] = useState(12);
   const [sortBy, setSortBy] = useState("featured");
-  const [expandedFilterSection, setExpandedFilterSection] = useState<string | null>(null);
+  const [expandedFilterSection, setExpandedFilterSection] = useState<
+    string | null
+  >(null);
 
   // Heart like feature state
   const [likedArtworks, setLikedArtworks] = useState<string[]>([]);

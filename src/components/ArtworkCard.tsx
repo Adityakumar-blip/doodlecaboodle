@@ -43,7 +43,6 @@ const ArtworkCard = ({
   const [artist, setArtist] = useState<any>({});
   const artworkName = props?.name || name || ""; // fallback to prop or field
 
-
   const navigate = useNavigate();
 
   // Check for mobile device on mount and window resize
@@ -85,7 +84,7 @@ const ArtworkCard = ({
   }, [id, props]);
 
   const handleCardClick = () => {
-    navigate(`/product-detail/${id}`, {
+    navigate(`/work-detail/${id}`, {
       state: props,
     });
   };
@@ -127,7 +126,7 @@ const ArtworkCard = ({
       onClick={isClickable ? handleCardClick : undefined}
     >
       {/* Heart Icon */}
-      <button
+      {/* <button
         className="absolute top-3 right-3 z-10  transition"
         onClick={handleHeartClick}
         aria-label={liked ? "Unlike" : "Like"}
@@ -138,7 +137,7 @@ const ArtworkCard = ({
         ) : (
           <Heart size={28} color="#000000" strokeWidth={1.5} />
         )}
-      </button>
+      </button> */}
 
       {/* Image Container */}
       <div
@@ -173,20 +172,18 @@ const ArtworkCard = ({
         <p className="text-md text-gray-700">{price}</p>
       </div> */}
       {showDetails && (
-  <div className="p-4">
-    <h3 className="font-semibold">{artworkName}</h3>
-    <div className="flex items-center gap-2">
-      <p className="text-md text-gray-700 font-medium">
-        ₹{price}
-      </p>
-      {props?.slashedPrice && (
-        <p className="text-sm text-gray-500 line-through">
-          ₹{props.slashedPrice}
-        </p>
+        <div className="p-4">
+          <h3 className="font-semibold">{artworkName}</h3>
+          <div className="flex items-center gap-2">
+            <p className="text-md text-gray-700 font-medium">₹{price}</p>
+            {props?.slashedPrice && (
+              <p className="text-sm text-gray-500 line-through">
+                ₹{props.slashedPrice}
+              </p>
+            )}
+          </div>
+        </div>
       )}
-    </div>
-  </div>
-)}
     </div>
   );
 };

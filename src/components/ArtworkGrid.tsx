@@ -198,6 +198,7 @@ import ArtworkCard from "./ArtworkCard";
 import { Button } from "@/components/ui/button";
 import { Filter } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import WorkCard from "./Ourworkcard";
 
 const ArtworkGrid = () => {
   const navigate = useNavigate();
@@ -237,12 +238,16 @@ const ArtworkGrid = () => {
   ];
 
   // Filter products based on active category
-  const filteredProducts =
-    activeCategory === "All"
-      ? products
-      : products.filter(
-          (product: any) => product.categoryName === activeCategory
-        );
+  let filteredProducts =
+  activeCategory === "All"
+    ? products
+    : products.filter(
+        (product: any) => product.categoryName === activeCategory
+      );
+
+filteredProducts = [...filteredProducts].sort(
+  (a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)
+);
 
   return (
     <section className="py-16 bg-white">
@@ -332,7 +337,7 @@ const ArtworkGrid = () => {
         {!productsLoading && !productsError && filteredProducts.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredProducts.map((product) => (
-              <ArtworkCard
+              <WorkCard
                 id={product.id}
                 key={product.id}
                 imageUrl={product.imageUrl}
@@ -349,7 +354,7 @@ const ArtworkGrid = () => {
         )}
 
         {/* Load More Button */}
-        {filteredProducts.length > displayLimit && (
+        {/* {filteredProducts.length > displayLimit && (
           <div className="mt-12 text-center">
             <Button
               className="bg-transparent border border-gray-300 text-gray-700 hover:bg-blue-100 px-8 py-3 rounded-md transition-colors duration-300"
@@ -358,7 +363,7 @@ const ArtworkGrid = () => {
               Load More Artworks
             </Button>
           </div>
-        )}
+        )} */}
       </div>
     </section>
   );

@@ -258,6 +258,54 @@ const Cart = ({
   };
 
   // Validate and apply coupon with confetti animation
+  // const applyCoupon = async () => {
+  //   try {
+  //     await loadConfettiScript(); // Ensure confetti script is loaded
+  //     const couponsRef = collection(db, "coupons");
+  //     const q = query(couponsRef, where("code", "==", couponCode));
+  //     const querySnapshot = await getDocs(q);
+
+  //     if (querySnapshot.empty) {
+  //       setAppliedCoupon(null);
+  //       toast.error("Coupon not found");
+  //       return;
+  //     }
+
+  //     const couponDoc = querySnapshot.docs[0];
+  //     const couponData = couponDoc.data() as Coupon;
+
+  //     const currentTime = new Date().getTime();
+  //     const validFrom = (couponData.validFrom as Timestamp).toDate().getTime();
+  //     const validUntil = (couponData.validUntil as Timestamp)
+  //       .toDate()
+  //       .getTime();
+
+  //     const isCouponValid =
+  //       couponData.status === "active" &&
+  //       validFrom <= currentTime &&
+  //       validUntil >= currentTime;
+
+  //     if (isCouponValid) {
+  //       setAppliedCoupon({
+  //         ...couponData,
+  //         code: couponCode,
+  //         validFrom: new Date(validFrom),
+  //         validUntil: new Date(validUntil),
+  //       });
+  //       toast.success(`Coupon "${couponCode}" applied successfully!`);
+  //       triggerConfetti(); // Trigger confetti animation on successful coupon application
+  //     } else {
+  //       setAppliedCoupon(null);
+  //       toast.error("Invalid or expired coupon");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error applying coupon:", error);
+  //     toast.error("Failed to apply coupon");
+  //     setAppliedCoupon(null);
+  //   }
+  // };
+
+  // Updated applyCoupon function with category validation
   const applyCoupon = async () => {
     try {
       await loadConfettiScript(); // Ensure confetti script is loaded
@@ -285,19 +333,42 @@ const Cart = ({
         validFrom <= currentTime &&
         validUntil >= currentTime;
 
-      if (isCouponValid) {
-        setAppliedCoupon({
-          ...couponData,
-          code: couponCode,
-          validFrom: new Date(validFrom),
-          validUntil: new Date(validUntil),
-        });
-        toast.success(`Coupon "${couponCode}" applied successfully!`);
-        triggerConfetti(); // Trigger confetti animation on successful coupon application
-      } else {
+      if (!isCouponValid) {
         setAppliedCoupon(null);
         toast.error("Invalid or expired coupon");
+        return;
       }
+
+      // Check if coupon has category restrictions
+      if (couponData.categoryIds && couponData.categoryIds.length > 0) {
+        // Get all unique categories from cart items
+        const cartCategories = [
+          ...new Set(cartItems.map((item) => item.categoryId).filter(Boolean)),
+        ];
+
+        // Check if any cart item category matches the coupon's allowed categories
+        const hasValidCategory = cartCategories.some((categoryId) =>
+          couponData.categoryIds.includes(categoryId)
+        );
+
+        if (!hasValidCategory) {
+          setAppliedCoupon(null);
+          toast.error(
+            "This coupon is not applicable for the items in your cart"
+          );
+          return;
+        }
+      }
+
+      // If we reach here, coupon is valid and applicable
+      setAppliedCoupon({
+        ...couponData,
+        code: couponCode,
+        validFrom: new Date(validFrom),
+        validUntil: new Date(validUntil),
+      });
+      toast.success(`Coupon "${couponCode}" applied successfully!`);
+      triggerConfetti(); // Trigger confetti animation on successful coupon application
     } catch (error) {
       console.error("Error applying coupon:", error);
       toast.error("Failed to apply coupon");
@@ -433,7 +504,7 @@ const Cart = ({
     setShowNoteModal(false);
   };
 
-  const checkoutBaseUrl = "https://paymentandshipping.onrender.com";
+  const checkoutBaseUrl = "https://paymentandshipping-vke7.onrender.com";
   const checkoutBaseUrlLocal = "http://localhost:1990";
 
   // Handle checkout with Razorpay and save order history
@@ -441,13 +512,13 @@ const Cart = ({
     if (!auth.currentUser) return;
     setLoading(true);
     try {
-      axios.get("https://email-service-app.onrender.com/");
+      axios.get("https://email-service-app-ri2v.onrender.com/");
       await loadRazorpayScript();
 
       const charges = calculateCharges();
 
       const response = await axios.post(
-        `${checkoutBaseUrlLocal}/api/payment/create-order`,
+        `${checkoutBaseUrl}/api/payment/create-order`,
         {
           amount: parseFloat(charges.total),
           receipt: `order_${Date.now()}`,
@@ -480,7 +551,7 @@ const Cart = ({
         handler: async (response: any) => {
           try {
             const verifyResponse = await axios.post(
-              `${checkoutBaseUrlLocal}/api/payment/verify`,
+              `${checkoutBaseUrl}/api/payment/verify`,
               {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
@@ -525,7 +596,7 @@ const Cart = ({
               });
 
               // await axios.post(
-              //   "https://email-service-app.onrender.com/email/send",
+              //   "https://email-service-app-ri2v.onrender.com/email/send",
               //   {
               //     to: "doodlecaboodle08@gmail.com",
               //     subject: `New Order Received - ${order.orderId}`,
@@ -534,7 +605,7 @@ const Cart = ({
               // );
 
               // await axios.post(
-              //   "https://email-service-app.onrender.com/email/send",
+              //   "https://email-service-app-ri2v.onrender.com/email/send",
               //   {
               //     to: "doodlecaboodle08@gmail.com",
               //     subject: `Thank you for your order - ${order.orderId}`,

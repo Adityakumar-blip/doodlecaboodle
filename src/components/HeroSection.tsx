@@ -77,8 +77,6 @@ const HeroSection: React.FC = () => {
     return () => clearInterval(interval);
   }, [currentIndex, isTransitioning, heroImages.length]);
 
-  console.log("herom", heroImages);
-
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
       {heroImages.map((image, index) => (

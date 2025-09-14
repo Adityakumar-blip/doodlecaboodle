@@ -113,6 +113,7 @@ const ArtworkDetailPage = () => {
         timestamp: Date.now(),
         deliveryNote: "",
         productCategory: artwork?.categoryName,
+        categoryId: artwork?.categoryId,
       };
       addToCart(cartItem);
     }
@@ -142,10 +143,10 @@ const ArtworkDetailPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 md:py-12">
+    <div className="container mx-auto px-4 py-6  md:py-12">
       {/* Back button */}
       <Link
-        to="/gallery"
+        to="/"
         className="inline-flex items-center mb-6 text-gray-600 hover:text-gray-900 transition-colors"
       >
         <ArrowLeft size={18} className="mr-2" />
@@ -322,14 +323,19 @@ const ArtworkDetailPage = () => {
               <div>{artwork.categoryName}</div>
 
               <div className="text-gray-600">Surface</div>
-              <div><p>Chitrapat ,440 gsm</p></div>
+              <div>
+                <p>Chitrapat ,440 gsm</p>
+              </div>
 
               <div className="text-gray-600">Artwork</div>
-              <div><p>Original</p></div>
+              <div>
+                <p>Original</p>
+              </div>
 
               <div className="text-gray-600">To be Delivered in:</div>
-              <div><p>rolled</p></div>
-
+              <div>
+                <p>rolled</p>
+              </div>
             </div>
           </div>
 

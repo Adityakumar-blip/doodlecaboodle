@@ -61,7 +61,7 @@ const Index = () => {
       {/* <FeaturedArtistCarousel /> */}
 
       {/* <TestimonialsSection /> */}
-      <ProductReviewSection/>
+      <ProductReviewSection />
 
       <FAQPage />
     </div>

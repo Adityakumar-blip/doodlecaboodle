@@ -100,6 +100,17 @@ const BackToTopButton = () => {
   );
 };
 
+function ScrollToTop() {
+  const pathName = useLocation();
+
+  // This effect runs whenever the path name changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [pathName]);
+
+  return null;
+}
+
 const AppContent = () => {
   const location = useLocation();
   const hideNavbarAndFooter = location.pathname === "/login";
@@ -110,6 +121,7 @@ const AppContent = () => {
       <Sonner />
       {!hideNavbarAndFooter && <Navbar />}
       <div className={`${!hideNavbarAndFooter ? "mt-14" : ""}`}>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<LoginSignupPage />} />

@@ -46,6 +46,7 @@ interface ArtworkDetailProps {
   inStock: boolean;
   additionalImages?: string[];
   artistId?: string;
+  categoryId?: string;
 }
 
 interface Artist {
@@ -64,6 +65,7 @@ interface CartItem {
   size: SizeOption;
   uploadedImageUrl: string;
   timestamp: number;
+  categoryId?: string;
 }
 
 const WorkDetail = () => {
@@ -216,6 +218,7 @@ const WorkDetail = () => {
         size: selectedSize,
         uploadedImageUrl: imageUrl,
         timestamp: Date.now(),
+        categoryId: artwork?.categoryId,
       };
 
       // Add to cart (handles local storage or Firebase based on auth state)
@@ -328,7 +331,11 @@ const WorkDetail = () => {
             </div>
             <div className="mb-6">
               <Button
-                onClick={() => navigate("/get-yours")}
+                onClick={() =>
+                  navigate("/get-yours", {
+                    state: state.categoryId,
+                  })
+                }
                 className={` ${showUploadSection ? "hidden" : ""}`}
               >
                 Get Yours
