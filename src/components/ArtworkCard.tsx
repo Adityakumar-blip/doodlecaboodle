@@ -174,8 +174,27 @@ const ArtworkCard = ({
       </div> */}
       {showDetails && (
   <div className="p-4">
-    <h3 className="font-semibold">{artworkName}</h3>
-    <div className="flex items-center gap-2">
+    <div className="relative flex items-center gap-3">
+  <h3 className="font-semibold">{artworkName}</h3>
+  {/* Save % badge at rightmost side */}
+  {props?.slashedPrice && (() => {
+    const priceNum = Number(price);
+    const slashedNum = Number(props.slashedPrice);
+    if (slashedNum > priceNum && priceNum > 0) {
+      const percent = Math.round(((slashedNum - priceNum) / slashedNum) * 100);
+      return (
+        <span
+          className="bg-black text-white text-base font-bold px-3 py-1 rounded absolute right-0"
+          style={{ display: "inline-block" }}
+        >
+          save {percent}%
+        </span>
+      );
+    }
+    return null;
+  })()}
+</div>
+    <div className="flex items-center gap-2 mt-2">
       <p className="text-md text-gray-700 font-medium">
         ₹{price}
       </p>

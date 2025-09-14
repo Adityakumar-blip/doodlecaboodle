@@ -35,6 +35,7 @@ import ShippingAndRefundPolicy from "./components/ShippingRefund";
 import PhotoGuidelines from "./components/Photoguide";
 import OrderDetails from "./components/OrderDetail";
 import NavDetailBrowse from "./components/NavDetailBrowse";
+import PaintingArtistDetail from "./components/PaintingArtistDetail";
 
 const queryClient = new QueryClient();
 
@@ -124,6 +125,7 @@ const AppContent = () => {
           <Route path="/collection" element={<GalleryShowcase />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/artists/:id" element={<ArtistDetail />} />
+          <Route path="/painting-artists/:id" element={<PaintingArtistDetail />} />
           <Route path="/collections/:id" element={<CollectionDetail />} />
           <Route path="/about" element={<About />} />
           <Route path="/photo-guideline" element={<PhotoGuidelines />} />

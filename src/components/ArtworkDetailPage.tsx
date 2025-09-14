@@ -195,7 +195,7 @@ const ArtworkDetailPage = () => {
           {/* Artist and Title */}
           <div className="mb-2">
             <p
-              onClick={() => navigate("/artists/1")}
+              onClick={() => navigate(`/painting-artists/${state?.artistId}`)}
               className="text-gray-600 hover:underline hover:text-red-400 cursor-pointer"
             >
               {state.artistName}
