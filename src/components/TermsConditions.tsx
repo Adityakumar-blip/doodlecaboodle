@@ -291,7 +291,7 @@ const TermsAndConditions = () => {
               </h2>
               <p className="text-gray-600 text-sm leading-relaxed">
                 These Terms are governed by the laws of India. Any disputes will
-                be resolved in the courts of [Your City], India.
+                be resolved in the courts of kanpur, India.
               </p>
 
               <h2

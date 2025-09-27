@@ -515,8 +515,6 @@ const Cart = ({
               { timeout: 8000 }
             );
 
-            console.log("response razorpay", verifyResponse);
-
             if (verifyResponse.data.success) {
               const order: Order = {
                 orderId: response.razorpay_order_id,

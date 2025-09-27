@@ -1,6 +1,5 @@
 export const generateOrderEmailHTML = (order: any, user: any) => {
   const formatCurrency = (amount: number) => `₹${amount.toFixed(2)}`;
-  console.log("order details", order);
   return `
     <div style="font-family: Arial, sans-serif; line-height: 1.6;">
       <h2>New Order Received: ${order.orderId}</h2>
@@ -77,10 +76,8 @@ export const generateOrderEmailHTML = (order: any, user: any) => {
 
 export const generateThankYouEmailHTML = (order: any, user: any) => {
   const formatCurrency = (amount: number) => `₹${amount.toFixed(2)}`;
-  console.log("order details in thank you", order);
   const orderUrl = `${window.location.origin}/order/${order.orderId}`;
 
-  console.log(orderUrl);
   return `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
       <h2 style="color: #4CAF50;">🛍 Thank You for Your Purchase!</h2>

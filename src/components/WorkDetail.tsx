@@ -518,7 +518,7 @@ const WorkDetail = () => {
               <div className="text-gray-600">Dimensions</div>
               <div>
                 {selectedSize
-                  ? `${selectedSize.length}mm × ${selectedSize.width}mm`
+                  ? `${selectedSize.length}${selectedSize.unit} × ${selectedSize.width}${selectedSize.unit}`
                   : "Select a size"}
               </div>
               <div className="text-gray-600">Medium</div>
