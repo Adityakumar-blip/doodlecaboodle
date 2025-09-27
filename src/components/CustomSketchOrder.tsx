@@ -89,6 +89,7 @@ interface CartItem {
   timestamp: number;
   frame: string | null;
   deliveryNote?: any;
+  categoryId?: string;
 }
 
 const CustomSketchOrder: React.FC = () => {
