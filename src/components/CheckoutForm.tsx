@@ -102,6 +102,8 @@ const CheckoutForm = ({
     );
   };
 
+  console.log(validateForm());
+
   return (
     <div className="p-4 space-y-4">
       <h3 className="text-lg font-medium text-gray-900">Shipping Details</h3>

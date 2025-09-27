@@ -257,10 +257,9 @@ const Cart = ({
     }
   };
 
-  // Validate and apply coupon with confetti animation
   const applyCoupon = async () => {
     try {
-      await loadConfettiScript(); // Ensure confetti script is loaded
+      await loadConfettiScript();
       const couponsRef = collection(db, "coupons");
       const q = query(couponsRef, where("code", "==", couponCode));
       const querySnapshot = await getDocs(q);
@@ -285,19 +284,42 @@ const Cart = ({
         validFrom <= currentTime &&
         validUntil >= currentTime;
 
-      if (isCouponValid) {
-        setAppliedCoupon({
-          ...couponData,
-          code: couponCode,
-          validFrom: new Date(validFrom),
-          validUntil: new Date(validUntil),
-        });
-        toast.success(`Coupon "${couponCode}" applied successfully!`);
-        triggerConfetti(); // Trigger confetti animation on successful coupon application
-      } else {
+      if (!isCouponValid) {
         setAppliedCoupon(null);
         toast.error("Invalid or expired coupon");
+        return;
       }
+
+      // Check if coupon has category restrictions
+      if (couponData.categoryIds && couponData.categoryIds.length > 0) {
+        // Get all unique categories from cart items
+        const cartCategories = [
+          ...new Set(cartItems.map((item) => item.categoryId).filter(Boolean)),
+        ];
+
+        // Check if any cart item category matches the coupon's allowed categories
+        const hasValidCategory = cartCategories.some((categoryId) =>
+          couponData.categoryIds.includes(categoryId)
+        );
+
+        if (!hasValidCategory) {
+          setAppliedCoupon(null);
+          toast.error(
+            "This coupon is not applicable for the items in your cart"
+          );
+          return;
+        }
+      }
+
+      // If we reach here, coupon is valid and applicable
+      setAppliedCoupon({
+        ...couponData,
+        code: couponCode,
+        validFrom: new Date(validFrom),
+        validUntil: new Date(validUntil),
+      });
+      toast.success(`Coupon "${couponCode}" applied successfully!`);
+      triggerConfetti(); // Trigger confetti animation on successful coupon application
     } catch (error) {
       console.error("Error applying coupon:", error);
       toast.error("Failed to apply coupon");
@@ -336,6 +358,10 @@ const Cart = ({
       (total, item) => total + item.price * item.quantity,
       0
     );
+    const baseTotal = cartItems.reduce(
+      (total, item) => total + item.size.priceAdjustment * item.quantity,
+      0
+    );
     let deliveryCharges = 0;
     let packagingCharges = 50;
     let discount = 0;
@@ -350,7 +376,7 @@ const Cart = ({
         appliedCoupon.discountValue
       ) {
         if (appliedCoupon.discountType === "percentage") {
-          discount = (subtotal * appliedCoupon.discountValue) / 100;
+          discount = (baseTotal * appliedCoupon.discountValue) / 100;
         } else if (appliedCoupon.discountType === "fixed") {
           discount = appliedCoupon.discountValue;
         }
@@ -433,7 +459,6 @@ const Cart = ({
     setShowNoteModal(false);
   };
 
-  // const checkoutBaseUrl = "https://paymentandshipping.onrender.com";
   const checkoutBaseUrl = "https://paymentandshipping-vke7.onrender.com";
   const checkoutBaseUrlLocal = "http://localhost:1990";
 
@@ -442,7 +467,7 @@ const Cart = ({
     if (!auth.currentUser) return;
     setLoading(true);
     try {
-      axios.get("https://email-service-app.onrender.com/");
+      axios.get("https://email-service-app-ri2v.onrender.com/");
       await loadRazorpayScript();
 
       const charges = calculateCharges();
@@ -524,7 +549,7 @@ const Cart = ({
               });
 
               // await axios.post(
-              //   "https://email-service-app.onrender.com/email/send",
+              //   "https://email-service-app-ri2v.onrender.com/email/send",
               //   {
               //     to: "doodlecaboodle08@gmail.com",
               //     subject: `New Order Received - ${order.orderId}`,
@@ -533,7 +558,7 @@ const Cart = ({
               // );
 
               // await axios.post(
-              //   "https://email-service-app.onrender.com/email/send",
+              //   "https://email-service-app-ri2v.onrender.com/email/send",
               //   {
               //     to: "doodlecaboodle08@gmail.com",
               //     subject: `Thank you for your order - ${order.orderId}`,
@@ -748,7 +773,7 @@ const Cart = ({
                         </Button>
                       )}
                     </div>
-                    {appliedCoupon && (
+                    {appliedCoupon ? (
                       <p className="mt-2 text-sm text-green-600">
                         Coupon {appliedCoupon.code} applied (
                         {appliedCoupon.type === "delivery"
@@ -759,6 +784,10 @@ const Cart = ({
                           ? `${appliedCoupon.discountValue}% off`
                           : `₹${appliedCoupon.discountValue} off`}
                         )
+                      </p>
+                    ) : (
+                      <p className="mt-1 text-xs text-gray-500">
+                        *Coupon will only be applied on base price.
                       </p>
                     )}
                   </div>
@@ -872,7 +901,9 @@ const Cart = ({
                       </div> */}
                       {appliedCoupon && (
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Coupon Discount</span>
+                          <span className="text-gray-600">
+                            Coupon Discount{" "}
+                          </span>
                           <span className="text-green-600">
                             -₹{charges.discount}
                           </span>

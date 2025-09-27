@@ -34,6 +34,7 @@ import TermsAndConditions from "./components/TermsConditions";
 import ShippingAndRefundPolicy from "./components/ShippingRefund";
 import PhotoGuidelines from "./components/Photoguide";
 import OrderDetails from "./components/OrderDetail";
+import NavDetailBrowse from "./components/NavDetailBrowse";
 
 const queryClient = new QueryClient();
 
@@ -99,6 +100,17 @@ const BackToTopButton = () => {
   );
 };
 
+function ScrollToTop() {
+  const pathName = useLocation();
+
+  // This effect runs whenever the path name changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [pathName]);
+
+  return null;
+}
+
 const AppContent = () => {
   const location = useLocation();
   const hideNavbarAndFooter = location.pathname === "/login";
@@ -109,10 +121,15 @@ const AppContent = () => {
       <Sonner />
       {!hideNavbarAndFooter && <Navbar />}
       <div className={`${!hideNavbarAndFooter ? "mt-14" : ""}`}>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<LoginSignupPage />} />
           <Route path="/artwork-browse" element={<ArtworkBrowse />} />
+          <Route
+            path="/:categoryName/:categoryId"
+            element={<NavDetailBrowse />}
+          />
           <Route path="/product-detail/:id" element={<ArtworkDetailPage />} />
           <Route path="/work-detail/:id" element={<WorkDetail />} />
           <Route path="/artists" element={<Artist />} />

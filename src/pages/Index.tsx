@@ -9,6 +9,7 @@ import GalleryShowcase from "../components/GalleryShowcase";
 import TestimonialsSection from "../components/TestimonialsSection";
 import ArtCategorySection from "@/components/ArtCategory";
 import FeaturedArtistCarousel from "@/components/FeaturedArtistCarousel";
+import ProductReviewSection from "../components/ProductReviewCarousel";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "@/firebase/firebaseconfig";
 import OurWorks from "@/components/OurWorks";
@@ -51,15 +52,16 @@ const Index = () => {
       {/* <GalleryShowcase /> */}
       <QuoteSection />
 
-      {/* <ArtworkGrid /> */}
+      <ArtworkGrid />
 
-      <OurWorks />
+      {/* <OurWorks /> */}
 
       {/* <ArtCategorySection collections={collections} /> */}
 
-      <FeaturedArtistCarousel />
+      {/* <FeaturedArtistCarousel /> */}
 
       {/* <TestimonialsSection /> */}
+      <ProductReviewSection />
 
       <FAQPage />
     </div>

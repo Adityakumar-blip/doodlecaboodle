@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Heart,
   ShoppingCart,
@@ -8,6 +8,9 @@ import {
   Minus,
 } from "lucide-react";
 import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
+import { CartContext } from "@/context/CartContext";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/firebase/firebaseconfig";
 
 interface SizeOption {
   name: string;
@@ -34,15 +37,18 @@ interface ArtworkDetailProps {
 }
 
 const ArtworkDetailPage = () => {
+  const { cartItems, addToCart, setCartItems, toggleCart } =
+    useContext(CartContext);
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const state = location.state;
-  const [artwork, setArtwork] = useState<ArtworkDetailProps | null>(null);
+  const [artwork, setArtwork] = useState<any | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState<SizeOption | null>(null);
+  const [artist, setArtist] = useState<any>({});
 
   // Fetch artwork data (mock implementation)
   useEffect(() => {
@@ -51,8 +57,23 @@ const ArtworkDetailPage = () => {
 
       setArtwork(state);
       setActiveImage(state?.images?.[0]?.url);
-      setSelectedSize(state.dimensions[0]); // Default to first size
+      setSelectedSize(state.dimensions[0]);
+
       setIsLoading(false);
+
+      if (state?.artistId) {
+        const artistRef = doc(db, "artists", state.artistId);
+        const artistSnap = await getDoc(artistRef);
+        if (artistSnap.exists()) {
+          setArtist({
+            id: artistSnap.id,
+            name: artistSnap.data().name || "Unknown Artist",
+            description: artistSnap.data().bio || "No description available.",
+          });
+        } else {
+          setArtist(null);
+        }
+      }
     };
 
     fetchArtwork();
@@ -64,16 +85,42 @@ const ArtworkDetailPage = () => {
     }
   };
 
+  function getYearFromCreatedAt(createdAt) {
+    if (!createdAt || typeof createdAt.seconds !== "number") {
+      throw new Error("Invalid createdAt object");
+    }
+
+    const { seconds, nanoseconds } = createdAt;
+    const date = new Date(seconds * 1000 + (nanoseconds || 0) / 1e6);
+    return date.getFullYear();
+  }
+
   const handleAddToCart = () => {
     if (artwork && selectedSize) {
-      console.log(
-        `Added ${quantity} of ${artwork.title} (Size: ${selectedSize.name}) to cart`
-      );
+      const cartItem: any = {
+        id: `${artwork?.id}-${Date.now()}`,
+        artworkId: artwork?.id,
+        title: artwork?.name,
+        price: artwork?.price,
+        quantity,
+        artistName: artwork?.artistName,
+        size: {
+          value: `${artwork?.dimensions[0]?.length}x${artwork?.dimensions[0]?.width}`,
+          label: artwork?.dimensions[0]?.name,
+          priceAdjustment: selectedSize.priceAdjustment || 0,
+        },
+        uploadedImageUrl: artwork?.images[0]?.url,
+        timestamp: Date.now(),
+        deliveryNote: "",
+        productCategory: artwork?.categoryName,
+        categoryId: artwork?.categoryId,
+      };
+      addToCart(cartItem);
     }
   };
 
   const calculatePrice = () => {
-    if (!artwork || !selectedSize) return artwork?.price || "$0";
+    if (!artwork || !selectedSize) return artwork?.price || "₹0";
     const basePrice = parseFloat(artwork.price);
     const adjustedPrice = basePrice + selectedSize.priceAdjustment;
     return `₹${adjustedPrice.toLocaleString()}`;
@@ -96,10 +143,10 @@ const ArtworkDetailPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 md:py-12">
+    <div className="container mx-auto px-4 py-6  md:py-12">
       {/* Back button */}
       <Link
-        to="/gallery"
+        to="/"
         className="inline-flex items-center mb-6 text-gray-600 hover:text-gray-900 transition-colors"
       >
         <ArrowLeft size={18} className="mr-2" />
@@ -110,7 +157,7 @@ const ArtworkDetailPage = () => {
         {/* Left Column - Images */}
         <div>
           {/* Main Image */}
-          <div className="relative overflow-hidden aspect-[3/4] mb-4 rounded-lg">
+          <div className="relative overflow-hidden aspect-square mb-4 rounded-lg">
             <img
               src={activeImage}
               alt={artwork.title}
@@ -118,7 +165,7 @@ const ArtworkDetailPage = () => {
             />
             {/* Category Tag */}
             <div className="absolute top-3 left-3 bg-pastel-yellow px-2 py-0.5 rounded text-xs">
-              {artwork.category}
+              {artwork.categoryName}
             </div>
           </div>
 
@@ -157,14 +204,19 @@ const ArtworkDetailPage = () => {
             <h1 className="font-playfair text-2xl md:text-3xl font-medium text-gray-900 mb-2">
               {state?.name}
             </h1>
-            <p className="text-xl font-medium text-gray-900">
-              {calculatePrice()}
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-xl font-medium text-gray-900">
+                {calculatePrice()}
+              </p>
+              <p className="text-sm text-gray-500 line-through">
+                ₹{state?.slashedPrice}
+              </p>
+            </div>
           </div>
 
           {/* Actions */}
           <div className="flex flex-col md:flex-row gap-3 my-6">
-            {/* Quantity Selector */}
+            {/* Quantity Selector
             <div className="flex items-center border border-gray-300 rounded-md">
               <button
                 onClick={() => handleQuantityChange(quantity - 1)}
@@ -182,34 +234,37 @@ const ArtworkDetailPage = () => {
               >
                 <Plus size={16} />
               </button>
-            </div>
+            </div> */}
 
             {/* Add to Cart Button */}
             <button
               onClick={handleAddToCart}
-              disabled={!artwork.inStock || !selectedSize}
-              className={`flex-1 py-2 px-4 rounded-md flex items-center justify-center gap-2 font-medium ${
-                artwork.inStock && selectedSize
-                  ? "bg-gray-900 hover:bg-gray-800 text-white"
-                  : "bg-gray-200 text-gray-500 cursor-not-allowed"
+              disabled={artwork?.quantity === 0}
+              className={`flex-1 py-2 px-4 rounded-md flex items-center justify-center gap-2 font-medium text-white ${
+                artwork?.quantity === 0
+                  ? "bg-gray-500"
+                  : "bg-gray-900 hover:bg-gray-800"
+              }  text-white"
               }`}
             >
               <ShoppingCart size={18} />
-              <span>{artwork.inStock ? "Add to Cart" : "Out of Stock"}</span>
+              <span>
+                {artwork?.quantity === 0 ? "Out of Stock" : "Add to Cart"}
+              </span>
             </button>
 
             {/* Wishlist Button */}
-            <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-50">
+            {/* <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-50">
               <Heart
                 size={20}
                 className="text-gray-700 hover:text-pink-500 transition-colors"
               />
-            </button>
+            </button> */}
 
             {/* Share Button */}
-            <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-50">
+            {/* <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-50">
               <Share size={20} className="text-gray-700" />
-            </button>
+            </button> */}
           </div>
 
           <div>
@@ -228,7 +283,7 @@ const ArtworkDetailPage = () => {
                   >
                     <div className="font-medium">{size.name}</div>
                     <div className="text-sm text-gray-500">
-                      {size.width}" × {size.height}"
+                      {size.length}" × {size.width}"
                     </div>
                     <div className="text-sm font-medium text-gray-900 mt-1">
                       {size.priceAdjustment > 0
@@ -254,7 +309,7 @@ const ArtworkDetailPage = () => {
               <div className="text-gray-600">Dimensions</div>
               <div>
                 {selectedSize
-                  ? `${selectedSize.width}" × ${selectedSize.height}" × ${selectedSize.length}"`
+                  ? `${selectedSize.length}" × ${selectedSize.width}"`
                   : "Select a size"}
               </div>
 
@@ -262,27 +317,38 @@ const ArtworkDetailPage = () => {
               <div>{state?.materials[0]}</div>
 
               <div className="text-gray-600">Year</div>
-              <div>{artwork.yearCreated}</div>
+              <div>{getYearFromCreatedAt(state?.createdAt)}</div>
 
               <div className="text-gray-600">Category</div>
-              <div>{artwork.category}</div>
+              <div>{artwork.categoryName}</div>
+
+              <div className="text-gray-600">Surface</div>
+              <div>
+                <p>Chitrapat ,440 gsm</p>
+              </div>
+
+              <div className="text-gray-600">Artwork</div>
+              <div>
+                <p>Original</p>
+              </div>
+
+              <div className="text-gray-600">To be Delivered in:</div>
+              <div>
+                <p>rolled</p>
+              </div>
             </div>
           </div>
 
           {/* Artist Note - optional section */}
           <div className="mt-auto py-4 border-t border-gray-200">
             <h2 className="font-medium text-lg mb-2">About the Artist</h2>
-            <p className="text-gray-600">
-              {artwork.artistName} is a renowned artist specializing in art.
-              Their unique style captures emotion and imagination through
-              expressive brushwork and thoughtful composition.
-            </p>
+            <p className="text-gray-600">{artist?.description}</p>
           </div>
         </div>
       </div>
 
       {/* You may also like section */}
-      <div className="mt-16">
+      {/* <div className="mt-16">
         <h2 className="font-playfair text-2xl font-medium mb-6">
           You may also like
         </h2>
@@ -292,7 +358,7 @@ const ArtworkDetailPage = () => {
           <div className="bg-gray-100 aspect-[3/4] rounded-lg animate-pulse"></div>
           <div className="bg-gray-100 aspect-[3/4] rounded-lg animate-pulse hidden lg:block"></div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -12,10 +12,11 @@ interface WorkItem {
   artistName: string;
   price: string;
   category: string;
+  displayOrder?: number;
   [key: string]: any; // for any other extra fields
 }
 
-const OurWorks = () => {
+const OurWorks: React.FC = () => {
   const [works, setWorks] = useState<WorkItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,12 +26,20 @@ const OurWorks = () => {
   useEffect(() => {
     const fetchWorks = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "ourworks"));
+        const querySnapshot = await getDocs(collection(db, "products"));
         const worksData: WorkItem[] = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         })) as WorkItem[];
-        setWorks(worksData);
+
+        // Sort by displayOrder, fallback to a large number for undefined orders
+        const sortedWorks = worksData.sort((a, b) => {
+          const orderA = a.displayOrder ?? 999999;
+          const orderB = b.displayOrder ?? 999999;
+          return orderA - orderB;
+        });
+
+        setWorks(sortedWorks);
       } catch (err: any) {
         console.error("Error fetching works:", err);
         setError("Failed to load artworks.");

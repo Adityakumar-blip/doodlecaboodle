@@ -20,6 +20,9 @@ import photoguide from "@/assets/photoguide02.png";
 import A5 from "@/assets/A5.png";
 import A4 from "@/assets/A4.jpg";
 import { uploadImagesToCloudinary } from "@/lib/UplaodCloudinary";
+import { useLocation } from "react-router-dom";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/firebase/firebaseconfig";
 
 interface OrderDetails {
   paperSize: string;
@@ -86,12 +89,13 @@ interface CartItem {
   timestamp: number;
   frame: string | null;
   deliveryNote?: any;
+  categoryId?: string;
 }
 
 const CustomSketchOrder: React.FC = () => {
   const { cartItems, addToCart, setCartItems, toggleCart } =
     useContext(CartContext);
-
+  const { state } = useLocation();
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [orderDetails, setOrderDetails] = useState<OrderDetails>({
     paperSize: "A4",
@@ -108,6 +112,7 @@ const CustomSketchOrder: React.FC = () => {
   const [quantity, setQuantity] = useState<number>(1);
   const [showUploadSection, setShowUploadSection] = useState<boolean>(true);
   const [isAddedToCart, setIsAddedToCart] = useState<boolean>(false);
+  const [categories, setCategories] = useState<any>([]);
 
   const artworkId: string = `artwork-${Math.random()
     .toString(36)
@@ -257,14 +262,44 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
     setCurrentStep(stepIndex);
   };
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const querySnapshot = await getDocs(
+          collection(db, "productCategories")
+        );
+        const fetchedCategories: { id: string; name: string }[] = [];
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data?.name) {
+            fetchedCategories.push({
+              id: doc.id,
+              name: data.name,
+            });
+          }
+        });
+
+        // ✅ Filter by "Portrait" or "Sketch"
+        const filtered = fetchedCategories.filter((cat) =>
+          /portrait|sketch/i.test(cat.name)
+        );
+
+        setCategories(filtered);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   const handleAddToCart = async (): Promise<void> => {
     if (!orderDetails.image || !orderDetails.paperSize || !artworkId) return;
 
     setIsAddingToCart(true);
     try {
       const imageUrl = await uploadImagesToCloudinary(orderDetails.image);
-
-      console.log("image url", imageUrl);
 
       const selectedSize = paperSizes.find(
         (p) => p.value === orderDetails.paperSize
@@ -307,9 +342,8 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
         timestamp: Date.now(),
         frame: orderDetails.frame,
         deliveryNote: deliveryNote[0].deliveryNote,
+        categoryId: categories[0]?.id || state,
       };
-
-      console.log("cart item", cartItem);
 
       await addToCart(cartItem as any);
       setCartItems([cartItem as any]);

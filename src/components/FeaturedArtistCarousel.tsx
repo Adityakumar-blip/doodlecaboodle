@@ -13,8 +13,8 @@ const artists = [
     location: "San Francisco, CA",
     artworks: 24,
     featuredArt:
-      "https://res.cloudinary.com/dwmrrgaxd/image/upload/v1750393747/asgowoblwpqzwnkirf4o.png",
-    artTitle: "Napolean Bonaparte",
+      "https://res.cloudinary.com/dwmrrgaxd/image/upload/v1752501177/unuhyza0odq0crmho3kc.png",
+    artTitle: "Sparkle Girl",
     artSubtitle: "FALL IN LOVE WITH ART",
   },
   {
@@ -25,8 +25,8 @@ const artists = [
     location: "New York, NY",
     artworks: 18,
     featuredArt:
-      "https://res.cloudinary.com/dwmrrgaxd/image/upload/v1750393917/ggfypdxfgyiesoiukp3j.png",
-    artTitle: "Dog with Fur",
+      "https://res.cloudinary.com/dwmrrgaxd/image/upload/v1750393747/asgowoblwpqzwnkirf4o.png",
+    artTitle: "Napolean Bonaparte",
     artSubtitle: "DISCOVER NEW PERSPECTIVES",
   },
 ];

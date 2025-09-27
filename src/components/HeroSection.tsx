@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebase/firebaseconfig";
-
+//hero section
 interface HeroImage {
   desktopUrl: string;
   mobileUrl: string;
@@ -76,8 +76,6 @@ const HeroSection: React.FC = () => {
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
   }, [currentIndex, isTransitioning, heroImages.length]);
-
-  console.log("herom", heroImages);
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">

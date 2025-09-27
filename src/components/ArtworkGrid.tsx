@@ -198,6 +198,7 @@ import ArtworkCard from "./ArtworkCard";
 import { Button } from "@/components/ui/button";
 import { Filter } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import WorkCard from "./Ourworkcard";
 
 const ArtworkGrid = () => {
   const navigate = useNavigate();
@@ -214,6 +215,13 @@ const ArtworkGrid = () => {
   } = useSelector((state: RootState) => state.categories);
   const [activeCategory, setActiveCategory] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
+  const displayLimit = 8;
+  const [likedArtworks, setLikedArtworks] = useState<string[]>([]);
+  const handleLike = (id: string) => {
+    setLikedArtworks((prev) =>
+      prev.includes(id) ? prev.filter((artId) => artId !== id) : [...prev, id]
+    );
+  };
 
   // Fetch products and categories on component mount
   useEffect(() => {
@@ -222,13 +230,24 @@ const ArtworkGrid = () => {
   }, [dispatch]);
 
   // Combine "All" with dynamic categories from Firestore
-  const allCategories = ["All", ...categories.map((cat) => cat.name)];
+  const allCategories = [
+    "All",
+    ...categories
+      .filter((item) => item?.name !== "Portrait")
+      .map((cat) => cat.name),
+  ];
 
   // Filter products based on active category
-  const filteredProducts =
-    activeCategory === "All"
-      ? products
-      : products.filter((product) => product.category === activeCategory);
+  let filteredProducts =
+  activeCategory === "All"
+    ? products
+    : products.filter(
+        (product: any) => product.categoryName === activeCategory
+      );
+
+filteredProducts = [...filteredProducts].sort(
+  (a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)
+);
 
   return (
     <section className="py-16 bg-white">
@@ -255,14 +274,14 @@ const ArtworkGrid = () => {
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <div className="hidden md:flex items-center space-x-2 overflow-x-auto pb-2">
-                  {allCategories.length > 2 &&
+                  {allCategories.length >= 2 &&
                     allCategories.map((category) => (
                       <button
                         key={category}
                         onClick={() => setActiveCategory(category)}
                         className={`px-4 py-2 rounded-full text-sm transition-all ${
                           activeCategory === category
-                            ? "bg-pastel-pink text-gray-800"
+                            ? "bg-pastel-pink text-gray-200"
                             : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                         }`}
                       >
@@ -318,7 +337,7 @@ const ArtworkGrid = () => {
         {!productsLoading && !productsError && filteredProducts.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredProducts.map((product) => (
-              <ArtworkCard
+              <WorkCard
                 id={product.id}
                 key={product.id}
                 imageUrl={product.imageUrl}
@@ -327,20 +346,24 @@ const ArtworkGrid = () => {
                 price={product.price}
                 category={product.category}
                 props={product}
+                liked={likedArtworks.includes(product.id)}
+                onLike={() => handleLike(product.id)}
               />
             ))}
           </div>
         )}
 
         {/* Load More Button */}
-        <div className="mt-12 text-center">
-          <Button
-            className="bg-transparent border border-gray-300 text-gray-700 hover:bg-pastel-blue px-8 py-6"
-            onClick={() => navigate("/artwork-browse")}
-          >
-            Load More Artworks
-          </Button>
-        </div>
+        {/* {filteredProducts.length > displayLimit && (
+          <div className="mt-12 text-center">
+            <Button
+              className="bg-transparent border border-gray-300 text-gray-700 hover:bg-blue-100 px-8 py-3 rounded-md transition-colors duration-300"
+              onClick={() => navigate("/artwork-browse")}
+            >
+              Load More Artworks
+            </Button>
+          </div>
+        )} */}
       </div>
     </section>
   );

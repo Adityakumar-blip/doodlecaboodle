@@ -1,12 +1,19 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  query,
+  where,
+} from "firebase/firestore";
+import { useParams } from "react-router-dom";
 import WorkCard from "./Ourworkcard";
 import { Button } from "@/components/ui/button";
 import { Search, ChevronDown, SlidersHorizontal, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { db } from "@/firebase/firebaseconfig";
-import ArtworkCard from "./ArtworkCard";
 
 interface WorkItem {
   id: string;
@@ -23,7 +30,16 @@ interface WorkItem {
   [key: string]: any;
 }
 
-const ArtworkBrowse = () => {
+interface Category {
+  id: any;
+  name: string;
+  bannerImage: string;
+  [key: string]: any;
+}
+
+const NavDetailBrowse = () => {
+  const { categoryId } = useParams<{ categoryId: string }>();
+  const [category, setCategory] = useState<Category | null>(null);
   const [works, setWorks] = useState<WorkItem[]>([]);
   const [filteredWorks, setFilteredWorks] = useState<WorkItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -43,14 +59,6 @@ const ArtworkBrowse = () => {
     string | null
   >(null);
 
-  // Heart like feature state
-  const [likedArtworks, setLikedArtworks] = useState<string[]>([]);
-  const handleLike = (id: string) => {
-    setLikedArtworks((prev) =>
-      prev.includes(id) ? prev.filter((artId) => artId !== id) : [...prev, id]
-    );
-  };
-
   // Helper function to safely extract price as number
   const getPriceAsNumber = (price: any): number => {
     if (typeof price === "number") return price;
@@ -68,12 +76,43 @@ const ArtworkBrowse = () => {
     return Math.max(...prices, 20000);
   }, [works]);
 
-  // Fetch artworks from Firestore
+  // Fetch category and artworks from Firestore
   useEffect(() => {
-    const fetchWorks = async () => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+
+      if (!categoryId) {
+        setError("No category specified.");
+        setLoading(false);
+        return;
+      }
+
       try {
-        const querySnapshot = await getDocs(collection(db, "ourworks"));
-        const worksData: WorkItem[] = querySnapshot.docs.map((doc) => ({
+        // Fetch category document
+        const categoryRef = doc(db, "productCategories", categoryId);
+        const categorySnap = await getDoc(categoryRef);
+
+        if (!categorySnap.exists()) {
+          setError("Category not found.");
+          setLoading(false);
+          return;
+        }
+
+        const catData: Category = {
+          id: categorySnap.id,
+          ...categorySnap.data(),
+        };
+        setCategory(catData);
+
+        // Fetch products filtered by category name
+        const productsQuery = query(
+          collection(db, "products"),
+          where("categoryName", "==", catData.name),
+          where("status", "==", "active")
+        );
+        const productsSnap = await getDocs(productsQuery);
+        const worksData: WorkItem[] = productsSnap.docs.map((doc) => ({
           id: doc.id,
           sales: doc.data()?.sales || 0,
           ...doc.data(),
@@ -81,15 +120,15 @@ const ArtworkBrowse = () => {
         setWorks(worksData);
         setFilteredWorks(worksData);
       } catch (err: any) {
-        console.error("Error fetching works:", err);
-        setError("Failed to load artworks.");
+        console.error("Error fetching data:", err);
+        setError("Failed to load category or artworks.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchWorks();
-  }, []);
+    fetchData();
+  }, [categoryId]);
 
   // Update price range when works data changes
   useEffect(() => {
@@ -384,16 +423,24 @@ const ArtworkBrowse = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-white to-blue-50/30 py-24">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center flex flex-col items-center justify-center">
+      <section className="bg-gradient-to-b from-white to-blue-50/30 ">
+        <div className="">
+          {category?.bannerUrl && (
+            <img
+              src={category.bannerUrl}
+              alt={`${category.name} banner`}
+              className="w-full h-auto  object-cover  mb-8"
+            />
+          )}
+          {/* <div className="max-w-3xl mx-auto text-center flex flex-col items-center justify-center">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-              Discover Our Art Collection
+              Discover Our {category?.name || "Art"} Collection
             </h1>
             <p className="text-lg text-gray-600 mb-8">
-              Browse our curated selection of artworks from talented artists
-              worldwide. Find the perfect piece to inspire and elevate your
-              space.
+              Browse our curated selection of{" "}
+              {category?.name?.toLowerCase() || "artworks"} from talented
+              artists worldwide. Find the perfect piece to inspire and elevate
+              your space.
             </p>
             <div className="relative w-full max-w-md mx-4">
               <Search
@@ -402,7 +449,9 @@ const ArtworkBrowse = () => {
               />
               <input
                 type="text"
-                placeholder="Search artworks or artists..."
+                placeholder={`Search ${
+                  category?.name?.toLowerCase() || "artworks"
+                } or artists...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-colors"
@@ -416,7 +465,7 @@ const ArtworkBrowse = () => {
                 </button>
               )}
             </div>
-          </div>
+          </div> */}
         </div>
       </section>
 
@@ -438,11 +487,6 @@ const ArtworkBrowse = () => {
               </div>
 
               <div className="divide-y divide-gray-200">
-                {/* <FilterSection
-                  title="Category"
-                  options={filterOptions.category}
-                  type="category"
-                /> */}
                 <FilterSection
                   title="Artist"
                   options={filterOptions.artist}
@@ -458,7 +502,7 @@ const ArtworkBrowse = () => {
                   options={filterOptions.year}
                   type="year"
                 /> */}
-                {/* <FilterSection title="Price Range" type="priceRange" /> */}
+                <FilterSection title="Price Range" type="priceRange" />
               </div>
             </div>
           </aside>
@@ -612,7 +656,7 @@ const ArtworkBrowse = () => {
                   <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6">
                       {filteredWorks.slice(0, displayCount).map((work) => (
-                        <ArtworkCard
+                        <WorkCard
                           key={work.id}
                           id={work.id}
                           imageUrl={work.imageUrl}
@@ -621,9 +665,6 @@ const ArtworkBrowse = () => {
                           price={work.price}
                           category={work.category}
                           props={work}
-                          liked={likedArtworks.includes(work.id)}
-                          onLike={() => handleLike(work.id)}
-                          showDetails={false} // <-- Hide details here
                         />
                       ))}
                     </div>
@@ -687,11 +728,7 @@ const ArtworkBrowse = () => {
             </div>
 
             <div className="divide-y divide-gray-200">
-              <FilterSection
-                title="Category"
-                options={filterOptions.category}
-                type="category"
-              />
+              {/* Category filter removed as it's category-specific page */}
               <FilterSection
                 title="Artist"
                 options={filterOptions.artist}
@@ -745,4 +782,4 @@ const ArtworkBrowse = () => {
   );
 };
 
-export default ArtworkBrowse;
+export default NavDetailBrowse;
