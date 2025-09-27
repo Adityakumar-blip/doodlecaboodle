@@ -549,7 +549,6 @@ import { AppDispatch, RootState } from "@/store/store";
 import { CartContext } from "@/context/CartContext";
 import logo from "@/assets/logo-doodle.svg";
 import { useNavigate } from "react-router-dom";
-import doodle from "@/assets/doodle.png";
 
 
 const Navbar = () => {
@@ -774,14 +773,7 @@ const Navbar = () => {
               </button>
             </form>
           </div> */}
-          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex justify-center items-center w-full pointer-events-none">
-          <img
-            src={doodle} 
-            className="w-16 md:w-48 h-auto"
-            alt="New Logo"
-            style={{ maxHeight: "77px",marginRight:"33px" }}
-          />
-          </div>
+
 
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
