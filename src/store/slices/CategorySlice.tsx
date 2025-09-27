@@ -1,6 +1,6 @@
 import { db } from "@/firebase/firebaseconfig";
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 
 // Category-related types
 interface Category {
@@ -28,19 +28,12 @@ export const fetchCategories = createAsyncThunk(
   "categories/fetchCategories",
   async (_, { rejectWithValue }) => {
     try {
-      // Create a query that filters only active categories
       const categoriesRef = collection(db, "productCategories");
-      const activeCategoriesQuery = query(
-        categoriesRef,
-        where("isActive", "==", true)
-      );
-
-      const snapshot = await getDocs(activeCategoriesQuery);
+      const snapshot = await getDocs(categoriesRef);
       const categories: Category[] = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       })) as Category[];
-
       return categories;
     } catch (error: any) {
       return rejectWithValue(error.message || "Failed to fetch categories");
