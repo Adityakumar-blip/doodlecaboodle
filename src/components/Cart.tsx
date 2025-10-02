@@ -29,6 +29,7 @@ import {
   generateOrderEmailHTML,
   generateThankYouEmailHTML,
 } from "@/lib/SendOrderEmail";
+import { getWorkingBaseUrl } from "@/lib/utils";
 
 interface CartItem {
   id: string;
@@ -459,18 +460,24 @@ const Cart = ({
     setShowNoteModal(false);
   };
 
-  const checkoutBaseUrl = "https://paymentandshipping-vke7.onrender.com";
-  const checkoutBaseUrlLocal = "http://localhost:1990";
+  // const checkoutBaseUrl = "https://paymentandshipping-vke7.onrender.com";
+  // const checkoutBaseUrlLocal = "http://localhost:1990";
+
+  const urls = [
+    "https://paymentandshipping-vke7.onrender.com",
+    "https://paymentandshipping.onrender.com",
+  ];
 
   // Handle checkout with Razorpay and save order history
   const handleCheckout = async () => {
     if (!auth.currentUser) return;
     setLoading(true);
     try {
-      axios.get("https://email-service-app-ri2v.onrender.com/");
       await loadRazorpayScript();
 
       const charges = calculateCharges();
+
+      const checkoutBaseUrl = await getWorkingBaseUrl(urls);
 
       const response = await axios.post(
         `${checkoutBaseUrl}/api/payment/create-order`,
@@ -547,24 +554,6 @@ const Cart = ({
                 ...userDetails,
                 updatedAt: Date.now(),
               });
-
-              // await axios.post(
-              //   "https://email-service-app-ri2v.onrender.com/email/send",
-              //   {
-              //     to: "doodlecaboodle08@gmail.com",
-              //     subject: `New Order Received - ${order.orderId}`,
-              //     html: generateOrderEmailHTML(order, userDetails),
-              //   }
-              // );
-
-              // await axios.post(
-              //   "https://email-service-app-ri2v.onrender.com/email/send",
-              //   {
-              //     to: "doodlecaboodle08@gmail.com",
-              //     subject: `Thank you for your order - ${order.orderId}`,
-              //     html: generateThankYouEmailHTML(order, userDetails),
-              //   }
-              // );
 
               navigate(`/order/${verifyResponse?.data?.custom_order_id}`);
 
