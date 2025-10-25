@@ -3,13 +3,13 @@ import { Heart, ShoppingCart } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 interface WorkCardProps {
-  id: string | number; // Added ID prop for navigation
-  imageUrl: string;
-  title: string;
-  artistName: string;
+  id?: string | number; // Added ID prop for navigation
+  imageUrl?: string;
+  title?: string;
+  artistName?: string;
   price?: any;
-  category: string;
-  props: any;
+  category?: string;
+  props?: any;
   isClickable?: boolean;
   onAddToCart?: (e: React.MouseEvent) => void;
 }

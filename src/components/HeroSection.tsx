@@ -93,7 +93,7 @@ const HeroSection: React.FC = () => {
             className="object-cover w-full h-full"
           />
 
-          <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-16 lg:px-24 z-20 items-start">
+          {/* <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-16 lg:px-24 z-20 items-start">
             <div className="max-w-2xl">
               <h2 className="mb-4 text-4xl md:text-5xl lg:text-6xl font-bold text-white">
                 {image.title}
@@ -116,7 +116,7 @@ const HeroSection: React.FC = () => {
                 </Button>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       ))}
 

@@ -15,6 +15,10 @@ import { db } from "@/firebase/firebaseconfig";
 import OurWorks from "@/components/OurWorks";
 import FAQPage from "@/components/Faq";
 import DiscountModal from "@/components/DiscountModal";
+import BestsellerCarousel from "@/components/BestsellerCarousel";
+import CategorySection from "@/components/CategorySection";
+import ShopByCategory from "@/components/ShopByCategory";
+import CustomInfo from "@/components/CustomInfo";
 
 const Index = () => {
   const [collections, setCollections] = useState([]);
@@ -52,7 +56,13 @@ const Index = () => {
       {/* <GalleryShowcase /> */}
       <QuoteSection />
 
-      <ArtworkGrid />
+      <BestsellerCarousel />
+
+      <CategorySection />
+
+      <ShopByCategory />
+
+      {/* <ArtworkGrid /> */}
 
       {/* <OurWorks /> */}
 
@@ -62,6 +72,8 @@ const Index = () => {
 
       {/* <TestimonialsSection /> */}
       <ProductReviewSection />
+
+      <CustomInfo />
 
       <FAQPage />
     </div>

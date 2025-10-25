@@ -105,18 +105,38 @@ const NavDetailBrowse = () => {
         };
         setCategory(catData);
 
-        // Fetch products filtered by category name
-        const productsQuery = query(
+        // Fetch products filtered by category name OR where sectionCategoryIds contains the category id
+        const productsByNameQuery = query(
           collection(db, "products"),
           where("categoryName", "==", catData.name),
           where("status", "==", "active")
         );
-        const productsSnap = await getDocs(productsQuery);
-        const worksData: WorkItem[] = productsSnap.docs.map((doc) => ({
-          id: doc.id,
-          sales: doc.data()?.sales || 0,
-          ...doc.data(),
-        })) as WorkItem[];
+
+        const productsBySectionIdQuery = query(
+          collection(db, "products"),
+          where("sectionCategoryIds", "array-contains", catData.id),
+          where("status", "==", "active")
+        );
+
+        const [snapByName, snapBySection] = await Promise.all([
+          getDocs(productsByNameQuery),
+          getDocs(productsBySectionIdQuery),
+        ]);
+
+        // Combine and deduplicate results by doc id
+        const combinedDocs = [...snapByName.docs, ...snapBySection.docs];
+        const uniqueMap = new Map<string, any>();
+        combinedDocs.forEach((d) => {
+          if (!uniqueMap.has(d.id)) uniqueMap.set(d.id, d);
+        });
+
+        const worksData: WorkItem[] = Array.from(uniqueMap.values()).map(
+          (doc) => ({
+            id: doc.id,
+            sales: doc.data()?.sales || 0,
+            ...doc.data(),
+          })
+        ) as WorkItem[];
         setWorks(worksData);
         setFilteredWorks(worksData);
       } catch (err: any) {
@@ -429,7 +449,7 @@ const NavDetailBrowse = () => {
             <img
               src={category.bannerUrl}
               alt={`${category.name} banner`}
-              className="w-full h-auto  object-cover  mb-8"
+              className="w-full max-h-[700px]  object-cover  mb-8"
             />
           )}
           {/* <div className="max-w-3xl mx-auto text-center flex flex-col items-center justify-center">
@@ -654,7 +674,7 @@ const NavDetailBrowse = () => {
                 {/* Artworks Grid */}
                 {filteredWorks.length > 0 ? (
                   <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6">
                       {filteredWorks.slice(0, displayCount).map((work) => (
                         <WorkCard
                           key={work.id}
