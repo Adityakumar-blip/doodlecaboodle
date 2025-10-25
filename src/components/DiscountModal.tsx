@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 const DiscountModal = () => {
   const [showModal, setShowModal] = useState(false);
   const [copied, setCopied] = useState(false);
-  const couponCode = "WELCOME40";
+  const couponCode = "DC20";
 
   const loadConfettiScript = () => {
     return new Promise((resolve, reject) => {
@@ -62,7 +62,7 @@ const DiscountModal = () => {
         <p className="text-lg font-kalam text-gray-700 mb-6">
           We’re thrilled to have you here.
           <br />
-          As a special welcome gift, enjoy <strong>40% OFF</strong> on your
+          As a special welcome gift, enjoy <strong>20% OFF</strong> on your
           first portrait!
         </p>
 
