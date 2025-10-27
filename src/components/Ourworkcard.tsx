@@ -147,10 +147,10 @@ const WorkCard = ({
         <p className="text-sm text-gray-500">{artistName}</p>
         <p className="text-md text-gray-700">{price}</p>
       </div> */}
-      <div className="p-4">
-        <h3 className="font-semibold">{props?.name}</h3>
-        <div className="flex items-center gap-2">
-          <p className="text-md text-gray-700 font-medium">₹{price}</p>
+      <div className="p-4 space-y-2">
+        <h3 className="font-semibold text-lg mb-3">{props?.name}</h3>
+        <div className="flex items-center gap-3">
+          <p className="text-md text-gray-700 font-medium">MRP : ₹{price}</p>
           {props?.slashedPrice && (
             <p className="text-sm text-gray-500 line-through">
               ₹{props.slashedPrice}

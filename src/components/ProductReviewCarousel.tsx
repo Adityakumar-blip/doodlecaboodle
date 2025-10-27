@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import ReviewModal from "./ReviewModal";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import FaCheckCircle from "../assets/FaCheckCircle.png";
 import { db } from "@/firebase/firebaseconfig";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ProductReviewItem {
   type: "image";
@@ -17,55 +18,85 @@ interface ProductReviewCarouselProps {
   items: ProductReviewItem[];
 }
 
-const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({
-  items,
-}) => {
-  const [activeIndex, setActiveIndex] = useState(0);
+interface ArrowProps {
+  onClick: () => void;
+  show?: boolean;
+}
+
+// Custom Arrow Components
+const NextArrow: React.FC<ArrowProps> = ({ onClick, show = true }) => {
+  if (!show) return null;
+  return (
+    <button
+      onClick={onClick}
+      className="w-12 h-12 absolute right-0 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/80 flex items-center justify-center shadow-md hover:bg-white transition-all"
+      aria-label="Next"
+    >
+      <ChevronRight size={24} className="text-gray-900" />
+    </button>
+  );
+};
+
+const PrevArrow: React.FC<ArrowProps> = ({ onClick, show = true }) => {
+  if (!show) return null;
+  return (
+    <button
+      onClick={onClick}
+      className="w-12 h-12 absolute left-0 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/80 flex items-center justify-center shadow-md hover:bg-white transition-all"
+      aria-label="Previous"
+    >
+      <ChevronLeft size={24} className="text-gray-900" />
+    </button>
+  );
+};
+
+const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({ items }) => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [slidesToShow, setSlidesToShow] = useState(3);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const carouselRef = useRef<HTMLDivElement>(null);
 
-  const visibleItems = items;
-
+  // Responsive slides logic
   useEffect(() => {
-    if (!carouselRef.current) return;
-    const itemWidth = carouselRef.current.scrollWidth / visibleItems.length;
-    const scrollPosition =
-      itemWidth * activeIndex +
-      itemWidth / 2 -
-      carouselRef.current.offsetWidth / 2;
+    const updateSlidesToShow = () => {
+      if (window.innerWidth < 640) {
+        setSlidesToShow(1);
+      } else if (window.innerWidth < 1024) {
+        setSlidesToShow(2);
+      } else {
+        setSlidesToShow(3);
+      }
+    };
 
-    carouselRef.current.scrollTo({
-      left: scrollPosition,
-      behavior: "smooth",
-    });
-  }, [activeIndex, visibleItems.length]);
+    updateSlidesToShow();
+    window.addEventListener("resize", updateSlidesToShow);
+    return () => window.removeEventListener("resize", updateSlidesToShow);
+  }, []);
 
-  const goToPrevious = () => {
-    if (activeIndex === 0) return;
-    setActiveIndex((prev) => prev - 1);
+  const maxSlide = Math.max(0, items.length - slidesToShow);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev >= maxSlide ? 0 : prev + 1));
   };
 
-  const goToNext = () => {
-    if (activeIndex === visibleItems.length - 1) return;
-    setActiveIndex((prev) => prev + 1);
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev <= 0 ? maxSlide : prev - 1));
   };
 
   const goToSlide = (index: number) => {
-    setActiveIndex(index);
+    setCurrentSlide(index);
   };
 
-  const handleReviewSubmit = (data: {
-    rating: number;
-    review: string;
-    name: string;
-    verified: boolean;
-  }) => {
-    // Handle form submission (e.g., send
-    setIsModalOpen(false);
-  };
+  // Auto-play functionality
+  useEffect(() => {
+    const interval = setInterval(() => {
+      nextSlide();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [currentSlide, maxSlide]);
 
   return (
-    <section className="py-16 bg-gradient-to-br from-pastel-pink/30 to-pastel-purple/30">
+    <div className="py-16 bg-gradient-to-br from-sky-100/50 to-blue-100/50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
           <h2 className="text-4xl font-bold font-poppins text-gray-800 mb-3">
@@ -74,8 +105,9 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             See what our customers say about their purchases!
           </p>
-          <div className="h-1 w-24 bg-gradient-to-r from-pastel-pink to-pastel-purple mx-auto mt-4"></div>
+          <div className="h-1 w-24 bg-gradient-to-r from-sky-300 to-blue-300 mx-auto mt-4"></div>
         </div>
+
         <div className="flex justify-center mb-6">
           <button
             onClick={() => setIsModalOpen(true)}
@@ -84,134 +116,89 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({
             Write a Review
           </button>
         </div>
-        <div className="w-full relative">
-          <div
-            ref={carouselRef}
-            className="flex items-center space-x-4 overflow-x-hidden py-8 p-4 scroll-smooth"
-          >
-            {visibleItems.map((item, index) => {
-              const isActive = index === activeIndex;
-              return (
+
+        {/* Carousel Container */}
+        <div className="relative px-12">
+          <PrevArrow onClick={prevSlide} show={currentSlide > 0} />
+
+          <div className="overflow-hidden">
+            <div
+              className="flex transition-transform duration-700 ease-in-out"
+              style={{
+                transform: `translateX(-${currentSlide * (100 / slidesToShow)}%)`,
+              }}
+            >
+              {items.map((item, index) => (
                 <div
                   key={`${item.src}-${index}`}
-                  className={`bg-white transition-all duration-300 flex-shrink-0 relative rounded-2xl shadow-lg flex flex-col items-center
-                    ${
-                      isActive
-                        ? "w-[320px] h-[580px] scale-100 z-10"
-                        : "w-[240px] h-[480px] opacity-70"
-                    }`}
+                  className="flex-shrink-0 px-3"
+                  style={{ width: `${100 / slidesToShow}%` }}
                 >
-                  <img
-                    src={item.src}
-                    alt={`Review ${index + 1}`}
-                    width={320}
-                    height={440}
-                    className={`object-cover rounded-t-2xl mx-auto ${
-                      isActive ? "w-[320px] h-[440px]" : "w-[240px] h-[340px]"
-                    }`}
-                    style={{ aspectRatio: "3/4" }}
-                    onClick={() => goToSlide(index)}
-                  />
-                  <div className="w-full px-4 py-3 flex flex-col items-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <div className="flex items-center bg-white rounded-lg px-3 py-1 shadow">
-                        <span className="font-semibold text-lg text-gray-800">
-                          {item.name}
-                        </span>
-                        {item.verified && (
-                          <img
-                            src={FaCheckCircle}
-                            alt="Verified"
-                            className="ml-2"
-                            style={{ width: 20, height: 20 }}
-                          />
-                        )}
+                  <div className="bg-white rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl">
+                    <img
+                      src={item.src}
+                      alt={`Review ${index + 1}`}
+                      className="w-full h-[420px] object-cover rounded-t-2xl"
+                    />
+                    <div className="p-6 flex flex-col items-center text-center">
+                      <div className="flex flex-col items-center gap-3 mb-4">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-lg text-gray-800">
+                            {item.name}
+                          </span>
+                          {item.verified && (
+                            <img
+                              src={FaCheckCircle}
+                              alt="Verified"
+                              className="w-5 h-5"
+                            />
+                          )}
+                        </div>
+                        <div className="flex justify-center">
+                          {[...Array(5)].map((_, i) => (
+                            <svg
+                              key={i}
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 20 20"
+                              fill={i < item.rating ? "#FFD600" : "#E5E7EB"}
+                              className="w-5 h-5"
+                            >
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.175 0l-3.37 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.174 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.286-3.957z" />
+                            </svg>
+                          ))}
+                        </div>
                       </div>
+                      <p className="text-gray-700 text-center max-w-prose mx-auto">{item.review}</p>
                     </div>
-                    <div className="flex justify-center mb-2">
-                      {[...Array(5)].map((_, i) => (
-                        <svg
-                          key={i}
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                          fill={i < item.rating ? "#FFD600" : "#E5E7EB"}
-                          className="w-6 h-6"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.175 0l-3.37 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.174 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.286-3.957z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <p className="text-gray-700 font-medium text-center">
-                      {item.review}
-                    </p>
                   </div>
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
-          <div className="flex flex-1 absolute top-[50%] px-6 w-full justify-between mt-4 pointer-events-none">
-            {activeIndex > 0 && (
+
+          <NextArrow onClick={nextSlide} show={currentSlide < maxSlide} />
+
+          {/* Dots indicator */}
+          <div className="flex justify-center gap-2 mt-8">
+            {Array.from({ length: maxSlide + 1 }).map((_, index) => (
               <button
-                onClick={goToPrevious}
-                className="w-12 h-12 rounded-full bg-white/80 flex items-center justify-center shadow-md hover:bg-white pointer-events-auto z-[10]"
-                aria-label="Previous"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-              </button>
-            )}
-            <div />
-            {activeIndex < visibleItems.length - 1 && (
-              <button
-                onClick={goToNext}
-                className="w-12 h-12 rounded-full bg-white/80 flex items-center justify-center shadow-md hover:bg-white pointer-events-auto z-[10]"
-                aria-label="Next"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </button>
-            )}
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  currentSlide === index
+                    ? "bg-sky-400 w-8"
+                    : "bg-gray-300 w-2 hover:bg-gray-400"
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
           </div>
         </div>
-        <div className="flex justify-center mt-6 space-x-2">
-          {visibleItems.map((_, idx) => (
-            <button
-              key={idx}
-              className={`w-3 h-3 rounded-full ${
-                idx === activeIndex ? "bg-pastel-purple" : "bg-gray-300"
-              }`}
-              onClick={() => goToSlide(idx)}
-              aria-label={`Go to review ${idx + 1}`}
-            />
-          ))}
-        </div>
+
+        {/* Review Modal */}
+        <ReviewModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       </div>
-      <ReviewModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-    </section>
+    </div>
   );
 };
 
@@ -227,19 +214,17 @@ const ProductReviewSection: React.FC = () => {
           where("isPublished", "==", true)
         );
         const querySnapshot = await getDocs(q);
-        const fetchedReviews: ProductReviewItem[] = querySnapshot.docs.map(
-          (doc) => {
-            const data = doc.data();
-            return {
-              type: "image" as const,
-              src: data.image,
-              name: data.name,
-              review: data.reviewText,
-              rating: data.rating,
-              verified: true, // Assuming all fetched reviews are verified
-            };
-          }
-        );
+        const fetchedReviews: ProductReviewItem[] = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            type: "image" as const,
+            src: data.image,
+            name: data.name,
+            review: data.reviewText,
+            rating: data.rating,
+            verified: true, // Assuming all fetched reviews are verified
+          };
+        });
         setReviews(fetchedReviews);
       } catch (error) {
         console.error("Error fetching reviews:", error);

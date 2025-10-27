@@ -91,8 +91,8 @@ const CategorySection = () => {
 
                 {/* Label at Bottom */}
                 <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20">
-                  <div className="bg-rose-200 px-8 py-2">
-                    <span className="text-gray-800 font-semibold text-sm tracking-wider">
+                  <div className="bg-orange-100 px-8 py-2">
+                    <span className="text-gray-800 font-semibold text-lg uppercase tracking-wider">
                       {category.label}
                     </span>
                   </div>

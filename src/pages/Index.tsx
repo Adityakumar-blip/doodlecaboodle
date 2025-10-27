@@ -19,6 +19,7 @@ import BestsellerCarousel from "@/components/BestsellerCarousel";
 import CategorySection from "@/components/CategorySection";
 import ShopByCategory from "@/components/ShopByCategory";
 import CustomInfo from "@/components/CustomInfo";
+import BGDoodle from "@/assets/Bottom BULK Design.png";
 
 const Index = () => {
   const [collections, setCollections] = useState([]);
@@ -49,7 +50,7 @@ const Index = () => {
     return () => unsubscribe();
   }, []);
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <DiscountModal />
       <HeroSection />
 
@@ -71,9 +72,21 @@ const Index = () => {
       {/* <FeaturedArtistCarousel /> */}
 
       {/* <TestimonialsSection /> */}
+
+      {/* Divider Image Section */}
+      <div className="w-full bg-gray-50 pb-8 md:pb-12">
+        <div className="px-4 md:px-6 lg:px-8">
+          <img
+            src={BGDoodle}
+            alt="Doodle Art Showcase"
+            className="w-full md:max-w-[85vw] lg:max-w-[75vw] xl:max-w-[89vw] mx-auto rounded-2xl shadow-lg object-cover h-[300px] sm:h-[400px] md:h-[500px] lg:h-[750px]"
+          />
+        </div>
+      </div>
+
       <ProductReviewSection />
 
-      <CustomInfo />
+      {/* <CustomInfo /> */}
 
       <FAQPage />
     </div>

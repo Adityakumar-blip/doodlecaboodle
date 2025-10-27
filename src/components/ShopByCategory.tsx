@@ -65,10 +65,10 @@ const ShopByCategory = () => {
       <div className="container px-4 mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 mb-3">
+          <h2 className="text-4xl font-bold text-[#FF0000] mb-3 font-['Jost']">
             Shop By Category
           </h2>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600 text-lg font-['Jost']">
             Explore our curated collections
           </p>
         </div>
