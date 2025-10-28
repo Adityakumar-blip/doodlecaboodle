@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { db } from "@/firebase/firebaseconfig";
 import ArtworkCard from "./ArtworkCard";
+import { useNavigate } from "react-router-dom";
 
 interface WorkItem {
   id: string;
@@ -24,6 +25,7 @@ interface WorkItem {
 }
 
 const ArtworkBrowse = () => {
+  const navigate = useNavigate();
   const [works, setWorks] = useState<WorkItem[]>([]);
   const [filteredWorks, setFilteredWorks] = useState<WorkItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -395,7 +397,7 @@ const ArtworkBrowse = () => {
               worldwide. Find the perfect piece to inspire and elevate your
               space.
             </p>
-            <div className="relative w-full max-w-md mx-4">
+            {/* <div className="relative w-full max-w-md mx-4">
               <Search
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                 size={18}
@@ -415,6 +417,14 @@ const ArtworkBrowse = () => {
                   <X size={16} />
                 </button>
               )}
+            </div> */}
+            <div className="relative w-full max-w-md mx-4">
+              <Button
+                onClick={() => navigate("/get-yours")}
+                className="px-8 py-4 text-sm font-medium text-black bg-[#e63946] text-white border border-white rounded-md hover:bg-[#d62828] transition-colors"
+              >
+                Get Yours
+              </Button>
             </div>
           </div>
         </div>
@@ -423,7 +433,7 @@ const ArtworkBrowse = () => {
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar Filters - Desktop */}
-          <aside className="hidden md:block w-64 flex-shrink-0">
+          {/* <aside className="hidden md:block w-64 flex-shrink-0">
             <div className="sticky top-28 bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
               <div className="p-4 border-b border-gray-200 flex justify-between items-center">
                 <h2 className="font-medium text-gray-800">Filters</h2>
@@ -438,11 +448,6 @@ const ArtworkBrowse = () => {
               </div>
 
               <div className="divide-y divide-gray-200">
-                {/* <FilterSection
-                  title="Category"
-                  options={filterOptions.category}
-                  type="category"
-                /> */}
                 <FilterSection
                   title="Artist"
                   options={filterOptions.artist}
@@ -453,15 +458,9 @@ const ArtworkBrowse = () => {
                   options={filterOptions.medium}
                   type="medium"
                 />
-                {/* <FilterSection
-                  title="Year"
-                  options={filterOptions.year}
-                  type="year"
-                /> */}
-                {/* <FilterSection title="Price Range" type="priceRange" /> */}
               </div>
             </div>
-          </aside>
+          </aside> */}
 
           {/* Main Content */}
           <main className="flex-1">
@@ -501,7 +500,7 @@ const ArtworkBrowse = () => {
             </div>
 
             {/* Desktop Sort Dropdown */}
-            <div className="hidden md:flex justify-between items-center mb-6">
+            {/* <div className="hidden md:flex justify-between items-center mb-6">
               <h2 className="text-lg font-medium text-gray-800">
                 Browse Artworks
               </h2>
@@ -528,7 +527,7 @@ const ArtworkBrowse = () => {
                   />
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {loading ? (
               <div className="flex items-center justify-center py-20">
@@ -668,7 +667,7 @@ const ArtworkBrowse = () => {
       </div>
 
       {/* Mobile Filter Drawer */}
-      {showMobileFilters && (
+      {/* {showMobileFilters && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex md:hidden">
           <div
             className="bg-white w-full max-w-xs h-full overflow-y-auto ml-auto transform transition-transform duration-300 ease-out"
@@ -729,7 +728,7 @@ const ArtworkBrowse = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       <style jsx>{`
         @keyframes slideInRight {

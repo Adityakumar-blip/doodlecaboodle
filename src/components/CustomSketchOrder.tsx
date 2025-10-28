@@ -23,11 +23,13 @@ import { uploadImagesToCloudinary } from "@/lib/UplaodCloudinary";
 import { useLocation } from "react-router-dom";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebase/firebaseconfig";
+import { Value } from "@radix-ui/react-select";
 
 interface OrderDetails {
   paperSize: string;
   numberOfFaces: number;
   background: string;
+  artworkType?: string;
   image: File | null;
   frame: string | null;
 }
@@ -101,6 +103,7 @@ const CustomSketchOrder: React.FC = () => {
     paperSize: "A4",
     numberOfFaces: 1,
     background: "white",
+    artworkType: "sketch",
     image: null,
     frame: null,
   });
@@ -117,6 +120,19 @@ const CustomSketchOrder: React.FC = () => {
   const artworkId: string = `artwork-${Math.random()
     .toString(36)
     .substr(2, 9)}`;
+
+  const artworkType = [
+    {
+      id: "sketch",
+      name: "Pencil Sketch",
+      value: "sketch",
+    },
+    // {
+    //   id: "painting",
+    //   name: "Painting",
+    //   value: "painting",
+    // },
+  ];
 
   const paperSizes: PaperSize[] = [
     {
@@ -383,6 +399,53 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
       description: "All faces clearly visible",
     },
   ];
+
+  const ArtworkStep: React.FC = () => (
+    <div className="space-y-4 sm:space-y-6">
+      <div className="mb-6 sm:mb-8">
+        <h3 className="text-lg sm:text-xl font-medium text-gray-800 mb-2">
+          Artwork Type
+        </h3>
+        <p className="text-gray-500 text-sm sm:text-base">
+          Choose your preferred type
+        </p>
+      </div>
+      <div className="space-y-3">
+        {artworkType.map((size) => (
+          <motion.div
+            key={size.value}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+              orderDetails.artworkType === size.value
+                ? "border-blue-300 bg-blue-50"
+                : "border-gray-200 hover:border-blue-200"
+            }`}
+            onClick={() => handleInputChange("artworkType", size.value)}
+          >
+            <div className="flex justify-between items-center">
+              <div>
+                <h4 className="font-medium text-gray-800 text-sm sm:text-base">
+                  {size.name}
+                </h4>
+              </div>
+              <div className="text-right">
+                {orderDetails.artworkType === size.value && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="w-5 h-5 bg-blue-400 rounded-full flex items-center justify-center mt-1 ml-auto"
+                  >
+                    <Check className="w-3 h-3 text-white" />
+                  </motion.div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
 
   const PaperSizeStep: React.FC = () => (
     <div className="space-y-4 sm:space-y-6">
@@ -738,34 +801,41 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
   const steps: Step[] = [
     {
       id: 0,
+      title: "Artwork",
+      description: "Type",
+      icon: <Palette className="w-4 h-4" />,
+      component: <ArtworkStep />,
+    },
+    {
+      id: 1,
       title: "Size",
       description: "Paper format",
       icon: <Ruler className="w-4 h-4" />,
       component: <PaperSizeStep />,
     },
     {
-      id: 1,
+      id: 2,
       title: "Faces",
       description: "How many",
       icon: <Users className="w-4 h-4" />,
       component: <NumberOfFacesStep />,
     },
     {
-      id: 2,
+      id: 3,
       title: "Background",
       description: "Style choice",
       icon: <Palette className="w-4 h-4" />,
       component: <BackgroundStep />,
     },
     {
-      id: 3,
+      id: 4,
       title: "Frame",
       description: "Frame option",
       icon: <Ruler className="w-4 h-4" />,
       component: <FrameStep />,
     },
     {
-      id: 4,
+      id: 5,
       title: "Upload",
       description: "Reference photo",
       icon: <Camera className="w-4 h-4" />,

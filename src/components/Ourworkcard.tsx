@@ -121,7 +121,7 @@ const WorkCard = ({
         onClick={isClickable ? handleCardClick : undefined}
       >
         {/* Image Container with hover effect */}
-        <div className="relative overflow-hidden aspect square">
+        <div className="relative overflow-hidden aspect-square">
           {/* Primary image */}
           <img
             src={props?.images?.[0]?.url}
@@ -147,12 +147,18 @@ const WorkCard = ({
         <p className="text-sm text-gray-500">{artistName}</p>
         <p className="text-md text-gray-700">{price}</p>
       </div> */}
-      <div className="p-4 space-y-2">
-        <h3 className="font-semibold text-lg mb-3">{props?.name}</h3>
+      <div className="p-3 sm:p-4 space-y-1 sm:space-y-2">
+        {/* Responsive title: smaller on mobile, larger on tablet/desktop. Truncate to keep card tidy. */}
+        <h3 className="font-semibold text-sm sm:text-base md:text-lg lg:text-xl mb-1 sm:mb-3 truncate leading-tight">
+          {props?.name}
+        </h3>
         <div className="flex items-center gap-3">
-          <p className="text-md text-gray-700 font-medium">MRP : ₹{price}</p>
+          {/* Price: scale up with screen size */}
+          <p className="text-sm sm:text-base md:text-lg text-gray-700 font-medium">
+            MRP : ₹{price}
+          </p>
           {props?.slashedPrice && (
-            <p className="text-sm text-gray-500 line-through">
+            <p className="text-xs sm:text-sm md:text-base text-gray-500 line-through">
               ₹{props.slashedPrice}
             </p>
           )}

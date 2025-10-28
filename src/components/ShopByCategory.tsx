@@ -8,6 +8,7 @@ interface CategoryItem {
   name: string;
   image?: string;
   badge?: string | null;
+  displayOrder?: number | string;
   [key: string]: any;
 }
 
@@ -36,11 +37,22 @@ const ShopByCategory = () => {
           ...it,
           image:
             it.image ||
-            it.bannerUrl ||
+            it.imageUrl ||
             it.bannerImage ||
             "https://via.placeholder.com/600?text=Category",
         }));
-        setCategories(normalized);
+
+        // Sort by numeric displayOrder (ascending). Items with missing or
+        // non-numeric displayOrder will be placed at the end.
+        const sorted = normalized.slice().sort((a, b) => {
+          const aVal = Number(a.displayOrder ?? Number.MAX_SAFE_INTEGER);
+          const bVal = Number(b.displayOrder ?? Number.MAX_SAFE_INTEGER);
+          const aNum = Number.isFinite(aVal) ? aVal : Number.MAX_SAFE_INTEGER;
+          const bNum = Number.isFinite(bVal) ? bVal : Number.MAX_SAFE_INTEGER;
+          return aNum - bNum;
+        });
+
+        setCategories(sorted);
       } catch (err: any) {
         console.error("Error fetching productCategories:", err);
         setError(err?.message || "Failed to load categories");
@@ -65,10 +77,10 @@ const ShopByCategory = () => {
       <div className="container px-4 mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-[#FF0000] mb-3 font-['Jost']">
+          <h2 className="text-4xl font-bold text-[#e63946] mb-3 font-['Jost']">
             Shop By Category
           </h2>
-          <p className="text-gray-600 text-lg font-['Jost']">
+          <p className="text-gray-600 text-xl font-['Jost']">
             Explore our curated collections
           </p>
         </div>
