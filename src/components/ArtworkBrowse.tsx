@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import WorkCard from "./Ourworkcard";
 import { Button } from "@/components/ui/button";
 import { Search, ChevronDown, SlidersHorizontal, X } from "lucide-react";
@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { db } from "@/firebase/firebaseconfig";
 import ArtworkCard from "./ArtworkCard";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface WorkItem {
   id: string;
@@ -25,11 +25,14 @@ interface WorkItem {
 }
 
 const ArtworkBrowse = () => {
+  const location = useLocation();
+  const state = location.state as { id?: string };
   const navigate = useNavigate();
   const [works, setWorks] = useState<WorkItem[]>([]);
   const [filteredWorks, setFilteredWorks] = useState<WorkItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [category, setCategory] = useState<any>(null);
   const [activeFilters, setActiveFilters] = useState({
     category: [] as string[],
     priceRange: [0, 20000] as [number, number],
@@ -383,47 +386,47 @@ const ArtworkBrowse = () => {
     { value: "best-sellers", label: "Best Sellers" },
   ];
 
+  useEffect(() => {
+    const fetchCategory = async () => {
+      const categoryRef = doc(db, "productCategories", state.id);
+      const categorySnap = await getDoc(categoryRef);
+
+      if (!categorySnap.exists()) {
+        setError("Category not found.");
+        setLoading(false);
+        return;
+      }
+
+      const catData: any = {
+        id: categorySnap.id,
+        ...categorySnap.data(),
+      };
+      setCategory(catData);
+    };
+
+    fetchCategory();
+  }, [state]);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-white to-blue-50/30 py-24">
-        <div className="container mx-auto px-4">
+      <section className="relative py-24  flex items-center justify-center overflow-hidden">
+        <img
+          src={category?.bannerUrl}
+          alt={`${category?.name} banner`}
+          className="absolute w-full max-h-[700px]  object-cover  mb-8"
+        />
+
+        <div className="relative container mx-auto px-4 bottom-0">
           <div className="max-w-3xl mx-auto text-center flex flex-col items-center justify-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-              Discover Our Art Collection
-            </h1>
-            <p className="text-lg text-gray-600 mb-8">
-              Browse our curated selection of artworks from talented artists
-              worldwide. Find the perfect piece to inspire and elevate your
-              space.
-            </p>
-            {/* <div className="relative w-full max-w-md mx-4">
-              <Search
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                size={18}
-              />
-              <input
-                type="text"
-                placeholder="Search artworks or artists..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-colors"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <X size={16} />
-                </button>
-              )}
-            </div> */}
-            <div className="relative w-full max-w-md mx-4">
+            <div className="relative w-full max-w-md mx-4 mt-60">
+              {" "}
+              {/* added mt-10 */}
               <Button
                 onClick={() => navigate("/get-yours")}
-                className="px-8 py-4 text-sm font-medium text-black bg-[#e63946] text-white border border-white rounded-md hover:bg-[#d62828] transition-colors"
+                className="px-8 py-4 text-sm font-medium bg-black text-white rounded-md hover:bg-gray-900 transition-colors"
               >
-                Get Yours
+                {category?.metaTitle || "Get Yours"}
               </Button>
             </div>
           </div>
@@ -465,7 +468,7 @@ const ArtworkBrowse = () => {
           {/* Main Content */}
           <main className="flex-1">
             {/* Mobile Toolbar */}
-            <div className="md:hidden flex items-center justify-between mb-6 gap-4">
+            {/* <div className="md:hidden flex items-center justify-between mb-6 gap-4">
               <Button
                 onClick={() => setShowMobileFilters(true)}
                 variant="outline"
@@ -497,7 +500,7 @@ const ArtworkBrowse = () => {
                   size={16}
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Desktop Sort Dropdown */}
             {/* <div className="hidden md:flex justify-between items-center mb-6">
@@ -609,7 +612,7 @@ const ArtworkBrowse = () => {
                 {/* Artworks Grid */}
                 {filteredWorks.length > 0 ? (
                   <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6">
                       {filteredWorks.slice(0, displayCount).map((work) => (
                         <ArtworkCard
                           key={work.id}

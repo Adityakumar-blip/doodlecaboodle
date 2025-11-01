@@ -109,7 +109,7 @@ const BestsellerCarousel = () => {
       <div className=" mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-[#e63946] mb-3 font-['Jost']">
+          <h2 className="text-4xl font-bold text-[#c11414] mb-3 font-['Jost']">
             Shop Best Sellers
           </h2>
           {/* <p className="text-gray-800 text-lg">

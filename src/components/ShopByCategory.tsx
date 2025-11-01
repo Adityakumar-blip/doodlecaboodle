@@ -66,7 +66,7 @@ const ShopByCategory = () => {
 
   const handleCategoryClick = (category: any) => {
     if (category?.name === "Portrait") {
-      navigate("/artwork-browse");
+      navigate("/artwork-browse", { state: { id: category?.id } });
     } else {
       navigate(`/${category?.name}/${category?.id}`);
     }
@@ -77,7 +77,7 @@ const ShopByCategory = () => {
       <div className="container px-4 mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-[#e63946] mb-3 font-['Jost']">
+          <h2 className="text-4xl font-bold text-[#c11414] mb-3 font-['Jost']">
             Shop By Category
           </h2>
           <p className="text-gray-600 text-xl font-['Jost']">

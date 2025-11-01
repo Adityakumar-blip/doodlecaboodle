@@ -79,7 +79,7 @@ const Index = () => {
           <img
             src={BGDoodle}
             alt="Doodle Art Showcase"
-            className="w-full md:max-w-[85vw] lg:max-w-[75vw] xl:max-w-[89vw] mx-auto rounded-2xl shadow-lg object-cover h-[300px] sm:h-[400px] md:h-[500px] lg:h-[750px]"
+            className="w-full max-w-full md:max-w-[85vw] lg:max-w-[75vw] xl:max-w-[89vw] mx-auto rounded-2xl shadow-lg object-contain max-h-[300px] sm:max-h-[400px] md:max-h-[500px] lg:max-h-[600px] xl:max-h-[750px]"
           />
         </div>
       </div>

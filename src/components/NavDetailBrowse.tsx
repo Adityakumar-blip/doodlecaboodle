@@ -452,40 +452,6 @@ const NavDetailBrowse = () => {
               className="w-full max-h-[700px]  object-cover  mb-8"
             />
           )}
-          {/* <div className="max-w-3xl mx-auto text-center flex flex-col items-center justify-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-              Discover Our {category?.name || "Art"} Collection
-            </h1>
-            <p className="text-lg text-gray-600 mb-8">
-              Browse our curated selection of{" "}
-              {category?.name?.toLowerCase() || "artworks"} from talented
-              artists worldwide. Find the perfect piece to inspire and elevate
-              your space.
-            </p>
-            <div className="relative w-full max-w-md mx-4">
-              <Search
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                size={18}
-              />
-              <input
-                type="text"
-                placeholder={`Search ${
-                  category?.name?.toLowerCase() || "artworks"
-                } or artists...`}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-colors"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <X size={16} />
-                </button>
-              )}
-            </div>
-          </div> */}
         </div>
       </section>
 

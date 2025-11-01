@@ -90,9 +90,13 @@ const CategorySection = () => {
                 </div>
 
                 {/* Label at Bottom */}
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20">
-                  <div className="bg-orange-100 px-8 py-2">
-                    <span className="text-gray-800 font-semibold text-sm sm:text-lg uppercase tracking-wider">
+                <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-20">
+                  <div className="bg-orange-100 px-3 py-1 sm:px-4 sm:py-1.5 md:px-5 md:py-2">
+                    <span
+                      className="text-gray-800 font-semibold 
+      text-xs sm:text-sm md:text-base lg:text-lg 
+      uppercase tracking-wider"
+                    >
                       {category.label}
                     </span>
                   </div>
