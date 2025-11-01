@@ -86,37 +86,11 @@ const HeroSection: React.FC = () => {
             index === currentIndex ? "opacity-100" : "opacity-0"
           }`}
         >
-          <div className="absolute inset-0 bg-black/30 z-10" />
           <img
             src={isMobile ? image.mobileUrl : image.desktopUrl}
             alt={image.title}
-            className="object-cover w-full h-full"
+            className="object-cover object-center w-full h-full"
           />
-
-          {/* <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-16 lg:px-24 z-20 items-start">
-            <div className="max-w-2xl">
-              <h2 className="mb-4 text-4xl md:text-5xl lg:text-6xl font-bold text-white">
-                {image.title}
-              </h2>
-              <p className="mb-8 text-lg md:text-xl text-white/90">
-                {image.subtitle}
-              </p>
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => navigate("/artwork-browse")}
-                  className="px-6 py-3 text-sm font-semibold text-black bg-white rounded-md hover:bg-white/90 transition-colors"
-                >
-                  Explore Collection
-                </button>
-                <Button
-                  onClick={() => navigate("/get-yours")}
-                  className="px-8 py-4 text-sm font-medium text-black bg-transparent text-white border border-white rounded-md hover:bg-white/90 hover:text-black transition-colors"
-                >
-                  Get Yours
-                </Button>
-              </div>
-            </div>
-          </div> */}
         </div>
       ))}
 

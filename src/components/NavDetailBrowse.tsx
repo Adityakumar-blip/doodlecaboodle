@@ -27,14 +27,22 @@ interface WorkItem {
   year: number;
   sales?: number;
   materials?: string[];
+  tags?: string[];
   [key: string]: any;
 }
 
 interface Category {
-  id: any;
+  id: string;
   name: string;
-  bannerImage: string;
+  bannerUrl: string;
   [key: string]: any;
+}
+
+interface FilterItem {
+  id: string;
+  title: string;
+  type: string; // checkbox, dropdown, radio, input, slider
+  options?: string[];
 }
 
 const NavDetailBrowse = () => {
@@ -51,6 +59,10 @@ const NavDetailBrowse = () => {
     artist: [] as string[],
     medium: [] as string[],
   });
+  const [dynamicFilters, setDynamicFilters] = useState<FilterItem[]>([]);
+  const [selectedDynamicFilters, setSelectedDynamicFilters] = useState<{
+    [filterId: string]: string[];
+  }>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [displayCount, setDisplayCount] = useState(12);
@@ -59,7 +71,7 @@ const NavDetailBrowse = () => {
     string | null
   >(null);
 
-  // Helper function to safely extract price as number
+  // Helper: Convert price to number
   const getPriceAsNumber = (price: any): number => {
     if (typeof price === "number") return price;
     if (typeof price === "string") {
@@ -69,27 +81,24 @@ const NavDetailBrowse = () => {
     return 0;
   };
 
-  // Calculate max price from works data
+  // Max price from works
   const maxPrice = useMemo(() => {
     if (works.length === 0) return 20000;
-    const prices = works.map((work) => getPriceAsNumber(work.price));
+    const prices = works.map((w) => getPriceAsNumber(w.price));
     return Math.max(...prices, 20000);
   }, [works]);
 
-  // Fetch category and artworks from Firestore
+  // Fetch category and artworks
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
-
       if (!categoryId) {
         setError("No category specified.");
         setLoading(false);
         return;
       }
-
       try {
-        // Fetch category document
         const categoryRef = doc(db, "productCategories", categoryId);
         const categorySnap = await getDoc(categoryRef);
 
@@ -105,13 +114,12 @@ const NavDetailBrowse = () => {
         };
         setCategory(catData);
 
-        // Fetch products filtered by category name OR where sectionCategoryIds contains the category id
+        // Fetch products
         const productsByNameQuery = query(
           collection(db, "products"),
           where("categoryName", "==", catData.name),
           where("status", "==", "active")
         );
-
         const productsBySectionIdQuery = query(
           collection(db, "products"),
           where("sectionCategoryIds", "array-contains", catData.id),
@@ -123,7 +131,6 @@ const NavDetailBrowse = () => {
           getDocs(productsBySectionIdQuery),
         ]);
 
-        // Combine and deduplicate results by doc id
         const combinedDocs = [...snapByName.docs, ...snapBySection.docs];
         const uniqueMap = new Map<string, any>();
         combinedDocs.forEach((d) => {
@@ -136,11 +143,11 @@ const NavDetailBrowse = () => {
             sales: doc.data()?.sales || 0,
             ...doc.data(),
           })
-        ) as WorkItem[];
+        );
         setWorks(worksData);
         setFilteredWorks(worksData);
       } catch (err: any) {
-        console.error("Error fetching data:", err);
+        console.error(err);
         setError("Failed to load category or artworks.");
       } finally {
         setLoading(false);
@@ -150,7 +157,22 @@ const NavDetailBrowse = () => {
     fetchData();
   }, [categoryId]);
 
-  // Update price range when works data changes
+  // Fetch dynamic filters
+  useEffect(() => {
+    const fetchFilters = async () => {
+      if (!categoryId) return;
+
+      const snap = await getDocs(
+        query(collection(db, "filters"), where("categoryId", "==", categoryId))
+      );
+
+      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setDynamicFilters(list as FilterItem[]);
+    };
+    fetchFilters();
+  }, [categoryId]);
+
+  // Update price range
   useEffect(() => {
     if (works.length > 0 && activeFilters.priceRange[1] === 20000) {
       setActiveFilters((prev) => ({
@@ -160,7 +182,7 @@ const NavDetailBrowse = () => {
     }
   }, [works, maxPrice]);
 
-  // Extract filter options dynamically from fetched data
+  // Extract filter options dynamically from works
   const filterOptions = useMemo(
     () => ({
       category: [...new Set(works.map((a) => a.category))]
@@ -179,118 +201,25 @@ const NavDetailBrowse = () => {
     [works]
   );
 
-  // Filter & sort artworks
-  useEffect(() => {
-    let filtered = [...works];
-
-    // Category filter
-    if (activeFilters.category.length > 0) {
-      filtered = filtered.filter((artwork) =>
-        activeFilters.category.includes(artwork.category)
-      );
-    }
-
-    // Artist filter
-    if (activeFilters.artist.length > 0) {
-      filtered = filtered.filter((artwork) =>
-        activeFilters.artist.includes(artwork.artistName)
-      );
-    }
-
-    // Medium filter
-    if (activeFilters.medium.length > 0) {
-      filtered = filtered.filter((artwork) =>
-        activeFilters.medium.includes(artwork.materials?.[0] || artwork.medium)
-      );
-    }
-
-    // Year filter
-    if (activeFilters.year.length > 0) {
-      filtered = filtered.filter((artwork) =>
-        activeFilters.year.includes(artwork.year?.toString())
-      );
-    }
-
-    // Price range filter
-    filtered = filtered.filter((artwork) => {
-      const priceNum = getPriceAsNumber(artwork.price);
-      return (
-        priceNum >= activeFilters.priceRange[0] &&
-        priceNum <= activeFilters.priceRange[1]
-      );
+  // Toggle dynamic filter selection
+  const toggleDynamicFilter = (filterId: string, option: string) => {
+    setSelectedDynamicFilters((prev) => {
+      const current = prev[filterId] || [];
+      if (current.includes(option)) {
+        return {
+          ...prev,
+          [filterId]: current.filter((item) => item !== option),
+        };
+      } else {
+        return {
+          ...prev,
+          [filterId]: [...current, option],
+        };
+      }
     });
-
-    // Search filter
-    if (searchQuery.trim() !== "") {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (artwork) =>
-          artwork.title?.toLowerCase().includes(query) ||
-          artwork.artistName?.toLowerCase().includes(query) ||
-          artwork.category?.toLowerCase().includes(query) ||
-          artwork.medium?.toLowerCase().includes(query)
-      );
-    }
-
-    // Sorting
-    switch (sortBy) {
-      case "price-low-high":
-        filtered.sort((a, b) => {
-          const priceA = getPriceAsNumber(a.price);
-          const priceB = getPriceAsNumber(b.price);
-          return priceA - priceB;
-        });
-        break;
-      case "price-high-low":
-        filtered.sort((a, b) => {
-          const priceA = getPriceAsNumber(a.price);
-          const priceB = getPriceAsNumber(b.price);
-          return priceB - priceA;
-        });
-        break;
-      case "newest":
-        filtered.sort((a, b) => (b.year || 0) - (a.year || 0));
-        break;
-      case "oldest":
-        filtered.sort((a, b) => (a.year || 0) - (b.year || 0));
-        break;
-      case "best-sellers":
-        filtered.sort((a, b) => (b.sales || 0) - (a.sales || 0));
-        break;
-      case "alphabetical":
-        filtered.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
-        break;
-      case "artist-name":
-        filtered.sort((a, b) =>
-          (a.artistName || "").localeCompare(b.artistName || "")
-        );
-        break;
-      default:
-        // Featured - keep original order or sort by sales
-        filtered.sort((a, b) => (b.sales || 0) - (a.sales || 0));
-        break;
-    }
-
-    setFilteredWorks(filtered);
-    setDisplayCount(12); // Reset display count when filters change
-  }, [activeFilters, searchQuery, sortBy, works]);
-
-  const loadMore = () => {
-    setDisplayCount((prev) => Math.min(prev + 8, filteredWorks.length));
   };
 
-  const clearFilters = () => {
-    setActiveFilters({
-      category: [],
-      priceRange: [0, maxPrice],
-      year: [],
-      artist: [],
-      medium: [],
-    });
-    setSearchQuery("");
-    setSortBy("featured");
-  };
-
+  // Toggle standard filter item
   const toggleFilterItem = (
     type: keyof typeof activeFilters,
     value: string
@@ -305,18 +234,6 @@ const NavDetailBrowse = () => {
     });
   };
 
-  const countActiveFilters = () => {
-    return (
-      (activeFilters.category.length > 0 ? 1 : 0) +
-      (activeFilters.artist.length > 0 ? 1 : 0) +
-      (activeFilters.medium.length > 0 ? 1 : 0) +
-      (activeFilters.year.length > 0 ? 1 : 0) +
-      (activeFilters.priceRange[0] > 0 || activeFilters.priceRange[1] < maxPrice
-        ? 1
-        : 0)
-    );
-  };
-
   const toggleFilterSection = (section: string) => {
     setExpandedFilterSection(
       expandedFilterSection === section ? null : section
@@ -327,31 +244,150 @@ const NavDetailBrowse = () => {
     setActiveFilters((prev) => ({ ...prev, priceRange: value }));
   };
 
+  const countActiveFilters = () => {
+    return (
+      Object.values(selectedDynamicFilters).reduce(
+        (acc, arr) => acc + arr.length,
+        0
+      ) +
+      (activeFilters.category.length > 0 ? 1 : 0) +
+      (activeFilters.artist.length > 0 ? 1 : 0) +
+      (activeFilters.medium.length > 0 ? 1 : 0) +
+      (activeFilters.year.length > 0 ? 1 : 0) +
+      (activeFilters.priceRange[0] > 0 || activeFilters.priceRange[1] < maxPrice
+        ? 1
+        : 0)
+    );
+  };
+
+  const clearFilters = () => {
+    setActiveFilters({
+      category: [],
+      priceRange: [0, maxPrice],
+      year: [],
+      artist: [],
+      medium: [],
+    });
+    setSelectedDynamicFilters({});
+    setSearchQuery("");
+    setSortBy("featured");
+  };
+
+  // Filter & sort works
+  useEffect(() => {
+    let filtered = [...works];
+
+    // Standard filters
+    if (activeFilters.category.length > 0)
+      filtered = filtered.filter((w) =>
+        activeFilters.category.includes(w.category)
+      );
+    if (activeFilters.artist.length > 0)
+      filtered = filtered.filter((w) =>
+        activeFilters.artist.includes(w.artistName)
+      );
+    if (activeFilters.medium.length > 0)
+      filtered = filtered.filter((w) =>
+        activeFilters.medium.includes(w.materials?.[0] || w.medium)
+      );
+    if (activeFilters.year.length > 0)
+      filtered = filtered.filter((w) =>
+        activeFilters.year.includes(w.year?.toString())
+      );
+    filtered = filtered.filter((w) => {
+      const priceNum = getPriceAsNumber(w.price);
+      return (
+        priceNum >= activeFilters.priceRange[0] &&
+        priceNum <= activeFilters.priceRange[1]
+      );
+    });
+
+    // Search
+    if (searchQuery.trim() !== "") {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (w) =>
+          w.title?.toLowerCase().includes(q) ||
+          w.artistName?.toLowerCase().includes(q) ||
+          w.category?.toLowerCase().includes(q) ||
+          w.medium?.toLowerCase().includes(q)
+      );
+    }
+
+    // Dynamic filters
+    Object.entries(selectedDynamicFilters).forEach(([filterId, selected]) => {
+      if (selected.length === 0) return;
+      filtered = filtered.filter(
+        (w) => w.tags && selected.some((opt) => w.tags?.includes(opt))
+      );
+    });
+
+    // Sorting
+    switch (sortBy) {
+      case "price-low-high":
+        filtered.sort(
+          (a, b) => getPriceAsNumber(a.price) - getPriceAsNumber(b.price)
+        );
+        break;
+      case "price-high-low":
+        filtered.sort(
+          (a, b) => getPriceAsNumber(b.price) - getPriceAsNumber(a.price)
+        );
+        break;
+      case "newest":
+        filtered.sort((a, b) => (b.year || 0) - (a.year || 0));
+        break;
+      case "oldest":
+        filtered.sort((a, b) => (a.year || 0) - (b.year || 0));
+        break;
+      case "alphabetical":
+        filtered.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+        break;
+      case "artist-name":
+        filtered.sort((a, b) =>
+          (a.artistName || "").localeCompare(b.artistName || "")
+        );
+        break;
+      case "best-sellers":
+      default:
+        filtered.sort((a, b) => (b.sales || 0) - (a.sales || 0));
+        break;
+    }
+
+    setFilteredWorks(filtered);
+    setDisplayCount(12);
+  }, [activeFilters, selectedDynamicFilters, searchQuery, sortBy, works]);
+
+  const loadMore = () => {
+    setDisplayCount((prev) => Math.min(prev + 8, filteredWorks.length));
+  };
+
   // Filter section component
   const FilterSection = ({
     title,
     options,
     type,
+    filterId,
   }: {
     title: string;
     options?: string[];
     type: string;
+    filterId?: string;
   }) => (
     <div className="border-b border-gray-200 py-4 px-4">
       <button
-        onClick={() => toggleFilterSection(type)}
+        onClick={() => toggleFilterSection(filterId || type)}
         className="flex w-full items-center justify-between text-left font-medium text-gray-800 hover:text-blue-600 transition-colors"
       >
         {title}
         <ChevronDown
           size={18}
           className={`transition-transform duration-200 ${
-            expandedFilterSection === type ? "rotate-180" : ""
+            expandedFilterSection === (filterId || type) ? "rotate-180" : ""
           }`}
         />
       </button>
-
-      {expandedFilterSection === type && (
+      {expandedFilterSection === (filterId || type) && (
         <div className="mt-3 space-y-2 pl-1 max-h-[240px] overflow-y-auto pr-1">
           {type === "priceRange" ? (
             <div className="space-y-4">
@@ -399,27 +435,26 @@ const NavDetailBrowse = () => {
               </div>
             </div>
           ) : (
-            options?.map((option) => (
-              <div
-                key={option}
-                className="flex items-center hover:bg-gray-50 rounded p-1"
-              >
+            options?.map((opt) => (
+              <div key={opt} className="flex items-center p-1 hover:bg-gray-50">
                 <Checkbox
-                  id={`${type}-${option}`}
-                  checked={activeFilters[
-                    type as keyof typeof activeFilters
-                  ].includes(option)}
-                  onCheckedChange={() =>
-                    toggleFilterItem(type as keyof typeof activeFilters, option)
+                  checked={
+                    filterId
+                      ? selectedDynamicFilters[filterId]?.includes(opt)
+                      : activeFilters[
+                          type as keyof typeof activeFilters
+                        ].includes(opt)
                   }
-                  className="h-4 w-4 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                  onCheckedChange={() =>
+                    filterId
+                      ? toggleDynamicFilter(filterId, opt)
+                      : toggleFilterItem(
+                          type as keyof typeof activeFilters,
+                          opt
+                        )
+                  }
                 />
-                <label
-                  htmlFor={`${type}-${option}`}
-                  className="ml-2 text-sm text-gray-700 cursor-pointer flex-1 py-1"
-                >
-                  {option}
-                </label>
+                <label className="ml-2 text-sm text-gray-700">{opt}</label>
               </div>
             ))
           )}
@@ -428,7 +463,6 @@ const NavDetailBrowse = () => {
     </div>
   );
 
-  // Sort options for the dropdown
   const sortOptions = [
     { value: "featured", label: "Featured" },
     { value: "price-low-high", label: "Price: Low to High" },
@@ -442,22 +476,20 @@ const NavDetailBrowse = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-b from-white to-blue-50/30 ">
-        <div className="">
-          {category?.bannerUrl && (
-            <img
-              src={category.bannerUrl}
-              alt={`${category.name} banner`}
-              className="w-full max-h-[700px]  object-cover  mb-8"
-            />
-          )}
-        </div>
+      {/* Hero */}
+      <section className="bg-gradient-to-b from-white to-blue-50/30">
+        {category?.bannerUrl && (
+          <img
+            src={category.bannerUrl}
+            alt={`${category.name} banner`}
+            className="w-full max-h-[700px] object-cover mb-8"
+          />
+        )}
       </section>
 
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar Filters - Desktop */}
+          {/* Sidebar Filters */}
           <aside className="hidden md:block w-64 flex-shrink-0">
             <div className="sticky top-28 bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
               <div className="p-4 border-b border-gray-200 flex justify-between items-center">
@@ -471,9 +503,8 @@ const NavDetailBrowse = () => {
                   </button>
                 )}
               </div>
-
               <div className="divide-y divide-gray-200">
-                <FilterSection
+                {/* <FilterSection
                   title="Artist"
                   options={filterOptions.artist}
                   type="artist"
@@ -482,12 +513,17 @@ const NavDetailBrowse = () => {
                   title="Medium"
                   options={filterOptions.medium}
                   type="medium"
-                />
-                {/* <FilterSection
-                  title="Year"
-                  options={filterOptions.year}
-                  type="year"
                 /> */}
+                {/* Dynamic Filters */}
+                {dynamicFilters.map((filter) => (
+                  <FilterSection
+                    key={filter.id}
+                    title={filter.title}
+                    options={filter.options}
+                    type={filter.type}
+                    filterId={filter.id}
+                  />
+                ))}
                 <FilterSection title="Price Range" type="priceRange" />
               </div>
             </div>
@@ -495,7 +531,6 @@ const NavDetailBrowse = () => {
 
           {/* Main Content */}
           <main className="flex-1">
-            {/* Mobile Toolbar */}
             <div className="md:hidden flex items-center justify-between mb-6 gap-4">
               <Button
                 onClick={() => setShowMobileFilters(true)}
@@ -530,7 +565,6 @@ const NavDetailBrowse = () => {
               </div>
             </div>
 
-            {/* Desktop Sort Dropdown */}
             <div className="hidden md:flex justify-between items-center mb-6">
               <h2 className="text-lg font-medium text-gray-800">
                 Browse Artworks
@@ -577,47 +611,25 @@ const NavDetailBrowse = () => {
                 {/* Active Filters Pills */}
                 {countActiveFilters() > 0 && (
                   <div className="flex flex-wrap gap-2 mb-6">
-                    {/* Category pills */}
-                    {activeFilters.category.map((item) => (
+                    {/* Standard */}
+                    {activeFilters.artist.map((a) => (
                       <button
-                        key={`category-${item}`}
-                        onClick={() => toggleFilterItem("category", item)}
-                        className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm flex items-center hover:bg-blue-200 transition-colors"
-                      >
-                        Category: {item} <X size={14} className="ml-1" />
-                      </button>
-                    ))}
-                    {/* Artist pills */}
-                    {activeFilters.artist.map((item) => (
-                      <button
-                        key={`artist-${item}`}
-                        onClick={() => toggleFilterItem("artist", item)}
+                        key={`artist-${a}`}
+                        onClick={() => toggleFilterItem("artist", a)}
                         className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm flex items-center hover:bg-green-200 transition-colors"
                       >
-                        Artist: {item} <X size={14} className="ml-1" />
+                        Artist: {a} <X size={14} className="ml-1" />
                       </button>
                     ))}
-                    {/* Medium pills */}
-                    {activeFilters.medium.map((item) => (
+                    {activeFilters.medium.map((m) => (
                       <button
-                        key={`medium-${item}`}
-                        onClick={() => toggleFilterItem("medium", item)}
+                        key={`medium-${m}`}
+                        onClick={() => toggleFilterItem("medium", m)}
                         className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm flex items-center hover:bg-purple-200 transition-colors"
                       >
-                        Medium: {item} <X size={14} className="ml-1" />
+                        Medium: {m} <X size={14} className="ml-1" />
                       </button>
                     ))}
-                    {/* Year pills */}
-                    {activeFilters.year.map((item) => (
-                      <button
-                        key={`year-${item}`}
-                        onClick={() => toggleFilterItem("year", item)}
-                        className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm flex items-center hover:bg-orange-200 transition-colors"
-                      >
-                        Year: {item} <X size={14} className="ml-1" />
-                      </button>
-                    ))}
-                    {/* Price range pill */}
                     {(activeFilters.priceRange[0] > 0 ||
                       activeFilters.priceRange[1] < maxPrice) && (
                       <button
@@ -629,11 +641,92 @@ const NavDetailBrowse = () => {
                         }
                         className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm flex items-center hover:bg-red-200 transition-colors"
                       >
-                        Price: ₹{activeFilters.priceRange[0].toLocaleString()} -
-                        ₹{activeFilters.priceRange[1].toLocaleString()}
+                        Price: ₹{activeFilters.priceRange[0].toLocaleString()}-
+                        ₹{activeFilters.priceRange[1].toLocaleString()}{" "}
                         <X size={14} className="ml-1" />
                       </button>
                     )}
+                    {/* Dynamic */}
+                    {Object.entries(selectedDynamicFilters).map(([fid, opts]) =>
+                      opts.map((opt) => (
+                        <button
+                          key={`${fid}-${opt}`}
+                          className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm flex items-center"
+                          onClick={() => toggleDynamicFilter(fid, opt)}
+                        >
+                          {opt} <X size={14} className="ml-1" />
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {/* Mobile Filter Drawer */}
+                {showMobileFilters && (
+                  <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex md:hidden">
+                    <div
+                      className="bg-white w-full max-w-xs h-full overflow-y-auto ml-auto transform transition-transform duration-300 ease-out"
+                      style={{ animation: "slideInRight 0.3s ease-out" }}
+                    >
+                      <div className="sticky top-0 bg-white px-4 py-4 border-b border-gray-200 flex justify-between items-center z-10">
+                        <h3 className="font-medium">Filter Options</h3>
+                        <button
+                          onClick={() => setShowMobileFilters(false)}
+                          className="p-1 hover:bg-gray-100 rounded transition-colors"
+                        >
+                          <X size={20} />
+                        </button>
+                      </div>
+
+                      <div className="divide-y divide-gray-200">
+                        {/* Standard filters */}
+                        {/* <FilterSection
+                          title="Artist"
+                          options={filterOptions.artist}
+                          type="artist"
+                        />
+                        <FilterSection
+                          title="Medium"
+                          options={filterOptions.medium}
+                          type="medium"
+                        /> */}
+                        {/* <FilterSection
+                          title="Year"
+                          options={filterOptions.year}
+                          type="year"
+                        /> */}
+
+                        {/* Dynamic Filters */}
+                        {dynamicFilters.map((filter) => (
+                          <FilterSection
+                            key={filter.id}
+                            title={filter.title}
+                            options={filter.options}
+                            type={filter.type}
+                            filterId={filter.id}
+                          />
+                        ))}
+                        <FilterSection title="Price Range" type="priceRange" />
+                      </div>
+
+                      <div className="sticky bottom-0 bg-white p-4 border-t border-gray-200 z-10">
+                        <div className="flex gap-3">
+                          <Button
+                            variant="outline"
+                            className="flex-1"
+                            onClick={clearFilters}
+                          >
+                            Clear All
+                          </Button>
+                          <Button
+                            className="flex-1 bg-blue-500 hover:bg-blue-600 text-white"
+                            onClick={() => setShowMobileFilters(false)}
+                          >
+                            Apply Filters ({countActiveFilters()})
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -642,26 +735,12 @@ const NavDetailBrowse = () => {
                   <>
                     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6">
                       {filteredWorks.slice(0, displayCount).map((work) => (
-                        <WorkCard
-                          key={work.id}
-                          id={work.id}
-                          imageUrl={work.imageUrl}
-                          title={work.title}
-                          artistName={work.artistName}
-                          price={work.price}
-                          category={work.category}
-                          props={work}
-                        />
+                        <WorkCard key={work.id} {...work} props={work} />
                       ))}
                     </div>
-
-                    {/* Load More Button */}
                     {displayCount < filteredWorks.length && (
                       <div className="mt-12 text-center">
-                        <Button
-                          onClick={loadMore}
-                          className="bg-transparent border border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-300 px-8 py-3 rounded-md transition-colors duration-300"
-                        >
+                        <Button onClick={loadMore}>
                           Load More Artworks (
                           {filteredWorks.length - displayCount} remaining)
                         </Button>
@@ -678,14 +757,9 @@ const NavDetailBrowse = () => {
                     </h3>
                     <p className="text-gray-600 mb-6">
                       No artworks match your current filters. Try adjusting your
-                      search criteria or clearing some filters.
+                      search or clearing filters.
                     </p>
-                    <Button
-                      onClick={clearFilters}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition-colors"
-                    >
-                      Clear All Filters
-                    </Button>
+                    <Button onClick={clearFilters}>Clear All Filters</Button>
                   </div>
                 )}
               </>
@@ -693,77 +767,6 @@ const NavDetailBrowse = () => {
           </main>
         </div>
       </div>
-
-      {/* Mobile Filter Drawer */}
-      {showMobileFilters && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex md:hidden">
-          <div
-            className="bg-white w-full max-w-xs h-full overflow-y-auto ml-auto transform transition-transform duration-300 ease-out"
-            style={{
-              animation: "slideInRight 0.3s ease-out",
-            }}
-          >
-            <div className="sticky top-0 bg-white px-4 py-4 border-b border-gray-200 flex justify-between items-center z-10">
-              <h3 className="font-medium">Filter Options</h3>
-              <button
-                onClick={() => setShowMobileFilters(false)}
-                className="p-1 hover:bg-gray-100 rounded transition-colors"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="divide-y divide-gray-200">
-              {/* Category filter removed as it's category-specific page */}
-              <FilterSection
-                title="Artist"
-                options={filterOptions.artist}
-                type="artist"
-              />
-              <FilterSection
-                title="Medium"
-                options={filterOptions.medium}
-                type="medium"
-              />
-              <FilterSection
-                title="Year"
-                options={filterOptions.year}
-                type="year"
-              />
-              <FilterSection title="Price Range" type="priceRange" />
-            </div>
-
-            <div className="sticky bottom-0 bg-white p-4 border-t border-gray-200 z-10">
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={clearFilters}
-                >
-                  Clear All
-                </Button>
-                <Button
-                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white"
-                  onClick={() => setShowMobileFilters(false)}
-                >
-                  Apply Filters ({countActiveFilters()})
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <style jsx>{`
-        @keyframes slideInRight {
-          from {
-            transform: translateX(100%);
-          }
-          to {
-            transform: translateX(0);
-          }
-        }
-      `}</style>
     </div>
   );
 };
