@@ -126,6 +126,12 @@ const ArtworkDetailPage = () => {
     return `₹${adjustedPrice.toLocaleString()}`;
   };
 
+  const isNotSketch =
+    artwork?.categoryName?.toLowerCase().includes("sketch") ||
+    artwork?.categoryName?.toLowerCase().includes("painting")
+      ? false
+      : true;
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-12 flex justify-center">
@@ -195,12 +201,18 @@ const ArtworkDetailPage = () => {
         <div className="flex flex-col h-full">
           {/* Artist and Title */}
           <div className="mb-2">
-            <p
-              onClick={() => navigate("/artists/1")}
-              className="text-gray-600 hover:underline hover:text-red-400 cursor-pointer"
-            >
-              {state.artistName}
-            </p>
+            {!isNotSketch && (
+              <p
+                onClick={() =>
+                  navigate(`/artists/${state.artistId}`, {
+                    state: { collection: "products" },
+                  })
+                }
+                className="text-gray-600 hover:underline hover:text-red-400 cursor-pointer"
+              >
+                {state.artistName}
+              </p>
+            )}
             <h1 className="font-playfair text-2xl md:text-3xl font-medium text-gray-900 mb-2">
               {state?.name}
             </h1>
@@ -288,7 +300,7 @@ const ArtworkDetailPage = () => {
                     <div className="text-sm font-medium text-gray-900 mt-1">
                       {size.priceAdjustment > 0
                         ? `+₹${size.priceAdjustment}`
-                        : "Base Price"}
+                        : !isNotSketch && "Base Price"}
                     </div>
                   </button>
                 ))}
@@ -316,34 +328,50 @@ const ArtworkDetailPage = () => {
               <div className="text-gray-600">Medium</div>
               <div>{state?.materials[0]}</div>
 
-              <div className="text-gray-600">Year</div>
-              <div>{getYearFromCreatedAt(state?.createdAt)}</div>
+              {!isNotSketch && <div className="text-gray-600">Year</div>}
+
+              {!isNotSketch && (
+                <div>{getYearFromCreatedAt(state?.createdAt)}</div>
+              )}
 
               <div className="text-gray-600">Category</div>
               <div>{artwork.categoryName}</div>
 
-              <div className="text-gray-600">Surface</div>
-              <div>
-                <p>Chitrapat ,440 gsm</p>
-              </div>
+              {!isNotSketch && <div className="text-gray-600">Surface</div>}
 
-              <div className="text-gray-600">Artwork</div>
-              <div>
-                <p>Original</p>
-              </div>
+              {!isNotSketch && (
+                <div>
+                  <p>Chitrapat ,440 gsm</p>
+                </div>
+              )}
 
-              <div className="text-gray-600">To be Delivered in:</div>
-              <div>
-                <p>rolled</p>
-              </div>
+              {!isNotSketch && <div className="text-gray-600">Artwork</div>}
+
+              {!isNotSketch && (
+                <div>
+                  <p>Original</p>
+                </div>
+              )}
+
+              {!isNotSketch && (
+                <div className="text-gray-600">To be Delivered in:</div>
+              )}
+
+              {!isNotSketch && (
+                <div>
+                  <p>rolled</p>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Artist Note - optional section */}
-          <div className="mt-auto py-4 border-t border-gray-200">
-            <h2 className="font-medium text-lg mb-2">About the Artist</h2>
-            <p className="text-gray-600">{artist?.description}</p>
-          </div>
+          {!isNotSketch && (
+            <div className="mt-auto py-4 border-t border-gray-200">
+              <h2 className="font-medium text-lg mb-2">About the Artist</h2>
+              <p className="text-gray-600">{artist?.description}</p>
+            </div>
+          )}
         </div>
       </div>
 

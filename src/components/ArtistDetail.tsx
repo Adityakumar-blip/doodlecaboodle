@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   doc,
   getDoc,
@@ -47,6 +47,8 @@ interface WorkCardProps extends Work {
 }
 
 const ArtistDetail: React.FC = () => {
+  const location = useLocation();
+  const { collection: artistCollection } = location.state || {};
   const [artist, setArtist] = useState<Artist | null>(null);
   const [works, setWorks] = useState<Work[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -78,8 +80,12 @@ const ArtistDetail: React.FC = () => {
         }
 
         // Fetch works from ourworks collection where artistId matches
+        const chosenCollection = artistCollection
+          ? artistCollection
+          : "ourworks";
+
         const worksQuery = query(
-          collection(db, "ourworks"),
+          collection(db, chosenCollection),
           where("artistId", "==", id)
         );
         const worksSnapshot = await getDocs(worksQuery);
@@ -294,6 +300,7 @@ const ArtistDetail: React.FC = () => {
                       category={work.category}
                       props={work}
                       isClickable={false}
+                      showPrice={false}
                     />
                   ))
                 ) : (

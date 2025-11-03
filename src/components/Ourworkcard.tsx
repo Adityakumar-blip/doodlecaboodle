@@ -11,6 +11,7 @@ interface WorkCardProps {
   category?: string;
   props?: any;
   isClickable?: boolean;
+  showPrice?: boolean;
   onAddToCart?: (e: React.MouseEvent) => void;
 }
 
@@ -24,6 +25,7 @@ const WorkCard = ({
   onAddToCart,
   props,
   isClickable = true,
+  showPrice = true,
 }: WorkCardProps) => {
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
@@ -154,10 +156,12 @@ const WorkCard = ({
         </h3>
         <div className="flex items-center gap-3">
           {/* Price: scale up with screen size */}
-          <p className="text-sm sm:text-base md:text-lg text-gray-700 font-medium">
-            MRP : ₹{price}
-          </p>
-          {props?.slashedPrice && (
+          {showPrice && (
+            <p className="text-sm sm:text-base md:text-lg text-gray-700 font-medium">
+              MRP : ₹{price}
+            </p>
+          )}
+          {props?.slashedPrice && showPrice && (
             <p className="text-xs sm:text-sm md:text-base text-gray-500 line-through">
               ₹{props.slashedPrice}
             </p>
