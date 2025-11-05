@@ -131,6 +131,9 @@ const ArtworkDetailPage = () => {
     artwork?.categoryName?.toLowerCase().includes("painting")
       ? false
       : true;
+  const isCandle = artwork?.categoryName?.toLowerCase().includes("candle")
+    ? true
+    : false;
 
   if (isLoading) {
     return (
@@ -360,6 +363,13 @@ const ArtworkDetailPage = () => {
               {!isNotSketch && (
                 <div>
                   <p>rolled</p>
+                </div>
+              )}
+
+              {isCandle && <div className="text-gray-600">Weight</div>}
+              {isCandle && (
+                <div>
+                  <p>{artwork.Weight}</p>
                 </div>
               )}
             </div>
