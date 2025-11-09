@@ -30,7 +30,9 @@ const ShopByCategory = () => {
           ...(d.data() as object),
         })) as CategoryItem[];
 
-        const filtered = items.filter((it) => it.isSection !== true);
+        const filtered = items.filter(
+          (it) => it.isSection !== true && it.isActive,
+        );
 
         // Map to include an image fallback if none provided
         const normalized = filtered.map((it) => ({
