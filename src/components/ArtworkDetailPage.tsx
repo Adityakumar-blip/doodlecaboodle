@@ -1,16 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
-import {
-  Heart,
-  ShoppingCart,
-  ArrowLeft,
-  Share,
-  Plus,
-  Minus,
-} from "lucide-react";
+import { ShoppingCart, ArrowLeft, Plus, Minus } from "lucide-react";
 import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { CartContext } from "@/context/CartContext";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebase/firebaseconfig";
+import RelatedProducts from "./RelatedProduct";
 
 interface SizeOption {
   name: string;
@@ -21,48 +15,102 @@ interface SizeOption {
   priceAdjustment: number;
 }
 
-interface ArtworkDetailProps {
+type DescriptionField = { field: string; value: string };
+
+type MediaType = "image" | "video";
+
+interface DisplayImage {
+  url: string;
+  type: MediaType;
+  /** which variant this image came from (if any) */
+  variantId?: string;
+}
+
+interface Variant {
   id: string;
-  imageUrl: string;
-  title: string;
-  artistName: string;
-  price: string;
-  category: string;
-  description: string;
-  dimensions: SizeOption[];
-  medium: string;
-  yearCreated: string;
-  inStock: boolean;
-  additionalImages?: string[];
+  colorName: string;
+  colorHex: string; // HEX like #FF0000
+  sku?: string;
+  priceAdjustment?: number;
+  quantity?: number | null; // for READY_MADE; else null
+  images?: { url: string; type: MediaType }[];
+  isDefault?: boolean;
 }
 
 const ArtworkDetailPage = () => {
-  const { cartItems, addToCart, setCartItems, toggleCart } =
-    useContext(CartContext);
+  const { addToCart, toggleCart } = useContext(CartContext);
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const state = location.state;
+
   const [artwork, setArtwork] = useState<any | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState<SizeOption | null>(null);
   const [artist, setArtist] = useState<any>({});
+  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null); // no default selection
 
-  // Fetch artwork data (mock implementation)
+  // --- Helpers ---
+  const dedupeByUrl = (arr: DisplayImage[]) => {
+    const seen = new Set<string>();
+    const out: DisplayImage[] = [];
+    for (const img of arr) {
+      if (!img?.url) continue;
+      if (!seen.has(img.url)) {
+        seen.add(img.url);
+        out.push(img);
+      }
+    }
+    return out;
+  };
+
   useEffect(() => {
     const fetchArtwork = async () => {
       setIsLoading(true);
 
-      setArtwork(state);
-      setActiveImage(state?.images?.[0]?.url);
-      setSelectedSize(state.dimensions[0]);
+      // base object from route state
+      const base = state || {};
+      const productImages: DisplayImage[] = Array.isArray(base.images)
+        ? base.images.map((i: any) => ({ url: i.url, type: i.type }))
+        : [];
+
+      // merge variant images (if any) INTO artwork.images
+      const variantImages: DisplayImage[] = Array.isArray(base.variants)
+        ? base.variants.flatMap((v: Variant) =>
+            (v.images || []).map((img) => ({
+              url: img.url,
+              type: img.type,
+              variantId: v.id,
+            }))
+          )
+        : [];
+
+      const mergedImages = dedupeByUrl([...productImages, ...variantImages]);
+
+      // initialize selected size
+      const firstSize: SizeOption | null =
+        Array.isArray(base?.dimensions) && base.dimensions.length > 0
+          ? base.dimensions[0]
+          : null;
+
+      // construct the final artwork for UI (with merged images)
+      const finalArtwork = {
+        ...base,
+        images: mergedImages,
+      };
+
+      setArtwork(finalArtwork);
+      setSelectedSize(firstSize);
+      setSelectedVariant(null); // no preselect
+      setActiveImage(mergedImages?.[0]?.url || "");
 
       setIsLoading(false);
 
-      if (state?.artistId) {
-        const artistRef = doc(db, "artists", state.artistId);
+      // load artist info (optional)
+      if (base?.artistId) {
+        const artistRef = doc(db, "artists", base.artistId);
         const artistSnap = await getDoc(artistRef);
         if (artistSnap.exists()) {
           setArtist({
@@ -79,51 +127,97 @@ const ArtworkDetailPage = () => {
     fetchArtwork();
   }, [id, state]);
 
+  // When user picks a different color variant, switch hero to that variant's first image
+  useEffect(() => {
+    if (!artwork?.images?.length) return;
+
+    if (selectedVariant?.id) {
+      const firstVariantImg = (artwork.images as DisplayImage[]).find(
+        (img) => img.variantId === selectedVariant.id
+      );
+      if (firstVariantImg && firstVariantImg.url !== activeImage) {
+        setActiveImage(firstVariantImg.url);
+      }
+    } else {
+      // If variant is cleared, fall back to the product's first image
+      const first = (artwork.images as DisplayImage[])?.[0]?.url;
+      if (first && first !== activeImage) {
+        setActiveImage(first);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedVariant?.id, artwork?.images]);
+
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity >= 1) {
       setQuantity(newQuantity);
     }
   };
 
-  function getYearFromCreatedAt(createdAt) {
+  function getYearFromCreatedAt(createdAt: any) {
     if (!createdAt || typeof createdAt.seconds !== "number") {
       throw new Error("Invalid createdAt object");
     }
-
     const { seconds, nanoseconds } = createdAt;
     const date = new Date(seconds * 1000 + (nanoseconds || 0) / 1e6);
     return date.getFullYear();
   }
 
+  const isReadyMade = artwork?.orderType === "ready_made";
+  const variantQty = isReadyMade ? selectedVariant?.quantity ?? null : null;
+  const isOutOfStock = isReadyMade
+    ? selectedVariant
+      ? variantQty === 0
+      : artwork?.quantity === 0
+    : artwork?.quantity === 0;
+
   const handleAddToCart = () => {
-    if (artwork && selectedSize) {
-      const cartItem: any = {
-        id: `${artwork?.id}-${Date.now()}`,
-        artworkId: artwork?.id,
-        title: artwork?.name,
-        price: artwork?.price,
-        quantity,
-        artistName: artwork?.artistName,
-        size: {
-          value: `${artwork?.dimensions[0]?.length}x${artwork?.dimensions[0]?.width}`,
-          label: artwork?.dimensions[0]?.name,
-          priceAdjustment: selectedSize.priceAdjustment || 0,
-        },
-        uploadedImageUrl: artwork?.images[0]?.url,
-        timestamp: Date.now(),
-        deliveryNote: "",
-        productCategory: artwork?.categoryName,
-        categoryId: artwork?.categoryId,
-      };
-      addToCart(cartItem);
-    }
+    if (!artwork || !selectedSize) return;
+
+    const price =
+      Number(artwork?.price || 0) +
+      Number(selectedSize?.priceAdjustment || 0) +
+      Number(selectedVariant?.priceAdjustment || 0);
+
+    const cartItem: any = {
+      id: `${artwork?.id}-${selectedVariant?.id || "base"}-${Date.now()}`,
+      artworkId: artwork?.id,
+      title: artwork?.name,
+      price,
+      quantity,
+      artistName: artwork?.artistName,
+      size: {
+        value: `${selectedSize.length}x${selectedSize.width}`,
+        label: selectedSize.name,
+        priceAdjustment: selectedSize.priceAdjustment || 0,
+      },
+      variant: selectedVariant
+        ? {
+            id: selectedVariant.id,
+            colorName: selectedVariant.colorName,
+            colorHex: selectedVariant.colorHex,
+            priceAdjustment: selectedVariant.priceAdjustment || 0,
+            sku: selectedVariant.sku || null,
+          }
+        : null,
+      uploadedImageUrl: activeImage || artwork.images?.[0]?.url,
+      timestamp: Date.now(),
+      deliveryNote: "",
+      productCategory: artwork?.categoryName,
+      categoryId: artwork?.categoryId,
+    };
+
+    addToCart(cartItem);
+    toggleCart?.();
   };
 
   const calculatePrice = () => {
-    if (!artwork || !selectedSize) return artwork?.price || "₹0";
-    const basePrice = parseFloat(artwork.price);
-    const adjustedPrice = basePrice + selectedSize.priceAdjustment;
-    return `₹${adjustedPrice.toLocaleString()}`;
+    if (!artwork) return "₹0";
+    const base = Number(artwork.price) || 0;
+    const sizeAdj = Number(selectedSize?.priceAdjustment || 0);
+    const colorAdj = Number(selectedVariant?.priceAdjustment || 0);
+    const total = base + sizeAdj + colorAdj;
+    return `₹${total.toLocaleString()}`;
   };
 
   const isNotSketch =
@@ -131,6 +225,7 @@ const ArtworkDetailPage = () => {
     artwork?.categoryName?.toLowerCase().includes("painting")
       ? false
       : true;
+
   const isCandle = artwork?.categoryName?.toLowerCase().includes("candle")
     ? true
     : false;
@@ -151,6 +246,19 @@ const ArtworkDetailPage = () => {
     );
   }
 
+  function convertToWeight(value: number) {
+    if (value >= 1) {
+      return value.toFixed(2) + " kg";
+    } else {
+      const grams = value * 1000;
+      return Math.round(grams) + " g";
+    }
+  }
+
+  const hasDynamicDetails =
+    Array.isArray(artwork?.descriptionFields) &&
+    (artwork?.descriptionFields as DescriptionField[]).length > 0;
+
   return (
     <div className="container mx-auto px-4 py-6  md:py-12">
       {/* Back button */}
@@ -167,11 +275,16 @@ const ArtworkDetailPage = () => {
         <div>
           {/* Main Image */}
           <div className="relative overflow-hidden aspect-square mb-4 rounded-lg">
-            <img
-              src={activeImage}
-              alt={artwork.title}
-              className="w-full h-full object-cover"
-            />
+            {activeImage ? (
+              <img
+                src={activeImage}
+                alt={artwork?.name || "Artwork"}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-100" />
+            )}
+
             {/* Category Tag */}
             <div className="absolute top-3 left-3 bg-pastel-yellow px-2 py-0.5 rounded text-xs">
               {artwork.categoryName}
@@ -179,21 +292,28 @@ const ArtworkDetailPage = () => {
           </div>
 
           {/* Thumbnail Images */}
-          {state?.images && state.images.length > 0 && (
+          {Array.isArray(artwork.images) && artwork.images.length > 0 && (
             <div className="grid grid-cols-4 gap-2">
-              {state?.images?.map((img, index) => (
+              {(artwork.images as DisplayImage[]).map((img, index) => (
                 <div
-                  key={index}
+                  key={`${img.url}-${index}`}
                   className={`aspect-square cursor-pointer rounded overflow-hidden ${
                     activeImage === img.url ? "ring-2 ring-gray-900" : ""
                   }`}
                   onClick={() => setActiveImage(img.url)}
                 >
-                  <img
-                    src={img?.url}
-                    alt={`Detail view ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+                  {img.type === "video" ? (
+                    <video
+                      src={img.url}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={img.url}
+                      alt={`Detail view ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -223,15 +343,17 @@ const ArtworkDetailPage = () => {
               <p className="text-xl font-medium text-gray-900">
                 {calculatePrice()}
               </p>
-              <p className="text-sm text-gray-500 line-through">
-                ₹{state?.slashedPrice}
-              </p>
+              {state?.slashedPrice && (
+                <p className="text-sm text-gray-500 line-through">
+                  ₹{state?.slashedPrice}
+                </p>
+              )}
             </div>
           </div>
 
           {/* Actions */}
           <div className="flex flex-col md:flex-row gap-3 my-6">
-            {/* Quantity Selector
+            {/* (Optional) Quantity Selector
             <div className="flex items-center border border-gray-300 rounded-md">
               <button
                 onClick={() => handleQuantityChange(quantity - 1)}
@@ -254,39 +376,22 @@ const ArtworkDetailPage = () => {
             {/* Add to Cart Button */}
             <button
               onClick={handleAddToCart}
-              disabled={artwork?.quantity === 0}
+              disabled={isOutOfStock}
               className={`flex-1 py-2 px-4 rounded-md flex items-center justify-center gap-2 font-medium text-white ${
-                artwork?.quantity === 0
-                  ? "bg-gray-500"
-                  : "bg-gray-900 hover:bg-gray-800"
-              }  text-white"
+                isOutOfStock ? "bg-gray-500" : "bg-gray-900 hover:bg-gray-800"
               }`}
             >
               <ShoppingCart size={18} />
-              <span>
-                {artwork?.quantity === 0 ? "Out of Stock" : "Add to Cart"}
-              </span>
+              <span>{isOutOfStock ? "Out of Stock" : "Add to Cart"}</span>
             </button>
-
-            {/* Wishlist Button */}
-            {/* <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-50">
-              <Heart
-                size={20}
-                className="text-gray-700 hover:text-pink-500 transition-colors"
-              />
-            </button> */}
-
-            {/* Share Button */}
-            {/* <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-50">
-              <Share size={20} className="text-gray-700" />
-            </button> */}
           </div>
 
+          {/* Size Selector */}
           <div>
             <div className="mb-6">
               <h3 className="text-sm font-medium text-gray-900 mb-3">Size</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {artwork.dimensions.map((size) => (
+                {(artwork.dimensions || []).map((size: SizeOption) => (
                   <button
                     key={size.name}
                     onClick={() => setSelectedSize(size)}
@@ -303,13 +408,52 @@ const ArtworkDetailPage = () => {
                     <div className="text-sm font-medium text-gray-900 mt-1">
                       {size.priceAdjustment > 0
                         ? `+₹${size.priceAdjustment}`
-                        : !isNotSketch && "Base Price"}
+                        : "Base Price"}
                     </div>
                   </button>
                 ))}
               </div>
             </div>
           </div>
+
+          {/* Color Selector (no default selected) */}
+          {Array.isArray(artwork?.variants) && artwork.variants.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-sm font-medium text-gray-900 mb-3">Color</h3>
+              <div className="flex flex-wrap gap-3">
+                {artwork.variants.map((v: Variant) => {
+                  const selected = selectedVariant?.id === v.id;
+                  return (
+                    <button
+                      key={v.id}
+                      type="button"
+                      onClick={() => setSelectedVariant(v)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition
+                      ${
+                        selected
+                          ? "border-gray-900 ring-1 ring-gray-900 bg-gray-50"
+                          : "border-gray-300 hover:border-gray-400"
+                      }`}
+                      aria-label={`Select color ${v.colorName}`}
+                      title={v.colorName}
+                    >
+                      <span
+                        className="inline-block h-5 w-5 rounded-full border"
+                        style={{ backgroundColor: v.colorHex }}
+                      />
+                      <span className="text-sm">{v.colorName}</span>
+                      {typeof v.priceAdjustment === "number" &&
+                        v.priceAdjustment > 0 && (
+                          <span className="ml-1 text-xs text-gray-600">
+                            +₹{v.priceAdjustment}
+                          </span>
+                        )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Description */}
           <div className="mb-8">
@@ -318,64 +462,76 @@ const ArtworkDetailPage = () => {
           </div>
 
           {/* Details */}
-          <div className="py-4 border-t border-gray-200">
-            <h2 className="font-medium text-lg mb-3">Details</h2>
-            <div className="grid grid-cols-2 gap-y-2">
-              <div className="text-gray-600">Dimensions</div>
-              <div>
-                {selectedSize
-                  ? `${selectedSize.length}" × ${selectedSize.width}"`
-                  : "Select a size"}
+          {hasDynamicDetails ? (
+            <div className="py-4 border-t border-gray-200">
+              <h2 className="font-medium text-lg mb-3">Details</h2>
+              <div className="grid grid-cols-2 gap-y-2">
+                {(artwork.descriptionFields as DescriptionField[]).map(
+                  (row, i) => (
+                    <React.Fragment key={`${row.field}-${i}`}>
+                      <div className="text-gray-600">{row.field}</div>
+                      <div>{row.value}</div>
+                    </React.Fragment>
+                  )
+                )}
               </div>
-
-              <div className="text-gray-600">Medium</div>
-              <div>{state?.materials[0]}</div>
-
-              {!isNotSketch && <div className="text-gray-600">Year</div>}
-
-              {!isNotSketch && (
-                <div>{getYearFromCreatedAt(state?.createdAt)}</div>
-              )}
-
-              <div className="text-gray-600">Category</div>
-              <div>{artwork.categoryName}</div>
-
-              {!isNotSketch && <div className="text-gray-600">Surface</div>}
-
-              {!isNotSketch && (
-                <div>
-                  <p>Chitrapat ,440 gsm</p>
-                </div>
-              )}
-
-              {!isNotSketch && <div className="text-gray-600">Artwork</div>}
-
-              {!isNotSketch && (
-                <div>
-                  <p>Original</p>
-                </div>
-              )}
-
-              {!isNotSketch && (
-                <div className="text-gray-600">To be Delivered in:</div>
-              )}
-
-              {!isNotSketch && (
-                <div>
-                  <p>rolled</p>
-                </div>
-              )}
-
-              {isCandle && <div className="text-gray-600">Weight</div>}
-              {isCandle && (
-                <div>
-                  <p>{artwork.Weight}</p>
-                </div>
-              )}
             </div>
-          </div>
+          ) : (
+            <div className="py-4 border-t border-gray-200">
+              <h2 className="font-medium text-lg mb-3">Details</h2>
+              <div className="grid grid-cols-2 gap-y-2">
+                <div className="text-gray-600">Dimensions</div>
+                <div>
+                  {selectedSize
+                    ? `${selectedSize.length}" × ${selectedSize.width}"`
+                    : "Select a size"}
+                </div>
 
-          {/* Artist Note - optional section */}
+                <div className="text-gray-600">Medium</div>
+                <div>{state?.materials?.[0]}</div>
+
+                {!isNotSketch && <div className="text-gray-600">Year</div>}
+                {!isNotSketch && (
+                  <div>{getYearFromCreatedAt(state?.createdAt)}</div>
+                )}
+
+                <div className="text-gray-600">Category</div>
+                <div>{artwork.categoryName}</div>
+
+                {!isNotSketch && <div className="text-gray-600">Surface</div>}
+                {!isNotSketch && (
+                  <div>
+                    <p>Chitrapat ,440 gsm</p>
+                  </div>
+                )}
+
+                {!isNotSketch && <div className="text-gray-600">Artwork</div>}
+                {!isNotSketch && (
+                  <div>
+                    <p>Original</p>
+                  </div>
+                )}
+
+                {!isNotSketch && (
+                  <div className="text-gray-600">To be Delivered in:</div>
+                )}
+                {!isNotSketch && (
+                  <div>
+                    <p>rolled</p>
+                  </div>
+                )}
+
+                {isCandle && <div className="text-gray-600">Weight</div>}
+                {isCandle && (
+                  <div>
+                    <p>{convertToWeight(artwork?.weight)}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* About the Artist */}
           {!isNotSketch && (
             <div className="mt-auto py-4 border-t border-gray-200">
               <h2 className="font-medium text-lg mb-2">About the Artist</h2>
@@ -385,18 +541,41 @@ const ArtworkDetailPage = () => {
         </div>
       </div>
 
-      {/* You may also like section */}
-      {/* <div className="mt-16">
-        <h2 className="font-playfair text-2xl font-medium mb-6">
-          You may also like
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          <div className="bg-gray-100 aspect-[3/4] rounded-lg animate-pulse"></div>
-          <div className="bg-gray-100 aspect-[3/4] rounded-lg animate-pulse"></div>
-          <div className="bg-gray-100 aspect-[3/4] rounded-lg animate-pulse"></div>
-          <div className="bg-gray-100 aspect-[3/4] rounded-lg animate-pulse hidden lg:block"></div>
+      {/* Banners (full-width, no cropping) */}
+      {Array.isArray(artwork?.banners) && artwork.banners.length > 0 && (
+        <div className="container px-0 mt-12">
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+            {artwork.banners.map((b: any, i: number) => (
+              <div
+                key={`banner-${i}`}
+                className="w-full bg-gray-50 rounded-lg border overflow-hidden"
+              >
+                {b.type === "video" ? (
+                  <video
+                    src={b.url}
+                    controls
+                    className="w-full h-auto block"
+                    style={{ maxHeight: "80vh" }}
+                  />
+                ) : (
+                  <img
+                    src={b.url}
+                    alt={`Banner ${i + 1}`}
+                    className="w-full h-auto object-contain block"
+                    loading="lazy"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
-      </div> */}
+      )}
+
+      {/* Related products */}
+      {Array.isArray(artwork?.relatedProducts) &&
+        artwork.relatedProducts.length > 0 && (
+          <RelatedProducts ids={artwork.relatedProducts} />
+        )}
     </div>
   );
 };
