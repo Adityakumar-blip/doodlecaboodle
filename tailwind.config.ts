@@ -69,12 +69,13 @@ export default {
         },
       },
       fontFamily: {
-        playfair: ["Playfair Display", "sans-serif"],
+        playfair: ["Jost", "sans-serif"],
         nunito: ["Nunito", "sans-serif"],
         poppins: ["Poppins", "sans-serif"],
         lora: ["Lora", "sans-serif"],
         cormorant: ["Cormorant", "sans-serif"],
         kalam: ["Kalam", "sans-serif"],
+        jost: ["Jost", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",

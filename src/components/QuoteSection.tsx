@@ -3,7 +3,7 @@ import { Separator } from "@/components/ui/separator";
 
 const QuoteSection = () => {
   return (
-    <section className="py-32 bg-pastel-blue/20">
+    <section className="py-32 bg-background">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
           <div className="mb-10 flex items-center justify-center">

@@ -49,7 +49,7 @@ const FAQPage = () => {
 
   if (loading) {
     return (
-      <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-gray-50 min-h-screen">
+      <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-primary-foreground min-h-screen">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-playfair font-bold text-center tracking-wide mb-8 sm:mb-12 md:mb-16 text-gray-800">
             Frequently Asked Questions
@@ -63,7 +63,7 @@ const FAQPage = () => {
   }
 
   return (
-    <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-gray-50 min-h-screen">
+    <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-primary-foreground min-h-screen">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-playfair font-bold text-center tracking-wide mb-8 sm:mb-12 md:mb-16 text-gray-800">
           Frequently Asked Questions

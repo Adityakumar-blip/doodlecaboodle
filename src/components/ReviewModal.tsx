@@ -140,25 +140,19 @@ const ReviewModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
+        <div className="flex items-center justify-between bg-primary  p-6 border-b">
           <div className="flex items-center space-x-3">
             {currentStep > 1 && !isSuccess && (
-              <button
-                onClick={prevStep}
-                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <ArrowLeft size={20} />
+              <button onClick={prevStep} className="p-1 ">
+                <ArrowLeft size={20} className="text-primary-foreground" />
               </button>
             )}
-            <h2 className="text-xl font-bold text-gray-800">
+            <h2 className="text-xl font-semibold font-jost text-primary-foreground">
               {isSuccess ? "Thank You!" : "Write a Review"}
             </h2>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <X size={24} />
+          <button onClick={onClose} className="p-1 ">
+            <X size={24} className="text-primary-foreground" />
           </button>
         </div>
 
@@ -170,7 +164,7 @@ const ReviewModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                 <div
                   key={i}
                   className={`flex-1 h-2 rounded-full transition-colors ${
-                    i + 1 <= currentStep ? "bg-black" : "bg-gray-200"
+                    i + 1 <= currentStep ? "bg-accent" : "bg-gray-200"
                   }`}
                 />
               ))}
@@ -398,7 +392,7 @@ const ReviewModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                   <button
                     onClick={nextStep}
                     disabled={!canProceed()}
-                    className="flex-1 py-3 px-4 bg-black text-white rounded-xl font-semibold hover:bg-black disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+                    className="flex-1 py-3 px-4 bg-primary text-white rounded-xl font-semibold hover:bg-primary disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
                   >
                     <span>Continue</span>
                     <ArrowRight size={16} />

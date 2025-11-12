@@ -475,7 +475,7 @@ const NavDetailBrowse = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-primary-foreground">
       {/* Hero */}
       <section className="bg-gradient-to-b from-white to-blue-50/30">
         {category?.bannerUrl && (

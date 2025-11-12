@@ -523,7 +523,7 @@ const LoginSignupPage = () => {
                 type="button"
                 onClick={formik.handleSubmit}
                 disabled={formik.isSubmitting}
-                className={`w-full bg-pastel-peach text-black py-3 px-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2 font-handwritten ${
+                className={`w-full bg-primary text-primary-foreground py-3 px-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2 font-handwritten ${
                   formik.isSubmitting ? "opacity-75 cursor-not-allowed" : ""
                 }`}
               >

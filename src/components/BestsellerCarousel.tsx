@@ -109,7 +109,7 @@ const BestsellerCarousel = () => {
       <div className=" mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-[#c11414] mb-3 font-['Jost']">
+          <h2 className="text-4xl font-bold text-primary mb-3 font-['Jost']">
             Shop Best Sellers
           </h2>
           {/* <p className="text-gray-800 text-lg">
@@ -167,7 +167,7 @@ const BestsellerCarousel = () => {
               onClick={() => setCurrentSlide(index)}
               className={`h-2 rounded-full transition-all duration-300 ${
                 currentSlide === index
-                  ? "bg-gray-900 w-8"
+                  ? "bg-accent w-8"
                   : "bg-gray-400 w-2 hover:bg-gray-600"
               }`}
               aria-label={`Go to slide ${index + 1}`}

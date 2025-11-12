@@ -51,6 +51,7 @@ const ArtworkDetailPage = () => {
   const [selectedSize, setSelectedSize] = useState<SizeOption | null>(null);
   const [artist, setArtist] = useState<any>({});
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null); // no default selection
+  const [categoryData, setCategoryData] = useState<any>(null);
 
   // --- Helpers ---
   const dedupeByUrl = (arr: DisplayImage[]) => {
@@ -107,6 +108,23 @@ const ArtworkDetailPage = () => {
       setActiveImage(mergedImages?.[0]?.url || "");
 
       setIsLoading(false);
+
+      if (base?.categoryId) {
+        try {
+          const categoryRef = doc(db, "productCategories", base.categoryId);
+          const categorySnap = await getDoc(categoryRef);
+          if (categorySnap.exists()) {
+            setCategoryData({
+              id: categorySnap.id,
+              ...categorySnap.data(),
+            });
+          } else {
+            setCategoryData(null);
+          }
+        } catch (err) {
+          console.error("Error fetching category data:", err);
+        }
+      }
 
       // load artist info (optional)
       if (base?.artistId) {
@@ -209,6 +227,15 @@ const ArtworkDetailPage = () => {
 
     addToCart(cartItem);
     toggleCart?.();
+  };
+
+  const getVariantTotalPrice = (variant: Variant) => {
+    const base = Number(artwork.price) || 0;
+    const colorAdj = Number(variant.priceAdjustment) || 0;
+
+    const total = base + colorAdj;
+    console.log("Variant total price:", total);
+    return `₹${total.toLocaleString()}`;
   };
 
   const calculatePrice = () => {
@@ -423,12 +450,19 @@ const ArtworkDetailPage = () => {
               <div className="flex flex-wrap gap-3">
                 {artwork.variants.map((v: Variant) => {
                   const selected = selectedVariant?.id === v.id;
+                  console.log("Rendering variant:", v, "Selected:", selected);
+                  const previewImg =
+                    v.images && v.images.length > 0 ? v.images[0] : null;
                   return (
                     <button
                       key={v.id}
                       type="button"
-                      onClick={() => setSelectedVariant(v)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition
+                      onClick={() =>
+                        setSelectedVariant(
+                          selectedVariant?.id === v.id ? null : v
+                        )
+                      }
+                      className={`flex flex-col items-center gap-2 px-3 py-2 rounded-lg border transition
                       ${
                         selected
                           ? "border-gray-900 ring-1 ring-gray-900 bg-gray-50"
@@ -437,15 +471,26 @@ const ArtworkDetailPage = () => {
                       aria-label={`Select color ${v.colorName}`}
                       title={v.colorName}
                     >
-                      <span
-                        className="inline-block h-5 w-5 rounded-full border"
-                        style={{ backgroundColor: v.colorHex }}
-                      />
-                      <span className="text-sm">{v.colorName}</span>
+                      {previewImg && (
+                        <div className="">
+                          <img
+                            src={previewImg.url}
+                            alt=""
+                            className="w-[50px] h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="flex gap-2 items-center">
+                        <span
+                          className="inline-block h-5 w-5 rounded-full border"
+                          style={{ backgroundColor: v.colorHex }}
+                        />
+                        <span className="text-sm">{v.colorName}</span>
+                      </div>
                       {typeof v.priceAdjustment === "number" &&
                         v.priceAdjustment > 0 && (
                           <span className="ml-1 text-xs text-gray-600">
-                            +₹{v.priceAdjustment}
+                            {getVariantTotalPrice(v)}
                           </span>
                         )}
                     </button>
@@ -542,34 +587,26 @@ const ArtworkDetailPage = () => {
       </div>
 
       {/* Banners (full-width, no cropping) */}
-      {Array.isArray(artwork?.banners) && artwork.banners.length > 0 && (
-        <div className="container px-0 mt-12">
-          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-            {artwork.banners.map((b: any, i: number) => (
-              <div
-                key={`banner-${i}`}
-                className="w-full bg-gray-50 rounded-lg border overflow-hidden"
-              >
-                {b.type === "video" ? (
-                  <video
-                    src={b.url}
-                    controls
-                    className="w-full h-auto block"
-                    style={{ maxHeight: "80vh" }}
-                  />
-                ) : (
+      {Array.isArray(categoryData?.galleryImages) &&
+        categoryData.galleryImages.length > 0 && (
+          <div className="container px-0 mt-12">
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+              {categoryData.galleryImages.map((b: any, i: number) => (
+                <div
+                  key={`banner-${i}`}
+                  className="w-full bg-gray-50 rounded-lg border overflow-hidden"
+                >
                   <img
-                    src={b.url}
+                    src={b}
                     alt={`Banner ${i + 1}`}
                     className="w-full h-auto object-contain block"
                     loading="lazy"
                   />
-                )}
-              </div>
-            ))}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Related products */}
       {Array.isArray(artwork?.relatedProducts) &&

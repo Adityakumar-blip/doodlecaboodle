@@ -5,7 +5,7 @@ import logo from "@/assets/logo-doodle.svg";
 
 const Footer = () => {
   return (
-    <footer className="bg-white pt-16 pb-8">
+    <footer className="bg-primary-foreground pt-16 pb-8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-20">
           {/* Brand */}

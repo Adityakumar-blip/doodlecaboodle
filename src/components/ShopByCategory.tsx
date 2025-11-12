@@ -31,7 +31,7 @@ const ShopByCategory = () => {
         })) as CategoryItem[];
 
         const filtered = items.filter(
-          (it) => it.isSection !== true && it.isActive,
+          (it) => it.isSection !== true && it.isActive
         );
 
         // Map to include an image fallback if none provided
@@ -75,11 +75,11 @@ const ShopByCategory = () => {
   };
 
   return (
-    <div className="w-full py-16 px-4 bg-white">
+    <div className="w-full py-16 px-4 bg-primary-foreground">
       <div className="container px-4 mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-[#c11414] mb-3 font-['Jost']">
+          <h2 className="text-4xl font-bold text-primary mb-3 font-['Jost']">
             Shop By Category
           </h2>
           <p className="text-gray-600 text-xl font-['Jost']">

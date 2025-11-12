@@ -50,7 +50,9 @@ const PrevArrow: React.FC<ArrowProps> = ({ onClick, show = true }) => {
   );
 };
 
-const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({ items }) => {
+const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({
+  items,
+}) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slidesToShow, setSlidesToShow] = useState(3);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -96,7 +98,7 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({ items }) 
   }, [currentSlide, maxSlide]);
 
   return (
-    <div className="py-16 bg-gradient-to-br from-sky-100/50 to-blue-100/50">
+    <div className="py-16 bg-primary-foreground">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
           <h2 className="text-4xl font-bold font-poppins text-gray-800 mb-3">
@@ -105,13 +107,13 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({ items }) 
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             See what our customers say about their purchases!
           </p>
-          <div className="h-1 w-24 bg-gradient-to-r from-sky-300 to-blue-300 mx-auto mt-4"></div>
+          <div className="h-1 w-24 bg-accent mx-auto mt-4"></div>
         </div>
 
         <div className="flex justify-center mb-6">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-6 py-3 bg-white text-black font-poppins font-semibold rounded-lg transition-colors duration-300"
+            className="px-6 py-3 bg-primary text-primary-foreground font-poppins font-semibold rounded-lg transition-colors duration-300"
           >
             Write a Review
           </button>
@@ -125,7 +127,9 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({ items }) 
             <div
               className="flex transition-transform duration-700 ease-in-out"
               style={{
-                transform: `translateX(-${currentSlide * (100 / slidesToShow)}%)`,
+                transform: `translateX(-${
+                  currentSlide * (100 / slidesToShow)
+                }%)`,
               }}
             >
               {items.map((item, index) => (
@@ -168,7 +172,9 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({ items }) 
                           ))}
                         </div>
                       </div>
-                      <p className="text-gray-700 text-center max-w-prose mx-auto">{item.review}</p>
+                      <p className="text-gray-700 text-center max-w-prose mx-auto">
+                        {item.review}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -186,7 +192,7 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({ items }) 
                 onClick={() => goToSlide(index)}
                 className={`h-2 rounded-full transition-all duration-300 ${
                   currentSlide === index
-                    ? "bg-sky-400 w-8"
+                    ? "bg-accent w-8"
                     : "bg-gray-300 w-2 hover:bg-gray-400"
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
@@ -196,7 +202,10 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({ items }) 
         </div>
 
         {/* Review Modal */}
-        <ReviewModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+        <ReviewModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
       </div>
     </div>
   );
@@ -214,17 +223,19 @@ const ProductReviewSection: React.FC = () => {
           where("isPublished", "==", true)
         );
         const querySnapshot = await getDocs(q);
-        const fetchedReviews: ProductReviewItem[] = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            type: "image" as const,
-            src: data.image,
-            name: data.name,
-            review: data.reviewText,
-            rating: data.rating,
-            verified: true, // Assuming all fetched reviews are verified
-          };
-        });
+        const fetchedReviews: ProductReviewItem[] = querySnapshot.docs.map(
+          (doc) => {
+            const data = doc.data();
+            return {
+              type: "image" as const,
+              src: data.image,
+              name: data.name,
+              review: data.reviewText,
+              rating: data.rating,
+              verified: true, // Assuming all fetched reviews are verified
+            };
+          }
+        );
         setReviews(fetchedReviews);
       } catch (error) {
         console.error("Error fetching reviews:", error);

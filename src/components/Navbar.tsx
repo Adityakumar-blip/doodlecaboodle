@@ -190,8 +190,8 @@ const Navbar = () => {
         className={cn(
           "fixed top-0 left-0 right-0 z-40 transition-all duration-300",
           scrolled
-            ? "bg-white shadow-sm py-2" // Removed backdrop-blur-md to avoid transparency issues
-            : "bg-white py-4"
+            ? "bg-primary text-primary-foreground shadow-sm py-2" // Removed backdrop-blur-md to avoid transparency issues
+            : "bg-primary text-primary-foreground py-4"
         )}
       >
         <div className="container mx-auto px-4 flex items-center justify-between">
@@ -202,7 +202,7 @@ const Navbar = () => {
             >
               <img
                 src={logo}
-                className="w-6 md:w-10 h-6 md:h-10"
+                className="w-6 md:w-10 h-6 md:h-10 invert"
                 alt="doodlecaboodle"
               />
             </a>
@@ -266,8 +266,8 @@ const Navbar = () => {
               onClick={toggleCart}
               aria-label="Open cart"
             >
-              <ShoppingBag size={18} />
-              <span className="absolute text-white -top-1 -right-1 bg-pastel-pink text-xs w-4 h-4 rounded-full flex items-center justify-center">
+              <ShoppingBag size={18} className="text-white" />
+              <span className="absolute text-primary font-semibold -top-1 -right-1 bg-accent text-xs w-4 h-4 rounded-full flex items-center justify-center">
                 {cartItems.length}
               </span>
             </button>
@@ -278,11 +278,11 @@ const Navbar = () => {
                 onClick={toggleMenuDropdown}
                 aria-label="Menu options"
               >
-                <MoreVertical size={20} />
+                <MoreVertical size={20} className="text-primary-foreground" />
               </button>
 
               {isMenuDropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white shadow-lg rounded-md z-50">
+                <div className="absolute right-0 top-full mt-2 w-48 bg-primary-foreground shadow-lg rounded-md z-50">
                   <div className="py-2">
                     <a
                       href="/"
@@ -306,7 +306,7 @@ const Navbar = () => {
                       <div className="border-t border-gray-100 mt-2 pt-2">
                         <button
                           onClick={handleLogout}
-                          className="block w-full text-left px-4 py-2 text-pastel-pink font-medium hover:bg-pastel-pink/10"
+                          className="block w-full text-left px-4 py-2 text-primary font-medium hover:bg-primary/10"
                         >
                           Logout
                         </button>
@@ -315,7 +315,7 @@ const Navbar = () => {
                       <div className="border-t border-gray-100 mt-2 pt-2">
                         <button
                           onClick={handleLoginClick}
-                          className="block w-full text-left px-4 py-2 text-pastel-pink font-medium hover:bg-pastel-pink/10"
+                          className="block w-full text-left px-4 py-2 text-primary font-medium hover:bg-primary/10"
                         >
                           Login / Sign Up
                         </button>

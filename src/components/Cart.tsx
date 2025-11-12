@@ -673,7 +673,7 @@ const Cart = ({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 250 }}
-            className="fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-xl z-[60] flex flex-col"
+            className="fixed top-0 right-0 h-full w-full sm:w-96 bg-primary-foreground shadow-xl z-[60] flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
@@ -905,7 +905,7 @@ const Cart = ({
                     </div>
                   </div>
                   <Button
-                    className="w-full bg-gray-800 hover:bg-gray-900 text-white text-sm"
+                    className="w-full bg-primary hover:bg-primary text-white text-sm"
                     onClick={handleProceedToCheckout}
                     disabled={loading || isAuthenticated === null}
                   >

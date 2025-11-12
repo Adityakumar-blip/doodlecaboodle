@@ -97,7 +97,7 @@ const LoginForm = ({ onLoginSuccess, onNavigateToSignup }: LoginFormProps) => {
         </div>
         <Button
           type="submit"
-          className="w-full bg-pastel-pink hover:bg-pastel-pink/90 text-white"
+          className="w-full bg-primary hover:bg-primary/90 text-white"
           disabled={loading || !email.trim() || !password.trim()}
         >
           {loading ? "Logging in..." : "Login"}

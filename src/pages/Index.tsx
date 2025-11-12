@@ -74,7 +74,7 @@ const Index = () => {
       {/* <TestimonialsSection /> */}
 
       {/* Divider Image Section */}
-      <div className="w-full bg-gray-50 pb-8 md:pb-12">
+      <div className="w-full bg-primary-foreground pb-8 md:pb-12">
         <div className="px-4 md:px-6 lg:px-8">
           <img
             src={BGDoodle}
