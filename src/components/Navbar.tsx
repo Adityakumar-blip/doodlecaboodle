@@ -247,7 +247,7 @@ const Navbar = () => {
 
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
-              <button className="text-gray-700 hidden md:block hover:text-pastel-pink transition-colors">
+              <button className="text-primary-foreground hidden md:block hover:text-pastel-pink transition-colors">
                 <a href="/profile">
                   <User size={20} />
                 </a>

@@ -252,6 +252,9 @@ const ArtworkDetailPage = () => {
     artwork?.categoryName?.toLowerCase().includes("painting")
       ? false
       : true;
+  const isEmptyArtist = state?.artistName.toLowerCase().includes("none")
+    ? true
+    : false;
 
   const isCandle = artwork?.categoryName?.toLowerCase().includes("candle")
     ? true
@@ -351,7 +354,7 @@ const ArtworkDetailPage = () => {
         <div className="flex flex-col h-full">
           {/* Artist and Title */}
           <div className="mb-2">
-            {!isNotSketch && (
+            {!isNotSketch && !isEmptyArtist && (
               <p
                 onClick={() =>
                   navigate(`/artists/${state.artistId}`, {
