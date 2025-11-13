@@ -243,7 +243,7 @@ const LoginSignupPage = () => {
             <h1 className="text-3xl font-bold text-black font-handwritten">
               {isLogin ? "Welcome Back!" : "Join Our Doodle Crew!"}
             </h1>
-            <p className="text-brown-600 font-handwritten">
+            <p className="text-brown-600 font-handwritten text-[20px]">
               {isLogin
                 ? "Sign in to sketch your masterpiece"
                 : "Start your doodly adventure today"}
@@ -262,7 +262,7 @@ const LoginSignupPage = () => {
             <div className="space-y-6">
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-black font-handwritten flex items-center gap-2">
+                  <label className="text-lg font-medium text-black font-handwritten flex items-center gap-2">
                     <User size={16} className="text-brown-700" /> Full Name
                   </label>
                   <input
@@ -271,7 +271,7 @@ const LoginSignupPage = () => {
                     value={formik.values.name}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full px-4 py-3 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-handwritten ${
+                    className={`w-full text-md px-4 py-3 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-handwritten ${
                       formik.touched.name && formik.errors.name
                         ? "border-red-600"
                         : ""
@@ -291,7 +291,7 @@ const LoginSignupPage = () => {
               )}
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-black font-handwritten flex items-center gap-2">
+                <label className="text-lg font-medium text-black font-handwritten flex items-center gap-2">
                   <Mail size={16} className="text-brown-700" /> Email Address
                 </label>
                 <input
@@ -320,7 +320,7 @@ const LoginSignupPage = () => {
 
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-black font-handwritten flex items-center gap-2">
+                  <label className="text-lg font-medium text-black font-handwritten flex items-center gap-2">
                     <Phone size={16} className="text-brown-700" /> Phone Number
                   </label>
                   <input
@@ -350,7 +350,7 @@ const LoginSignupPage = () => {
 
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-black font-handwritten flex items-center gap-2">
+                  <label className="text-lg font-medium text-black font-handwritten flex items-center gap-2">
                     <Calendar size={16} className="text-brown-700" /> Date of
                     Birth
                   </label>
@@ -379,7 +379,7 @@ const LoginSignupPage = () => {
               )}
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-black font-handwritten flex items-center gap-2">
+                <label className="text-lg font-medium text-black font-handwritten flex items-center gap-2">
                   <Lock size={16} className="text-brown-700" /> Password
                 </label>
                 <div className="relative">
@@ -418,7 +418,7 @@ const LoginSignupPage = () => {
 
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-black font-handwritten flex items-center gap-2">
+                  <label className="text-lg font-medium text-black font-handwritten flex items-center gap-2">
                     <Lock size={16} className="text-brown-700" /> Confirm
                     Password
                   </label>
@@ -476,7 +476,7 @@ const LoginSignupPage = () => {
                       onBlur={formik.handleBlur}
                       className="mt-1 w-4 h-4 text-brown-700 border-brown-300 rounded focus:ring-brown-500"
                     />
-                    <span className="text-sm text-brown-600 font-handwritten">
+                    <span className="text-md text-brown-600 font-handwritten">
                       I agree to the{" "}
                       <a
                         href="/service-terms"
@@ -512,7 +512,7 @@ const LoginSignupPage = () => {
                       type="checkbox"
                       className="w-4 h-4 text-brown-700 border-brown-300 rounded focus:ring-brown-500"
                     />
-                    <span className="text-sm text-brown-600 font-handwritten">
+                    <span className="text-md text-brown-600 font-handwritten">
                       Remember me
                     </span>
                   </label>
@@ -523,7 +523,7 @@ const LoginSignupPage = () => {
                 type="button"
                 onClick={formik.handleSubmit}
                 disabled={formik.isSubmitting}
-                className={`w-full bg-primary text-primary-foreground py-3 px-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2 font-handwritten ${
+                className={`w-full bg-primary text-primary-foreground text-[20px] py-3 px-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2 font-handwritten ${
                   formik.isSubmitting ? "opacity-75 cursor-not-allowed" : ""
                 }`}
               >

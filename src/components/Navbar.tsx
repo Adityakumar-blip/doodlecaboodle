@@ -328,7 +328,7 @@ const Navbar = () => {
 
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="ml-2 text-gray-700 focus:outline-none md:hidden"
+              className="ml-2 text-white focus:outline-none md:hidden"
             >
               {isOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -338,17 +338,18 @@ const Navbar = () => {
         {/* Mobile Sidebar */}
         <div
           className={cn(
-            "md:hidden fixed top-0 left-0 h-full w-4/5 max-w-sm !bg-white shadow-2xl z-50 transition-transform duration-300 ease-in-out overflow-y-auto", // Added overflow-y-auto for scrolling
+            "md:hidden fixed top-0 left-0 h-full w-4/5 max-w-sm !bg-white shadow-2xl z-50 bg-primary-foreground transition-transform duration-300 ease-in-out overflow-y-auto", // Added overflow-y-auto for scrolling
             isOpen ? "translate-x-0" : "-translate-x-full"
           )}
-          style={{ backgroundColor: "#ffffff" }}
         >
           <div className="flex justify-between items-center p-4 border-b border-gray-100">
             <a href="/" className="flex items-center gap-2">
-              <img src={logo} className="w-8 h-8" alt="doodlecaboodle" />
-              <span className="text-xl font-playfair font-bold text-gray-900">
-                DoodleCaboodle
-              </span>
+              <div className="flex items-center gap-2">
+                <img src={logo} className="w-8 h-8" alt="doodlecaboodle" />
+                <span className="text-xl mt-2 font-playfair font-bold text-gray-900">
+                  DoodleCaboodle
+                </span>
+              </div>
             </a>
             <button
               onClick={() => setIsOpen(false)}

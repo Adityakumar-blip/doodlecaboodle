@@ -141,7 +141,7 @@ const BestsellerCarousel = () => {
                 {products.map((product) => (
                   <div
                     key={product.id}
-                    className="flex-shrink-0 gap-6 px-3"
+                    className="flex-shrink-0 gap-6 px-3 py-6"
                     style={{ width: `${100 / slidesToShow}%` }}
                   >
                     <WorkCard

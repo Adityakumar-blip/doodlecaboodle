@@ -5,7 +5,7 @@ import logo from "@/assets/logo-doodle.svg";
 
 const Footer = () => {
   return (
-    <footer className="bg-primary-foreground pt-16 pb-8">
+    <footer className="bg-primary text-primary-foreground pt-16 pb-8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-20">
           {/* Brand */}
@@ -15,9 +15,13 @@ const Footer = () => {
               className="text-2xl font-playfair font-bold text-gray-900 mb-4 inline-block"
             >
               {/* Doodle<span className="text-pastel-blue">Caboodle</span> */}
-              <img src={logo} className="w-10 h-10" alt="doodlecaboodle" />
+              <img
+                src={logo}
+                className="w-10 h-10 invert"
+                alt="doodlecaboodle"
+              />
             </a>
-            <p className="text-gray-600 mb-4 max-w-xs">
+            <p className="text-accent mb-4 max-w-xs">
               We’d love to be a small part of your big moments. Whether it’s a
               gift, a story, or just a hello — our inbox is always open, and our
               hearts always full.
@@ -26,28 +30,28 @@ const Footer = () => {
               <a
                 target="_blank"
                 href="https://www.facebook.com/doodlecaboodle.in"
-                className="bg-pastel-blue hover:bg-pastel-purple transition-colors p-2 rounded-full"
+                className="bg-primary-foreground hover:bg-pastel-purple transition-colors p-2 rounded-full"
               >
                 <Facebook size={18} className="text-gray-700" />
               </a>
               <a
                 target="_blank"
                 href="https://www.instagram.com/doodlecaboodle.in/"
-                className="bg-pastel-blue hover:bg-pastel-purple transition-colors p-2 rounded-full"
+                className="bg-primary-foreground hover:bg-pastel-purple transition-colors p-2 rounded-full"
               >
                 <Instagram size={18} className="text-gray-700" />
               </a>
               <a
                 target="_blank"
                 href="https://x.com/doodle_cabo0dle"
-                className="bg-pastel-blue hover:bg-pastel-purple transition-colors p-2 rounded-full"
+                className="bg-primary-foreground hover:bg-pastel-purple transition-colors p-2 rounded-full"
               >
                 <Twitter size={18} className="text-gray-700" />
               </a>
               <a
                 target="_blank"
                 href="https://www.linkedin.com/company/doodle-caboodle/"
-                className="bg-pastel-blue hover:bg-pastel-purple transition-colors p-2 rounded-full"
+                className="bg-primary-foreground hover:bg-pastel-purple transition-colors p-2 rounded-full"
               >
                 <Linkedin size={18} className="text-gray-700" />
               </a>
@@ -91,10 +95,7 @@ const Footer = () => {
             <h3 className="font-playfair font-bold text-lg mb-4">About</h3>
             <ul className="space-y-3">
               <li>
-                <a
-                  href="/about"
-                  className="text-gray-600 hover:text-pastel-pink"
-                >
+                <a href="/about" className="text-accent hover:text-pastel-pink">
                   Our Story
                 </a>
               </li>
@@ -126,14 +127,14 @@ const Footer = () => {
             <h3 className="font-playfair font-bold text-lg mb-4">Help</h3>
             <ul className="space-y-3">
               <li>
-                <a href="/faq" className="text-gray-600 hover:text-pastel-pink">
+                <a href="/faq" className="text-accent hover:text-pastel-pink">
                   FAQ
                 </a>
               </li>
               <li>
                 <a
                   href="/shipping-and-refund"
-                  className="text-gray-600 hover:text-pastel-pink"
+                  className="text-accent hover:text-pastel-pink"
                 >
                   Shipping & Refund
                 </a>
@@ -141,7 +142,7 @@ const Footer = () => {
               <li>
                 <a
                   href="/contact-us"
-                  className="text-gray-600 hover:text-pastel-pink"
+                  className="text-accent hover:text-pastel-pink"
                 >
                   Contact Us
                 </a>
@@ -149,7 +150,7 @@ const Footer = () => {
               <li>
                 <a
                   href="/privacy-policy"
-                  className="text-gray-600 hover:text-pastel-pink"
+                  className="text-accent hover:text-pastel-pink"
                 >
                   Privacy Policy
                 </a>
@@ -157,7 +158,7 @@ const Footer = () => {
               <li>
                 <a
                   href="/service-terms"
-                  className="text-gray-600 hover:text-pastel-pink"
+                  className="text-accent hover:text-pastel-pink"
                 >
                   Terms of Service
                 </a>
@@ -168,7 +169,7 @@ const Footer = () => {
 
         <div className="border-t border-gray-200 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-600 text-sm mb-4 md:mb-0">
+            <p className="text-accent text-sm mb-4 md:mb-0">
               © 2025 Doodlecaboodle. All rights reserved.
             </p>
             <div className="flex items-center">

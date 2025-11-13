@@ -138,7 +138,7 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({
                   className="flex-shrink-0 px-3"
                   style={{ width: `${100 / slidesToShow}%` }}
                 >
-                  <div className="bg-white rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl">
+                  <div className="bg-primary rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl">
                     <img
                       src={item.src}
                       alt={`Review ${index + 1}`}
@@ -147,16 +147,16 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({
                     <div className="p-6 flex flex-col items-center text-center">
                       <div className="flex flex-col items-center gap-3 mb-4">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-lg text-gray-800">
+                          <span className="font-semibold text-lg text-primary-foreground">
                             {item.name}
                           </span>
-                          {item.verified && (
+                          {/* {item.verified && (
                             <img
                               src={FaCheckCircle}
                               alt="Verified"
                               className="w-5 h-5"
                             />
-                          )}
+                          )} */}
                         </div>
                         <div className="flex justify-center">
                           {[...Array(5)].map((_, i) => (
@@ -172,7 +172,7 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({
                           ))}
                         </div>
                       </div>
-                      <p className="text-gray-700 text-center max-w-prose mx-auto">
+                      <p className="text-accent text-center max-w-prose mx-auto">
                         {item.review}
                       </p>
                     </div>

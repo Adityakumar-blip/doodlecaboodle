@@ -68,13 +68,13 @@ const BackToTopButton = () => {
       onClick={scrollToTop}
       className="
         fixed bottom-6 right-6 
-        bg-white hover:bg-black 
-        text-black hover:text-white 
+        bg-accent hover:bg-accent 
+        text-black hover:text-primary 
         rounded-full shadow-lg 
         z-50 
         w-[60px] h-[60px] 
         flex items-center justify-center
-        border-2 border-black
+        border-2 border-primary
       "
     >
       {/* Simple Doodly Up Arrow */}

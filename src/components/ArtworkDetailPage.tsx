@@ -405,7 +405,7 @@ const ArtworkDetailPage = () => {
               onClick={handleAddToCart}
               disabled={isOutOfStock}
               className={`flex-1 py-2 px-4 rounded-md flex items-center justify-center gap-2 font-medium text-white ${
-                isOutOfStock ? "bg-gray-500" : "bg-gray-900 hover:bg-gray-800"
+                isOutOfStock ? "bg-gray-500" : "bg-primary hover:bg-primary/90"
               }`}
             >
               <ShoppingCart size={18} />
