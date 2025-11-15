@@ -416,6 +416,7 @@ const ArtworkBrowse = () => {
             src={category.bannerUrl}
             alt={`${category.name} banner`}
             className="w-full max-h-[700px] object-cover mb-8"
+            onClick={() => navigate("/get-yours")}
           />
         )}
       </section>

@@ -23,7 +23,7 @@ const EmptyCart = () => {
       <p className="text-gray-500 text-center mb-6">
         Looks like you haven't added any artwork to your cart yet.
       </p>
-      <Button
+      {/* <Button
         onClick={() => {
           navigate("/artwork-browse");
           toggleCart();
@@ -31,7 +31,7 @@ const EmptyCart = () => {
         className="bg-pastel-pink hover:bg-pastel-pink/90 text-white"
       >
         Explore Artwork
-      </Button>
+      </Button> */}
     </motion.div>
   );
 };
