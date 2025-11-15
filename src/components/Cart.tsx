@@ -30,6 +30,7 @@ import {
   generateThankYouEmailHTML,
 } from "@/lib/SendOrderEmail";
 import { getWorkingBaseUrl } from "@/lib/utils";
+import { name } from "@cloudinary/url-gen/actions/namedTransformation";
 
 interface CartItem {
   id: string;
@@ -139,6 +140,7 @@ const Cart = ({
           const data = userDoc.data();
           setUserDetails((prev: any) => ({
             ...prev,
+            name: data.name || "",
             senderPhone: data.senderPhone || "",
             address: data.address || {
               line1: "",
@@ -464,8 +466,9 @@ const Cart = ({
   // const checkoutBaseUrlLocal = "http://localhost:1990";
 
   const urls = [
-    "https://paymentandshipping-vke7.onrender.com",
-    "https://paymentandshipping.onrender.com",
+    // "https://paymentandshipping-vke7.onrender.com",
+    // "https://paymentandshipping.onrender.com",
+    "http://localhost:1990",
   ];
 
   // Handle checkout with Razorpay and save order history

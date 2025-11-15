@@ -19,7 +19,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "@/store/slices/CategorySlice";
 import { AppDispatch, RootState } from "@/store/store";
 import { CartContext } from "@/context/CartContext";
-import logo from "@/assets/logo-doodle.svg";
+import logo from "@/assets/LOGO.svg";
 import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
@@ -202,7 +202,7 @@ const Navbar = () => {
             >
               <img
                 src={logo}
-                className="w-6 md:w-10 h-6 md:h-10 invert"
+                className="w-10 md:w-12 h-10 md:h-12"
                 alt="doodlecaboodle"
               />
             </a>
@@ -345,9 +345,13 @@ const Navbar = () => {
           <div className="flex justify-between items-center p-4 border-b border-gray-100">
             <a href="/" className="flex items-center gap-2">
               <div className="flex items-center gap-2">
-                <img src={logo} className="w-8 h-8" alt="doodlecaboodle" />
-                <span className="text-xl mt-2 font-playfair font-bold text-gray-900">
-                  DoodleCaboodle
+                <img
+                  src={logo}
+                  className="w-10 h-10 invert"
+                  alt="doodlecaboodle"
+                />
+                <span className="text-xl mt-1 font-playfair font-bold text-gray-900">
+                  Doodle Caboodle
                 </span>
               </div>
             </a>

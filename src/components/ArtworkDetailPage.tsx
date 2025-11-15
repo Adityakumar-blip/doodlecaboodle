@@ -183,11 +183,16 @@ const ArtworkDetailPage = () => {
 
   const isReadyMade = artwork?.orderType === "ready_made";
   const variantQty = isReadyMade ? selectedVariant?.quantity ?? null : null;
-  const isOutOfStock = isReadyMade
-    ? selectedVariant
-      ? variantQty === 0
-      : artwork?.quantity === 0
-    : artwork?.quantity === 0;
+  const isOutOfStock =
+    // If category is Painting or Sketch → out of stock depends ONLY on quantity
+    artwork?.categoryName === "Painting" || artwork?.categoryName === "Sketch"
+      ? isReadyMade
+        ? selectedVariant
+          ? variantQty === 0
+          : artwork?.quantity === 0
+        : artwork?.quantity === 0
+      : // For all other categories → use the isOutOfStock key stored in DB
+        artwork?.isOutOfStock ?? false;
 
   const handleAddToCart = () => {
     if (!artwork || !selectedSize) return;

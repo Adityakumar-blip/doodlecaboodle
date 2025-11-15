@@ -775,14 +775,14 @@ const UserProfile = () => {
               <TabsList className="grid grid-cols-2 mb-8">
                 <TabsTrigger
                   value="orders"
-                  className="data-[state=active]:bg-pastel-pink/10 data-[state=active]:text-pastel-pink"
+                  className="data-[state=active]:bg-primary/90 data-[state=active]:text-primary-foreground"
                 >
                   <ShoppingBag size={16} className="mr-2" />
                   Orders
                 </TabsTrigger>
                 <TabsTrigger
                   value="settings"
-                  className="data-[state=active]:bg-pastel-pink/10 data-[state=active]:text-pastel-pink"
+                  className="data-[state=active]:bg-primary/90 data-[state=active]:text-primary-foreground"
                 >
                   <Settings size={16} className="mr-2" />
                   Settings
@@ -800,7 +800,7 @@ const UserProfile = () => {
                   </div>
                   <div>
                     {orders.length > 0 ? (
-                      orders.map((order) => (
+                      orders.reverse().map((order) => (
                         <div
                           key={order.id}
                           className="p-6 border-b border-gray-100 last:border-0"
@@ -866,11 +866,11 @@ const UserProfile = () => {
                               </p> */}
                             </div>
                             <div className="flex gap-2">
-                              <Button variant="outline" size="sm">
+                              {/* <Button variant="outline" size="sm">
                                 Track Order
-                              </Button>
+                              </Button> */}
                               <Button
-                                className="bg-pastel-pink hover:bg-pastel-pink/90 text-white"
+                                className="bg-primary hover:bg-pastel-pink/90 text-white"
                                 size="sm"
                                 onClick={() => navigate(`/order/${order.id}`)}
                               >
@@ -966,7 +966,7 @@ const UserProfile = () => {
                         <div className="flex gap-2">
                           <Button
                             type="submit"
-                            className="bg-pastel-pink hover:bg-pastel-pink/90 text-white"
+                            className="bg-primary hover:bg-primary/90 text-white"
                           >
                             Update Password
                           </Button>

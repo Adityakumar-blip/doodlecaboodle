@@ -29,7 +29,6 @@ const CheckoutForm = ({
   loading: boolean;
 }) => {
   const [error, setError] = useState<string | null>(null);
-  console.log("user details", userDetails);
   // Debounce function to limit API calls
   const debounce = (func: (...args: any[]) => void, delay: number) => {
     let timeoutId: NodeJS.Timeout;
@@ -101,8 +100,6 @@ const CheckoutForm = ({
       userDetails.address.country === "India"
     );
   };
-
-  console.log(validateForm());
 
   return (
     <div className="p-4 space-y-4">

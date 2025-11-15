@@ -19,8 +19,8 @@ import Profile from "./pages/UserProfile";
 import OccasionDetail from "./components/OccasionDetail";
 import LoginSignupPage from "./pages/LoginSingupPage";
 import UserProvider from "./context/UserContext";
-import { Provider } from "react-redux";
-import store from "./store/store";
+import { Provider, useDispatch } from "react-redux";
+import store, { AppDispatch } from "./store/store";
 import WorkDetail from "./components/WorkDetail";
 import { CartProvider } from "./context/CartContext";
 import CustomSketchOrder from "./components/CustomSketchOrder";
@@ -35,6 +35,7 @@ import ShippingAndRefundPolicy from "./components/ShippingRefund";
 import PhotoGuidelines from "./components/Photoguide";
 import OrderDetails from "./components/OrderDetail";
 import NavDetailBrowse from "./components/NavDetailBrowse";
+import { fetchConfigurations } from "./store/slices/ConfigurationSlice";
 
 const queryClient = new QueryClient();
 
@@ -113,7 +114,12 @@ function ScrollToTop() {
 
 const AppContent = () => {
   const location = useLocation();
+  const dispatch = useDispatch<AppDispatch>();
   const hideNavbarAndFooter = location.pathname === "/login";
+
+  useEffect(() => {
+    dispatch(fetchConfigurations());
+  }, [dispatch]);
 
   return (
     <>

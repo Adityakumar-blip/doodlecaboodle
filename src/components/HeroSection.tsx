@@ -78,7 +78,7 @@ const HeroSection: React.FC = () => {
   }, [currentIndex, isTransitioning, heroImages.length]);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-black">
+    <div className="relative w-full h-[80vh] overflow-hidden bg-black">
       {heroImages.map((image, index) => (
         <div
           key={index}

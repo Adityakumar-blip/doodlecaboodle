@@ -410,128 +410,20 @@ const ArtworkBrowse = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative py-24  flex items-center justify-center overflow-hidden">
-        <img
-          src={category?.bannerUrl}
-          alt={`${category?.name} banner`}
-          className="absolute w-full max-h-[700px]  object-cover  mb-8"
-        />
-
-        <div className="relative container mx-auto px-4 bottom-0">
-          <div className="max-w-3xl mx-auto text-center flex flex-col items-center justify-center">
-            <div className="relative w-full max-w-md mx-4 mt-60">
-              {" "}
-              {/* added mt-10 */}
-              <Button
-                onClick={() => navigate("/get-yours")}
-                className="px-8 py-4 text-sm font-medium bg-black text-white rounded-md hover:bg-gray-900 transition-colors"
-              >
-                {category?.metaTitle || "Get Yours"}
-              </Button>
-            </div>
-          </div>
-        </div>
+      <section className="bg-gradient-to-b from-white to-blue-50/30">
+        {category?.bannerUrl && (
+          <img
+            src={category.bannerUrl}
+            alt={`${category.name} banner`}
+            className="w-full max-h-[700px] object-cover mb-8"
+          />
+        )}
       </section>
 
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar Filters - Desktop */}
-          {/* <aside className="hidden md:block w-64 flex-shrink-0">
-            <div className="sticky top-28 bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-              <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                <h2 className="font-medium text-gray-800">Filters</h2>
-                {countActiveFilters() > 0 && (
-                  <button
-                    onClick={clearFilters}
-                    className="text-xs text-blue-500 hover:text-blue-700 hover:underline transition-colors"
-                  >
-                    Clear all ({countActiveFilters()})
-                  </button>
-                )}
-              </div>
-
-              <div className="divide-y divide-gray-200">
-                <FilterSection
-                  title="Artist"
-                  options={filterOptions.artist}
-                  type="artist"
-                />
-                <FilterSection
-                  title="Medium"
-                  options={filterOptions.medium}
-                  type="medium"
-                />
-              </div>
-            </div>
-          </aside> */}
-
           {/* Main Content */}
           <main className="flex-1">
-            {/* Mobile Toolbar */}
-            {/* <div className="md:hidden flex items-center justify-between mb-6 gap-4">
-              <Button
-                onClick={() => setShowMobileFilters(true)}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <SlidersHorizontal size={16} />
-                Filters
-                {countActiveFilters() > 0 && (
-                  <span className="ml-1 bg-blue-100 text-blue-800 text-xs font-semibold h-5 min-w-5 rounded-full flex items-center justify-center">
-                    {countActiveFilters()}
-                  </span>
-                )}
-              </Button>
-
-              <div className="relative flex-1 max-w-48">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none w-full pl-3 pr-8 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
-                >
-                  {sortOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
-                  size={16}
-                />
-              </div>
-            </div> */}
-
-            {/* Desktop Sort Dropdown */}
-            {/* <div className="hidden md:flex justify-between items-center mb-6">
-              <h2 className="text-lg font-medium text-gray-800">
-                Browse Artworks
-              </h2>
-              <div className="flex items-center gap-4">
-                <div className="text-sm text-gray-600">
-                  Showing {Math.min(displayCount, filteredWorks.length)} of{" "}
-                  {filteredWorks.length} results
-                </div>
-                <div className="relative">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="appearance-none pl-3 pr-8 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 min-w-44"
-                  >
-                    {sortOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
-                    size={16}
-                  />
-                </div>
-              </div>
-            </div> */}
-
             {loading ? (
               <div className="flex items-center justify-center py-20">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
@@ -668,70 +560,6 @@ const ArtworkBrowse = () => {
           </main>
         </div>
       </div>
-
-      {/* Mobile Filter Drawer */}
-      {/* {showMobileFilters && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex md:hidden">
-          <div
-            className="bg-white w-full max-w-xs h-full overflow-y-auto ml-auto transform transition-transform duration-300 ease-out"
-            style={{
-              animation: "slideInRight 0.3s ease-out",
-            }}
-          >
-            <div className="sticky top-0 bg-white px-4 py-4 border-b border-gray-200 flex justify-between items-center z-10">
-              <h3 className="font-medium">Filter Options</h3>
-              <button
-                onClick={() => setShowMobileFilters(false)}
-                className="p-1 hover:bg-gray-100 rounded transition-colors"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="divide-y divide-gray-200">
-              <FilterSection
-                title="Category"
-                options={filterOptions.category}
-                type="category"
-              />
-              <FilterSection
-                title="Artist"
-                options={filterOptions.artist}
-                type="artist"
-              />
-              <FilterSection
-                title="Medium"
-                options={filterOptions.medium}
-                type="medium"
-              />
-              <FilterSection
-                title="Year"
-                options={filterOptions.year}
-                type="year"
-              />
-              <FilterSection title="Price Range" type="priceRange" />
-            </div>
-
-            <div className="sticky bottom-0 bg-white p-4 border-t border-gray-200 z-10">
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={clearFilters}
-                >
-                  Clear All
-                </Button>
-                <Button
-                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white"
-                  onClick={() => setShowMobileFilters(false)}
-                >
-                  Apply Filters ({countActiveFilters()})
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )} */}
 
       <style jsx>{`
         @keyframes slideInRight {

@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import {
   collection,
   getDocs,
@@ -12,8 +18,10 @@ import WorkCard from "./Ourworkcard";
 import { Button } from "@/components/ui/button";
 import { Search, ChevronDown, SlidersHorizontal, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Slider } from "@/components/ui/slider";
+import Slider from "rc-slider";
+import "rc-slider/assets/index.css";
 import { db } from "@/firebase/firebaseconfig";
+import ReactSlider from "react-slider";
 
 interface WorkItem {
   id: string;
@@ -41,9 +49,121 @@ interface Category {
 interface FilterItem {
   id: string;
   title: string;
-  type: string; // checkbox, dropdown, radio, input, slider
+  type: string;
   options?: string[];
 }
+
+// Custom debounce hook
+const useDebounce = (
+  value: [number, number],
+  delay: number
+): [number, number] => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
+interface PriceRangeSliderProps {
+  min: number;
+  max: number;
+  value: [number, number];
+  onChange: (value: [number, number]) => void;
+  onAfterChange?: (value: [number, number]) => void;
+  step?: number;
+}
+
+interface PriceRangeBoxProps {
+  min: number;
+  max: number;
+  value: [number, number];
+  onChange: (value: [number, number]) => void;
+}
+
+const PRESET_RANGES = [
+  { label: "Under ₹1,000", min: 0, max: 1000 },
+  { label: "₹1,000 - ₹5,000", min: 1000, max: 5000 },
+  { label: "₹5,000 - ₹10,000", min: 5000, max: 10000 },
+  { label: "₹10,000 - ₹20,000", min: 10000, max: 20000 },
+  { label: "Above ₹20,000", min: 20000, max: Infinity },
+];
+
+const PriceRangeBox: React.FC<PriceRangeBoxProps> = ({
+  min,
+  max,
+  value,
+  onChange,
+}) => {
+  const [minVal, setMinVal] = useState(value[0]);
+  const [maxVal, setMaxVal] = useState(value[1]);
+
+  useEffect(() => {
+    setMinVal(value[0]);
+    setMaxVal(value[1]);
+  }, [value]);
+
+  const applyCustomRange = () => {
+    const newMin = Math.max(min, minVal);
+    const newMax = Math.min(max, maxVal);
+
+    if (newMin <= newMax) {
+      onChange([newMin, newMax]);
+    }
+  };
+
+  return (
+    <div className="p-3 space-y-4">
+      {/* PRESET BUTTONS */}
+      <div className="space-y-2">
+        {PRESET_RANGES.map((range) => (
+          <button
+            key={range.label}
+            onClick={() =>
+              onChange([range.min, range.max === Infinity ? max : range.max])
+            }
+            className="w-full text-left px-3 py-2 border rounded-md hover:bg-blue-50 text-sm"
+          >
+            {range.label}
+          </button>
+        ))}
+      </div>
+
+      {/* CUSTOM INPUTS */}
+      <div className="flex gap-3">
+        <input
+          type="number"
+          placeholder="Min"
+          value={minVal}
+          onChange={(e) => setMinVal(Number(e.target.value))}
+          className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500 text-center"
+        />
+        <input
+          type="number"
+          placeholder="Max"
+          value={maxVal}
+          onChange={(e) => setMaxVal(Number(e.target.value))}
+          className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500 text-center"
+        />
+      </div>
+
+      <button
+        onClick={applyCustomRange}
+        className="w-full bg-accent text-white py-2 rounded-md hover:bg-accent/90"
+      >
+        Apply
+      </button>
+    </div>
+  );
+};
 
 const NavDetailBrowse = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -52,6 +172,15 @@ const NavDetailBrowse = () => {
   const [filteredWorks, setFilteredWorks] = useState<WorkItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // UI state for immediate slider feedback (not debounced)
+  const [priceRangeUI, setPriceRangeUI] = useState<[number, number]>([
+    0, 20000,
+  ]);
+
+  // Debounced price range for filtering (300ms delay)
+  const debouncedPriceRange = useDebounce(priceRangeUI, 300);
+
   const [activeFilters, setActiveFilters] = useState({
     category: [] as string[],
     priceRange: [0, 20000] as [number, number],
@@ -59,6 +188,7 @@ const NavDetailBrowse = () => {
     artist: [] as string[],
     medium: [] as string[],
   });
+
   const [dynamicFilters, setDynamicFilters] = useState<FilterItem[]>([]);
   const [selectedDynamicFilters, setSelectedDynamicFilters] = useState<{
     [filterId: string]: string[];
@@ -172,15 +302,25 @@ const NavDetailBrowse = () => {
     fetchFilters();
   }, [categoryId]);
 
-  // Update price range
+  // Initialize price range when works load
   useEffect(() => {
-    if (works.length > 0 && activeFilters.priceRange[1] === 20000) {
+    if (works.length > 0) {
+      const initialRange: [number, number] = [0, maxPrice];
+      setPriceRangeUI(initialRange);
       setActiveFilters((prev) => ({
         ...prev,
-        priceRange: [0, maxPrice],
+        priceRange: initialRange,
       }));
     }
-  }, [works, maxPrice]);
+  }, [works.length, maxPrice]);
+
+  // Update activeFilters when debounced value changes
+  useEffect(() => {
+    setActiveFilters((prev) => ({
+      ...prev,
+      priceRange: debouncedPriceRange,
+    }));
+  }, [debouncedPriceRange]);
 
   // Extract filter options dynamically from works
   const filterOptions = useMemo(
@@ -240,9 +380,10 @@ const NavDetailBrowse = () => {
     );
   };
 
-  const handlePriceRangeChange = (value: [number, number]) => {
-    setActiveFilters((prev) => ({ ...prev, priceRange: value }));
-  };
+  // Update UI state immediately for smooth slider
+  const handlePriceRangeChange = useCallback((value: number[]) => {
+    setPriceRangeUI(value as [number, number]);
+  }, []);
 
   const countActiveFilters = () => {
     return (
@@ -261,13 +402,15 @@ const NavDetailBrowse = () => {
   };
 
   const clearFilters = () => {
+    const resetRange: [number, number] = [0, maxPrice];
     setActiveFilters({
       category: [],
-      priceRange: [0, maxPrice],
+      priceRange: resetRange,
       year: [],
       artist: [],
       medium: [],
     });
+    setPriceRangeUI(resetRange);
     setSelectedDynamicFilters({});
     setSearchQuery("");
     setSortBy("featured");
@@ -392,47 +535,39 @@ const NavDetailBrowse = () => {
           {type === "priceRange" ? (
             <div className="space-y-4">
               <div className="px-2">
-                <Slider
+                <PriceRangeBox
                   min={0}
                   max={maxPrice}
-                  step={100}
-                  value={activeFilters.priceRange}
-                  onValueChange={handlePriceRangeChange}
-                  className="w-full"
+                  value={priceRangeUI}
+                  onChange={(v) => setPriceRangeUI(v)}
                 />
               </div>
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>₹{activeFilters.priceRange[0].toLocaleString()}</span>
-                <span>₹{activeFilters.priceRange[1].toLocaleString()}</span>
+              {/* <div className="flex justify-between text-sm text-gray-600">
+                <span>₹{priceRangeUI[0].toLocaleString()}</span>
+                <span>₹{priceRangeUI[1].toLocaleString()}</span>
               </div>
               <div className="flex gap-2 text-xs">
                 <input
                   type="number"
                   placeholder="Min"
-                  value={activeFilters.priceRange[0]}
+                  value={priceRangeUI[0]}
                   onChange={(e) => {
                     const value = Math.max(0, Number(e.target.value));
-                    handlePriceRangeChange([
-                      value,
-                      activeFilters.priceRange[1],
-                    ]);
+                    setPriceRangeUI([value, priceRangeUI[1]]);
                   }}
                   className="w-full px-2 py-1 border border-gray-300 rounded text-center"
                 />
                 <input
                   type="number"
                   placeholder="Max"
-                  value={activeFilters.priceRange[1]}
+                  value={priceRangeUI[1]}
                   onChange={(e) => {
                     const value = Math.min(maxPrice, Number(e.target.value));
-                    handlePriceRangeChange([
-                      activeFilters.priceRange[0],
-                      value,
-                    ]);
+                    setPriceRangeUI([priceRangeUI[0], value]);
                   }}
                   className="w-full px-2 py-1 border border-gray-300 rounded text-center"
                 />
-              </div>
+              </div> */}
             </div>
           ) : (
             options?.map((opt) => (
@@ -441,9 +576,11 @@ const NavDetailBrowse = () => {
                   checked={
                     filterId
                       ? selectedDynamicFilters[filterId]?.includes(opt)
-                      : activeFilters[
-                          type as keyof typeof activeFilters
-                        ].includes(opt)
+                      : (
+                          activeFilters[
+                            type as keyof typeof activeFilters
+                          ] as string[]
+                        ).includes(opt)
                   }
                   onCheckedChange={() =>
                     filterId
@@ -504,16 +641,6 @@ const NavDetailBrowse = () => {
                 )}
               </div>
               <div className="divide-y divide-gray-200">
-                {/* <FilterSection
-                  title="Artist"
-                  options={filterOptions.artist}
-                  type="artist"
-                />
-                <FilterSection
-                  title="Medium"
-                  options={filterOptions.medium}
-                  type="medium"
-                /> */}
                 {/* Dynamic Filters */}
                 {dynamicFilters.map((filter) => (
                   <FilterSection
@@ -633,12 +760,14 @@ const NavDetailBrowse = () => {
                     {(activeFilters.priceRange[0] > 0 ||
                       activeFilters.priceRange[1] < maxPrice) && (
                       <button
-                        onClick={() =>
+                        onClick={() => {
+                          const resetRange: [number, number] = [0, maxPrice];
                           setActiveFilters((prev) => ({
                             ...prev,
-                            priceRange: [0, maxPrice],
-                          }))
-                        }
+                            priceRange: resetRange,
+                          }));
+                          setPriceRangeUI(resetRange);
+                        }}
                         className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm flex items-center hover:bg-red-200 transition-colors"
                       >
                         Price: ₹{activeFilters.priceRange[0].toLocaleString()}-
@@ -651,7 +780,7 @@ const NavDetailBrowse = () => {
                       opts.map((opt) => (
                         <button
                           key={`${fid}-${opt}`}
-                          className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm flex items-center"
+                          className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm flex items-center hover:bg-indigo-200 transition-colors"
                           onClick={() => toggleDynamicFilter(fid, opt)}
                         >
                           {opt} <X size={14} className="ml-1" />
@@ -679,24 +808,6 @@ const NavDetailBrowse = () => {
                       </div>
 
                       <div className="divide-y divide-gray-200">
-                        {/* Standard filters */}
-                        {/* <FilterSection
-                          title="Artist"
-                          options={filterOptions.artist}
-                          type="artist"
-                        />
-                        <FilterSection
-                          title="Medium"
-                          options={filterOptions.medium}
-                          type="medium"
-                        /> */}
-                        {/* <FilterSection
-                          title="Year"
-                          options={filterOptions.year}
-                          type="year"
-                        /> */}
-
-                        {/* Dynamic Filters */}
                         {dynamicFilters.map((filter) => (
                           <FilterSection
                             key={filter.id}

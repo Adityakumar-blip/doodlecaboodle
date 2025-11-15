@@ -20,8 +20,11 @@ import CategorySection from "@/components/CategorySection";
 import ShopByCategory from "@/components/ShopByCategory";
 import CustomInfo from "@/components/CustomInfo";
 import BGDoodle from "@/assets/Bottom BULK Design.png";
+import { useSelector } from "react-redux";
 
 const Index = () => {
+  const { configurations } = useSelector((state: any) => state.configuration);
+
   const [collections, setCollections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -74,15 +77,19 @@ const Index = () => {
       {/* <TestimonialsSection /> */}
 
       {/* Divider Image Section */}
-      <div className="w-full bg-primary-foreground pb-8 md:pb-12">
+      <a
+        className="w-full bg-primary-foreground pb-8 md:pb-12 cursor-pointer"
+        target="_blank"
+        href="https://forms.gle/9ATNoaCByeqANusZ8"
+      >
         <div className="px-4 md:px-6 lg:px-8">
           <img
-            src={BGDoodle}
+            src={configurations[0]?.heroBanner || BGDoodle}
             alt="Doodle Art Showcase"
-            className="w-full max-w-full md:max-w-[85vw] lg:max-w-[75vw] xl:max-w-[89vw] mx-auto rounded-2xl shadow-lg object-contain max-h-[300px] sm:max-h-[400px] md:max-h-[500px] lg:max-h-[600px] xl:max-h-[750px]"
+            className="w-full max-w-full md:max-w-[85vw] lg:max-w-[75vw] xl:max-w-[89vw] mx-auto rounded-2xl object-contain max-h-[300px] sm:max-h-[400px] md:max-h-[500px] lg:max-h-[600px] xl:max-h-[750px]"
           />
         </div>
-      </div>
+      </a>
 
       <ProductReviewSection />
 

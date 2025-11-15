@@ -1,13 +1,13 @@
 import React from "react";
 import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
 
-import logo from "@/assets/logo-doodle.svg";
+import logo from "@/assets/LOGO.svg";
 
 const Footer = () => {
   return (
     <footer className="bg-primary text-primary-foreground pt-16 pb-8">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-20">
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4">
           {/* Brand */}
           <div className="mb-6 md:mb-0">
             <a
@@ -15,11 +15,7 @@ const Footer = () => {
               className="text-2xl font-playfair font-bold text-gray-900 mb-4 inline-block"
             >
               {/* Doodle<span className="text-pastel-blue">Caboodle</span> */}
-              <img
-                src={logo}
-                className="w-10 h-10 invert"
-                alt="doodlecaboodle"
-              />
+              <img src={logo} className="w-12 h-12" alt="doodlecaboodle" />
             </a>
             <p className="text-accent mb-4 max-w-xs">
               We’d love to be a small part of your big moments. Whether it’s a

@@ -167,7 +167,9 @@ const OrderDetails = () => {
                     className="w-24 h-24 object-cover rounded-md"
                   />
                   <div className="flex-1">
-                    <p className="font-medium text-gray-900">{item.name}</p>
+                    <p className="font-medium text-gray-900">
+                      {item.name || item?.title}
+                    </p>
                     <p className="text-sm text-gray-600">
                       by {item.artistName}
                     </p>
