@@ -462,14 +462,7 @@ const Cart = ({
     setShowNoteModal(false);
   };
 
-  // const checkoutBaseUrl = "https://paymentandshipping-vke7.onrender.com";
-  // const checkoutBaseUrlLocal = "http://localhost:1990";
-
-  const urls = [
-    // "https://paymentandshipping-vke7.onrender.com",
-    // "https://paymentandshipping.onrender.com",
-    "http://localhost:1990",
-  ];
+  const urls = ["https://api.doodlecaboodle.com"];
 
   // Handle checkout with Razorpay and save order history
   const handleCheckout = async () => {

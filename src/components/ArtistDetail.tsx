@@ -161,7 +161,7 @@ const ArtistDetail: React.FC = () => {
     `;
 
     try {
-      await axios.post("https://email-service-app.onrender.com/email/send", {
+      await axios.post("https://email.doodlecaboodle.com/email/send", {
         to: "doodlecaboodle08@gmail.com",
         subject: `New Message from ${user.displayName || user.email}`,
         html: htmlMessage,
