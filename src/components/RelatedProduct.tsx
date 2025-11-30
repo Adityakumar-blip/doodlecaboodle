@@ -31,6 +31,10 @@ export default function RelatedProducts({ ids }: { ids: string[] }) {
   const [loading, setLoading] = React.useState(true);
   const navigate = useNavigate();
 
+  // const isEmptyArtist = items?.artistName.toLowerCase().includes("none")
+  //   ? true
+  //   : false;
+
   React.useEffect(() => {
     let mounted = true;
     (async () => {
@@ -103,7 +107,9 @@ export default function RelatedProducts({ ids }: { ids: string[] }) {
                 </div>
                 <div className="mt-2">
                   <p className="text-sm text-gray-600 truncate">
-                    {p.artistName || p.categoryName}
+                    {/* {p.artistName?.toLocaleLowerCase().includes("none")
+                      ? ""
+                      : p.artistName} */}
                   </p>
                   <p className="font-medium truncate">{p.name}</p>
                   <p className="text-sm text-gray-700">
