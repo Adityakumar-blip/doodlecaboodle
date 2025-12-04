@@ -54,18 +54,28 @@ const ArtworkDetailPage = () => {
   const [categoryData, setCategoryData] = useState<any>(null);
 
   // --- Helpers ---
-  const dedupeByUrl = (arr: DisplayImage[]) => {
+  // Group images by variantId and show only the first image for each unique variantId (including base artwork)
+  const groupByVariantId = (arr: DisplayImage[]) => {
     const seen = new Set<string>();
     const out: DisplayImage[] = [];
     for (const img of arr) {
-      if (!img?.url) continue;
-      if (!seen.has(img.url)) {
-        seen.add(img.url);
+      const key = img.variantId || 'base';
+      if (!seen.has(key)) {
+        seen.add(key);
         out.push(img);
       }
     }
     return out;
   };
+
+  // useEffect(() => {
+  //   if (artwork && Array.isArray(artwork.images)) {
+  //     console.log('artwork.images:', artwork.images);
+  //     (artwork.images as DisplayImage[]).forEach((img, index) => {
+  //       console.log(`Thumbnail img.url [${index}]:`, img.url);
+  //     });
+  //   }
+  // }, [artwork]);
 
   useEffect(() => {
     const fetchArtwork = async () => {
@@ -88,7 +98,7 @@ const ArtworkDetailPage = () => {
           )
         : [];
 
-      const mergedImages = dedupeByUrl([...productImages, ...variantImages]);
+      const mergedImages = groupByVariantId([...productImages, ...variantImages]);
 
       // initialize selected size
       const firstSize: SizeOption | null =
