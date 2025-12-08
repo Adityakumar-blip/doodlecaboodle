@@ -555,7 +555,7 @@ const LoginSignupPage = () => {
           </div>
 
           <div className="text-center mt-6 text-sm text-brown-600 font-handwritten">
-            <p>© 2025 DoodleCaboodle. All rights reserved.</p>
+            <p>© 2025 Doodle Caboodle. All rights reserved.</p>
           </div>
         </div>
       </div>
