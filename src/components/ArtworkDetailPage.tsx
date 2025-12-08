@@ -54,18 +54,31 @@ const ArtworkDetailPage = () => {
   const [categoryData, setCategoryData] = useState<any>(null);
 
   // --- Helpers ---
-  // Group images by variantId and show only the first image for each unique variantId (including base artwork)
-  const groupByVariantId = (arr: DisplayImage[]) => {
-    const seen = new Set<string>();
-    const out: DisplayImage[] = [];
-    for (const img of arr) {
-      const key = img.variantId || 'base';
-      if (!seen.has(key)) {
-        seen.add(key);
-        out.push(img);
+  // Combine all base images and first image of each variant, then deduplicate by URL
+  const uniqueBaseAndVariantImages = (baseImages: DisplayImage[], variants: Variant[]) => {
+    const baseImgs = baseImages;
+    const firstVariantImgs: DisplayImage[] = [];
+    variants.forEach((v) => {
+      if (Array.isArray(v.images) && v.images.length > 0) {
+        const img = v.images[0];
+        firstVariantImgs.push({ ...img, variantId: v.id });
       }
-    }
-    return out;
+    });
+    console.log('Base images data:', baseImgs);
+    console.log('Total base images:', baseImgs.length);
+    console.log('First variant images data:', firstVariantImgs);
+    console.log('Total variant images:', firstVariantImgs.length);
+    // Deduplicate by URL
+    const allImgs = [...baseImgs, ...firstVariantImgs];
+    const seen = new Set<string>();
+    const uniqueImgs = allImgs.filter(img => {
+      if (!img.url || seen.has(img.url)) return false;
+      seen.add(img.url);
+      return true;
+    });
+    console.log('Unique images data:', uniqueImgs);
+    console.log('Total unique images:', uniqueImgs.length);
+    return uniqueImgs;
   };
 
   // useEffect(() => {
@@ -98,7 +111,7 @@ const ArtworkDetailPage = () => {
           )
         : [];
 
-      const mergedImages = groupByVariantId([...productImages, ...variantImages]);
+      const mergedImages = uniqueBaseAndVariantImages(productImages, Array.isArray(base.variants) ? base.variants : []);
 
       // initialize selected size
       const firstSize: SizeOption | null =

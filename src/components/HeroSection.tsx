@@ -11,6 +11,8 @@ interface HeroImage {
   title: string;
   subtitle: string;
   tag: string;
+  displayOrder?: number;
+  url?: string;
 }
 
 const HeroSection: React.FC = () => {
@@ -31,8 +33,18 @@ const HeroSection: React.FC = () => {
           title: doc.data().title,
           subtitle: doc.data().description,
           tag: doc.data().tag,
+          displayOrder: doc.data().displayOrder,
+          url: doc.data().url,
         }));
-        setHeroImages(bannersData);
+        // Sort by displayOrder (ascending, undefined last)
+        const sortedBanners = bannersData.sort((a, b) => {
+          if (a.displayOrder == null && b.displayOrder == null) return 0;
+          if (a.displayOrder == null) return 1;
+          if (b.displayOrder == null) return -1;
+          return a.displayOrder - b.displayOrder;
+        });
+        console.log('Sorted banner data:', sortedBanners);
+        setHeroImages(sortedBanners);
       } catch (error) {
         console.error("Error fetching banners:", error);
       }
@@ -85,12 +97,28 @@ const HeroSection: React.FC = () => {
           className={`absolute inset-0 w-full h-full transition-opacity duration-500 ease-in-out ${
             index === currentIndex ? "opacity-100" : "opacity-0"
           }`}
+          style={{ pointerEvents: index === currentIndex ? 'auto' : 'none' }}
         >
-          <img
-            src={isMobile ? image.mobileUrl : image.desktopUrl}
-            alt={image.title}
-            className="object-cover object-center w-full h-full"
-          />
+          {index === currentIndex && image.url ? (
+            <a
+              href={image.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: 'block', width: '100%', height: '100%' }}
+            >
+              <img
+                src={isMobile ? image.mobileUrl : image.desktopUrl}
+                alt={image.title}
+                className="object-cover object-center w-full h-full cursor-pointer"
+              />
+            </a>
+          ) : (
+            <img
+              src={isMobile ? image.mobileUrl : image.desktopUrl}
+              alt={image.title}
+              className="object-cover object-center w-full h-full"
+            />
+          )}
         </div>
       ))}
 
