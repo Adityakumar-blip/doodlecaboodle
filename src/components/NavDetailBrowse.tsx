@@ -172,6 +172,8 @@ const NavDetailBrowse = () => {
   const [filteredWorks, setFilteredWorks] = useState<WorkItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
+  const loaderRef = useRef<HTMLDivElement>(null);
 
   // UI state for immediate slider feedback (not debounced)
   const [priceRangeUI, setPriceRangeUI] = useState<[number, number]>([
@@ -492,8 +494,15 @@ const NavDetailBrowse = () => {
         );
         break;
       case "best-sellers":
-      default:
         filtered.sort((a, b) => (b.sales || 0) - (a.sales || 0));
+        break;
+      default:
+        // Sort by categoryDisplayOrder if available, otherwise keep original order
+        filtered.sort((a, b) => {
+          const orderA = a.categoryDisplayOrder ?? Number.MAX_SAFE_INTEGER;
+          const orderB = b.categoryDisplayOrder ?? Number.MAX_SAFE_INTEGER;
+          return orderA - orderB;
+        });
         break;
     }
 
@@ -501,9 +510,38 @@ const NavDetailBrowse = () => {
     setDisplayCount(12);
   }, [activeFilters, selectedDynamicFilters, searchQuery, sortBy, works]);
 
-  const loadMore = () => {
-    setDisplayCount((prev) => Math.min(prev + 8, filteredWorks.length));
-  };
+  const loadMore = useCallback(() => {
+    if (loadingMore || displayCount >= filteredWorks.length) return;
+    setLoadingMore(true);
+    // Simulate a small delay for smooth UX
+    setTimeout(() => {
+      setDisplayCount((prev) => Math.min(prev + 8, filteredWorks.length));
+      setLoadingMore(false);
+    }, 300);
+  }, [loadingMore, displayCount, filteredWorks.length]);
+
+  // Infinite scroll using IntersectionObserver
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && displayCount < filteredWorks.length && !loadingMore) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1, rootMargin: "100px" }
+    );
+
+    const currentLoaderRef = loaderRef.current;
+    if (currentLoaderRef) {
+      observer.observe(currentLoaderRef);
+    }
+
+    return () => {
+      if (currentLoaderRef) {
+        observer.unobserve(currentLoaderRef);
+      }
+    };
+  }, [displayCount, filteredWorks.length, loadingMore, loadMore]);
 
   // Filter section component
   const FilterSection = ({
@@ -849,12 +887,18 @@ const NavDetailBrowse = () => {
                         <WorkCard key={work.id} {...work} props={work} />
                       ))}
                     </div>
+                    {/* Infinite Scroll Loader */}
                     {displayCount < filteredWorks.length && (
-                      <div className="mt-12 text-center">
-                        <Button onClick={loadMore}>
-                          Load More Artworks (
-                          {filteredWorks.length - displayCount} remaining)
-                        </Button>
+                      <div
+                        ref={loaderRef}
+                        className="mt-12 flex items-center justify-center py-8"
+                      >
+                        {loadingMore && (
+                          <div className="flex items-center gap-3">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                            <span className="text-gray-600">Loading more artworks...</span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </>
