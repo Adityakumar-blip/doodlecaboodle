@@ -240,14 +240,14 @@ const LoginSignupPage = () => {
             {/* <div className="inline-flex items-center justify-center w-16 h-16 bg-brown-700 rounded-full mb-4 shadow-lg">
               <Sparkles className="w-8 h-8 text-white" />
             </div> */}
-            <h1 className="text-3xl font-bold text-black font-handwritten">
+            <h1 className="text-3xl font-bold text-black font-['Jost']">
               {isLogin ? "Welcome Back!" : "Join Our Doodle Crew!"}
             </h1>
-            <p className="text-brown-600 font-handwritten text-[20px]">
+            {/* <p className="text-brown-600 font-handwritten text-[20px]">
               {isLogin
                 ? "Sign in to sketch your masterpiece"
                 : "Start your doodly adventure today"}
-            </p>
+            </p> */}
           </div>
 
           <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-brown-300 p-8 transition-all duration-300 hover:shadow-2xl">
@@ -262,7 +262,7 @@ const LoginSignupPage = () => {
             <div className="space-y-6">
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="text-lg font-medium text-black font-handwritten flex items-center gap-2">
+                    <label className="text-lg font-medium text-black font-['Jost'] flex items-center gap-2">
                     <User size={16} className="text-brown-700" /> Full Name
                   </label>
                   <input
@@ -271,7 +271,7 @@ const LoginSignupPage = () => {
                     value={formik.values.name}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full text-md px-4 py-3 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-handwritten ${
+                    className={`w-full text-md px-4 py-3 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-['Jost'] ${
                       formik.touched.name && formik.errors.name
                         ? "border-red-600"
                         : ""
@@ -291,7 +291,7 @@ const LoginSignupPage = () => {
               )}
 
               <div className="space-y-2">
-                <label className="text-lg font-medium text-black font-handwritten flex items-center gap-2">
+                <label className="text-lg font-medium text-black font-['Jost'] flex items-center gap-2">
                   <Mail size={16} className="text-brown-700" /> Email Address
                 </label>
                 <input
@@ -300,7 +300,7 @@ const LoginSignupPage = () => {
                   value={formik.values.email}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className={`w-full px-4 py-3 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-handwritten ${
+                  className={`w-full px-4 py-3 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-['Jost'] ${
                     formik.touched.email && formik.errors.email
                       ? "border-red-600"
                       : ""
@@ -310,7 +310,7 @@ const LoginSignupPage = () => {
                 />
                 {formik.touched.email && formik.errors.email && (
                   <p
-                    className="text-red-600 text-sm font-handwritten"
+                    className="text-red-600 text-sm font-['Jost']"
                     role="alert"
                   >
                     {formik.errors.email}
@@ -320,7 +320,7 @@ const LoginSignupPage = () => {
 
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="text-lg font-medium text-black font-handwritten flex items-center gap-2">
+                  <label className="text-lg font-medium text-black font-['Jost'] flex items-center gap-2">
                     <Phone size={16} className="text-brown-700" /> Phone Number
                   </label>
                   <input
@@ -329,7 +329,7 @@ const LoginSignupPage = () => {
                     value={formik.values.phone}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full px-4 py-3 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-handwritten ${
+                    className={`w-full px-4 py-3 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-['Jost'] ${
                       formik.touched.phone && formik.errors.phone
                         ? "border-red-600"
                         : ""
@@ -339,7 +339,7 @@ const LoginSignupPage = () => {
                   />
                   {formik.touched.phone && formik.errors.phone && (
                     <p
-                      className="text-red-600 text-sm font-handwritten"
+                      className="text-red-600 text-sm font-['Jost']"
                       role="alert"
                     >
                       {formik.errors.phone}
@@ -350,7 +350,7 @@ const LoginSignupPage = () => {
 
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="text-lg font-medium text-black font-handwritten flex items-center gap-2">
+                  <label className="text-lg font-medium text-black font-['Jost'] flex items-center gap-2">
                     <Calendar size={16} className="text-brown-700" /> Date of
                     Birth
                   </label>
@@ -360,7 +360,7 @@ const LoginSignupPage = () => {
                     value={formik.values.birthDate}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full px-4 py-3 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-handwritten ${
+                    className={`w-full px-4 py-3 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-['Jost'] ${
                       formik.touched.birthDate && formik.errors.birthDate
                         ? "border-red-600"
                         : ""
@@ -369,7 +369,7 @@ const LoginSignupPage = () => {
                   />
                   {formik.touched.birthDate && formik.errors.birthDate && (
                     <p
-                      className="text-red-600 text-sm font-handwritten"
+                      className="text-red-600 text-sm font-['Jost']"
                       role="alert"
                     >
                       {formik.errors.birthDate}
@@ -379,7 +379,7 @@ const LoginSignupPage = () => {
               )}
 
               <div className="space-y-2">
-                <label className="text-lg font-medium text-black font-handwritten flex items-center gap-2">
+                <label className="text-lg font-medium text-black font-['Jost'] flex items-center gap-2">
                   <Lock size={16} className="text-brown-700" /> Password
                 </label>
                 <div className="relative">
@@ -389,7 +389,7 @@ const LoginSignupPage = () => {
                     value={formik.values.password}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full px-4 py-3 pr-12 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-handwritten ${
+                    className={`w-full px-4 py-3 pr-12 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-['Jost'] ${
                       formik.touched.password && formik.errors.password
                         ? "border-red-600"
                         : ""
@@ -418,7 +418,7 @@ const LoginSignupPage = () => {
 
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="text-lg font-medium text-black font-handwritten flex items-center gap-2">
+                  <label className="text-lg font-medium text-black font-['Jost'] flex items-center gap-2">
                     <Lock size={16} className="text-brown-700" /> Confirm
                     Password
                   </label>
@@ -429,7 +429,7 @@ const LoginSignupPage = () => {
                       value={formik.values.confirmPassword}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      className={`w-full px-4 py-3 pr-12 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-handwritten ${
+                      className={`w-full px-4 py-3 pr-12 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-['Jost'] ${
                         formik.touched.confirmPassword &&
                         formik.errors.confirmPassword
                           ? "border-red-600"
@@ -476,7 +476,7 @@ const LoginSignupPage = () => {
                       onBlur={formik.handleBlur}
                       className="mt-1 w-4 h-4 text-brown-700 border-brown-300 rounded focus:ring-brown-500"
                     />
-                    <span className="text-md text-brown-600 font-handwritten">
+                    <span className="text-md text-brown-600 font-['Jost']">
                       I agree to the{" "}
                       <a
                         href="/service-terms"
@@ -512,7 +512,7 @@ const LoginSignupPage = () => {
                       type="checkbox"
                       className="w-4 h-4 text-brown-700 border-brown-300 rounded focus:ring-brown-500"
                     />
-                    <span className="text-md text-brown-600 font-handwritten">
+                    <span className="text-md text-brown-600 font-['Jost']">
                       Remember me
                     </span>
                   </label>
@@ -528,25 +528,25 @@ const LoginSignupPage = () => {
                 }`}
               >
                 {formik.isSubmitting ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin font-['Jost']"></div>
                 ) : (
-                  <>
+                  <span className="font-['Jost'] flex items-center gap-2">
                     {isLogin ? "Sign In" : "Create Account"}
                     <ArrowRight
                       size={16}
                       className="transition-transform group-hover:translate-x-1"
                     />
-                  </>
+                  </span>
                 )}
               </button>
             </div>
 
             <div className="mt-6 text-center">
-              <p className="text-brown-600 font-handwritten">
+              <p className="text-brown-600 font-['Jost']">
                 {isLogin ? "New to the doodle crew?" : "Already a doodler?"}
                 <button
                   onClick={toggleMode}
-                  className="ml-2 text-brown-800 hover:underline font-medium transition-colors font-handwritten"
+                  className="ml-2 text-brown-800 hover:underline font-medium transition-colors font-['Jost']"
                 >
                   {isLogin ? "Sign up" : "Sign in"}
                 </button>
@@ -554,7 +554,7 @@ const LoginSignupPage = () => {
             </div>
           </div>
 
-          <div className="text-center mt-6 text-sm text-brown-600 font-handwritten">
+          <div className="text-center mt-6 text-sm text-brown-600 font-['Jost']">
             <p>© 2025 Doodle Caboodle. All rights reserved.</p>
           </div>
         </div>
