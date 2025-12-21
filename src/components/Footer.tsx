@@ -15,7 +15,10 @@ const Footer = () => {
               className="text-2xl font-playfair font-bold text-gray-900 mb-4 inline-block"
             >
               {/* Doodle<span className="text-pastel-blue">Caboodle</span> */}
-              <img src={logo} className="w-12 h-12" alt="doodlecaboodle" />
+              {/* <img src={logo} className="w-12 h-12" alt="doodlecaboodle" /> */}
+              <div className="w-16 sm:w-20 md:w-24 lg:w-28">
+                <img src={logo} alt="doodlecaboodle" className="w-full h-auto" />
+              </div>
             </a>
             <p className="text-accent mb-4 max-w-xs">
               We’d love to be a small part of your big moments. Whether it’s a
