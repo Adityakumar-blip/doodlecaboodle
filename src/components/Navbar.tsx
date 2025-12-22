@@ -190,8 +190,8 @@ const Navbar = () => {
         className={cn(
           "fixed top-0 left-0 right-0 z-40 transition-all duration-300",
           scrolled
-            ? "bg-primary text-primary-foreground shadow-sm py-2" // Removed backdrop-blur-md to avoid transparency issues
-            : "bg-primary text-primary-foreground py-4"
+            ? "bg-primary text-primary-foreground shadow-sm py-1.5" // Removed backdrop-blur-md to avoid transparency issues
+            : "bg-primary text-primary-foreground py-3"
         )}
       >
         <div className="container mx-auto px-4 flex items-center justify-between">
@@ -200,11 +200,18 @@ const Navbar = () => {
               href="/"
               className="text-2xl md:text-3xl font-playfair font-bold text-gray-900"
             >
-              <img
+              {/* <img
                 src={logo}
                 className="w-10 md:w-12 h-10 md:h-12"
                 alt="doodlecaboodle"
-              />
+              /> */}
+              <div className="w-10 sm:w-11 md:w-12 lg:w-14 xl:w-16">
+  <img
+    src={logo}
+    alt="doodlecaboodle"
+    className="w-full h-auto"
+  />
+</div>
             </a>
           </div>
 

@@ -470,7 +470,7 @@ const ArtworkDetailPage = () => {
                   >
                     <div className="font-medium">{size.name}</div>
                     <div className="text-sm text-gray-500">
-                      {size.length}" × {size.width}"
+                      {size.length} inch × {size.width} inch
                     </div>
                     <div className="text-sm font-medium text-gray-900 mt-1">
                       {size.priceAdjustment > 0
@@ -568,7 +568,7 @@ const ArtworkDetailPage = () => {
                 <div className="text-gray-600">Dimensions</div>
                 <div>
                   {selectedSize
-                    ? `${selectedSize.length}" × ${selectedSize.width}"`
+                    ? `${selectedSize.length} inch × ${selectedSize.width} inch`
                     : "Select a size"}
                 </div>
 

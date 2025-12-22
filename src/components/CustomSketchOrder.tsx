@@ -117,6 +117,12 @@ const CustomSketchOrder: React.FC = () => {
   const [isAddedToCart, setIsAddedToCart] = useState<boolean>(false);
   const [categories, setCategories] = useState<any>([]);
 
+  // 🔹 Reset guideline flag on page refresh
+useEffect(() => {
+  localStorage.removeItem("photoGuidelinesShown");
+}, []);
+
+
   const artworkId: string = `artwork-${Math.random()
     .toString(36)
     .substr(2, 9)}`;
@@ -406,7 +412,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
         <h3 className="text-lg sm:text-xl font-medium text-gray-800 mb-2">
           Artwork Type
         </h3>
-        <p className="text-gray-500 text-sm sm:text-base">
+        <p className="text-black-500 text-sm sm:text-base">
           Choose your preferred type
         </p>
       </div>
@@ -418,7 +424,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
             whileTap={{ scale: 0.99 }}
             className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
               orderDetails.artworkType === size.value
-                ? "border-blue-300 bg-blue-50"
+                ? "border-blue-300 bg-[hsl(38deg_55.07%_81.42%)]"
                 : "border-gray-200 hover:border-blue-200"
             }`}
             onClick={() => handleInputChange("artworkType", size.value)}
@@ -434,7 +440,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="w-5 h-5 bg-blue-400 rounded-full flex items-center justify-center mt-1 ml-auto"
+                    className="w-5 h-5 bg-primary rounded-full flex items-center justify-center mt-1 ml-auto"
                   >
                     <Check className="w-3 h-3 text-white" />
                   </motion.div>
@@ -453,7 +459,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
         <h3 className="text-lg sm:text-xl font-medium text-gray-800 mb-2">
           Paper Size
         </h3>
-        <p className="text-gray-500 text-sm sm:text-base">
+        <p className="text-black-500 text-sm sm:text-base">
           Choose your preferred format
         </p>
       </div>
@@ -465,17 +471,17 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
             whileTap={{ scale: 0.99 }}
             className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
               orderDetails.paperSize === size.value
-                ? "border-blue-300 bg-blue-50"
+                ? "border-blue-300 bg-[hsl(38deg_55.07%_81.42%)]"
                 : "border-gray-200 hover:border-blue-200"
             }`}
             onClick={() => handleInputChange("paperSize", size.value)}
           >
             <div className="flex justify-between items-center">
               <div>
-                <h4 className="font-medium text-gray-800 text-sm sm:text-base">
+                <h4 className="font-medium text-black-800 text-sm sm:text-base">
                   {size.label}
                 </h4>
-                <p className="text-xs sm:text-sm text-gray-500">
+                <p className="text-xs sm:text-sm text-black-500">
                   {size.description} • {size.processingTime}
                 </p>
               </div>
@@ -487,7 +493,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="w-5 h-5 bg-blue-400 rounded-full flex items-center justify-center mt-1 ml-auto"
+                    className="w-5 h-5 bg-primary rounded-full flex items-center justify-center mt-1 ml-auto"
                   >
                     <Check className="w-3 h-3 text-white" />
                   </motion.div>
@@ -503,14 +509,14 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
   const NumberOfFacesStep: React.FC = () => (
     <div className="space-y-4 sm:space-y-6">
       <div className="mb-6 sm:mb-8">
-        <h3 className="text-lg sm:text-xl font-medium text-gray-800 mb-2">
+        <h3 className="text-lg sm:text-xl font-medium text-black-800 mb-2">
           Number of Faces
         </h3>
-        <p className="text-gray-500 text-sm sm:text-base">
+        <p className="text-black-500 text-sm sm:text-base">
           How many people in the sketch?
         </p>
       </div>
-      <div className="bg-blue-50 p-4 sm:p-6 rounded-lg">
+      <div className="bg-[hsl(38deg_55.07%_81.42%)] p-4 sm:p-6 rounded-lg">
         <div className="flex items-center justify-center space-x-4 sm:space-x-6">
           <button
             onClick={() =>
@@ -529,10 +535,10 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
             animate={{ scale: 1 }}
             className="text-center"
           >
-            <div className="text-3xl sm:text-4xl font-light text-gray-800 mb-1">
+            <div className="text-3xl sm:text-4xl font-light text-black-800 mb-1">
               {orderDetails.numberOfFaces}
             </div>
-            <div className="text-xs sm:text-sm text-gray-500">
+            <div className="text-xs sm:text-sm text-black-500">
               {orderDetails.numberOfFaces === 1 ? "Face" : "Faces"}
             </div>
           </motion.div>
@@ -546,7 +552,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
           </button>
         </div>
         <div className="text-center mt-4">
-          <p className="text-xs sm:text-sm text-gray-500">
+          <p className="text-xs sm:text-sm text-black-500">
             {orderDetails.numberOfFaces === 1
               ? `Base price`
               : orderDetails.numberOfFaces === 2
@@ -558,7 +564,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
                 }/additional face`}
           </p>
           {orderDetails.numberOfFaces > 1 && (
-            <span className="inline-block bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs mt-2">
+            <span className="inline-block bg-accent text-blue-600 px-2 py-1 rounded text-xs mt-2">
               Group Order
             </span>
           )}
@@ -585,7 +591,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
             whileTap={{ scale: 0.99 }}
             className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
               orderDetails.background === option.value
-                ? "border-blue-300 bg-blue-50"
+                ? "border-blue-300 bg-[hsl(38deg_55.07%_81.42%)]"
                 : "border-gray-200 hover:border-blue-200"
             }`}
             onClick={() => handleInputChange("background", option.value)}
@@ -607,7 +613,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="w-5 h-5 bg-blue-400 rounded-full flex items-center justify-center mt-1 ml-auto"
+                    className="w-5 h-5 bg-primary rounded-full flex items-center justify-center mt-1 ml-auto"
                   >
                     <Check className="w-3 h-3 text-white" />
                   </motion.div>
@@ -636,7 +642,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
           whileTap={{ scale: 0.99 }}
           className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
             orderDetails.frame === null
-              ? "border-blue-300 bg-blue-50"
+              ? "border-blue-300 bg-[hsl(38deg_55.07%_81.42%)]"
               : "border-gray-200 hover:border-blue-200"
           }`}
           onClick={() => handleInputChange("frame", null)}
@@ -656,7 +662,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="w-5 h-5 bg-blue-400 rounded-full flex items-center justify-center mt-1 ml-auto"
+                  className="w-5 h-5 bg-primary rounded-full flex items-center justify-center mt-1 ml-auto"
                 >
                   <Check className="w-3 h-3 text-white" />
                 </motion.div>
@@ -671,7 +677,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
             whileTap={{ scale: 0.99 }}
             className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
               orderDetails.frame === option.value
-                ? "border-blue-300 bg-blue-50"
+                ? "border-blue-300 bg-[hsl(38deg_55.07%_81.42%)]"
                 : "border-gray-200 hover:border-blue-200"
             }`}
             onClick={() => handleInputChange("frame", option.value)}
@@ -701,7 +707,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="w-5 h-5 bg-blue-400 rounded-full flex items-center justify-center mt-1 ml-auto"
+                    className="w-5 h-5 bg-primary rounded-full flex items-center justify-center mt-1 ml-auto"
                   >
                     <Check className="w-3 h-3 text-white" />
                   </motion.div>
@@ -744,7 +750,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
           <label
             className={`flex flex-col items-center justify-center w-full h-32 sm:h-40 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-200 ${
               orderDetails.image
-                ? "border-blue-300 bg-blue-50"
+                ? "border-blue-300 bg-[hsl(38deg_55.07%_81.42%)]"
                 : "border-gray-200 hover:border-blue-200"
             }`}
           >
@@ -789,7 +795,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
         )}
         <button
           onClick={() => setShowGuidelines(true)}
-          className="w-full py-2 sm:py-3 px-4 bg-blue-50 text-gray-700 rounded-lg font-medium hover:bg-blue-100 transition-colors flex items-center justify-center text-sm sm:text-base"
+          className="w-full py-2 sm:py-3 px-4 bg-[hsl(38deg_55.07%_81.42%)] text-gray-700 rounded-lg font-medium hover:bg-[hsl(38deg_55.07%_81.42%)] transition-colors flex items-center justify-center text-sm sm:text-base"
         >
           <Info className="w-4 h-4 mr-2" />
           Photo Guidelines
@@ -798,6 +804,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
     );
   };
 
+  // Only 4 steps now, step 4 and 5 commented out
   const steps: Step[] = [
     {
       id: 0,
@@ -820,20 +827,20 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
       icon: <Users className="w-4 h-4" />,
       component: <NumberOfFacesStep />,
     },
-    {
-      id: 3,
-      title: "Background",
-      description: "Style choice",
-      icon: <Palette className="w-4 h-4" />,
-      component: <BackgroundStep />,
-    },
-    {
-      id: 4,
-      title: "Frame",
-      description: "Frame option",
-      icon: <Ruler className="w-4 h-4" />,
-      component: <FrameStep />,
-    },
+    // {
+    //   id: 3,
+    //   title: "Background",
+    //   description: "Style choice",
+    //   icon: <Palette className="w-4 h-4" />,
+    //   component: <BackgroundStep />,
+    // },
+    // {
+    //   id: 4,
+    //   title: "Frame",
+    //   description: "Frame option",
+    //   icon: <Ruler className="w-4 h-4" />,
+    //   component: <FrameStep />,
+    // },
     {
       id: 5,
       title: "Upload",
@@ -842,6 +849,22 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
       component: <ImageUploadStep />,
     },
   ];
+
+  useEffect(() => {
+  const isLastStep = currentStep === steps.length - 1;
+
+  if (isLastStep) {
+    const alreadyShown = localStorage.getItem("photoGuidelinesShown");
+
+    if (!alreadyShown) {
+      setTimeout(() => {
+        setShowGuidelines(true);
+        localStorage.setItem("photoGuidelinesShown", "true");
+      }, 200);
+    }
+  }
+}, [currentStep, steps.length]);
+  
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -882,10 +905,10 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
                     <motion.div
                       className={`w-7 sm:w-8 h-7 sm:h-8 rounded-full flex items-center justify-center text-sm cursor-pointer transition-all duration-200 ${
                         index === currentStep
-                          ? "bg-blue-400 text-white"
+                          ? "bg-primary text-white"
                           : completedSteps.includes(index)
-                          ? "bg-blue-100 text-gray-600"
-                          : "bg-gray-100 text-gray-400"
+                          ? "bg-accent text-gray-600"
+                          : "bg-accent text-black"
                       }`}
                       onClick={() => goToStep(index)}
                       whileHover={{ scale: 1.05 }}
@@ -900,10 +923,10 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
                     </motion.div>
                     {index < steps.length - 1 && (
                       <div
-                        className={`w-8 sm:w-12 h-px mx-2 sm:mx-3 ${
+                        className={`w-8 sm:w-12 h-px mx-2 sm:mx-3 text-black ${
                           completedSteps.includes(index)
                             ? "bg-blue-200"
-                            : "bg-gray-100"
+                            : "bg-accent"
                         }`}
                       />
                     )}
@@ -934,10 +957,10 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
                 <button
                   onClick={prevStep}
                   disabled={currentStep === 0}
-                  className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 w-full sm:w-auto ${
+                  className={`flex items-center px-4 py-2 text-white text-sm font-medium rounded-lg transition-all duration-200 w-full sm:w-auto ${
                     currentStep === 0
                       ? "bg-gray-50 text-gray-300 cursor-not-allowed"
-                      : "bg-blue-50 text-gray-700 hover:bg-blue-100"
+                      : "bg-primary text-gray-700 hover:bg-accent"
                   }`}
                 >
                   <ChevronLeft className="w-4 h-4 mr-1" />
@@ -946,7 +969,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
                 {currentStep < steps.length - 1 ? (
                   <button
                     onClick={nextStep}
-                    className="flex items-center px-4 py-2 bg-blue-400 text-white text-sm font-medium rounded-lg hover:bg-blue-500 transition-colors w-full sm:w-auto"
+                    className="flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-accent transition-colors w-full sm:w-auto"
                   >
                     Next
                     <ChevronRight className="w-4 h-4 ml-1" />
@@ -961,8 +984,8 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
                       isAddedToCart
                         ? "bg-pastel-peach text-white"
                         : orderDetails.image && !isAddingToCart
-                        ? "bg-blue-400 text-white hover:bg-blue-500"
-                        : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                        ? "bg-primary text-white hover:bg-blue-500"
+                        : "bg-gray-200 text-black cursor-not-allowed"
                     }`}
                   >
                     {isAddedToCart ? (
@@ -986,7 +1009,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-blue-50 border border-gray-100 rounded-lg p-4 sm:p-6 sticky top-4 sm:top-6"
+              className="bg-[hsl(38deg_55.07%_81.42%)] border border-gray-100 rounded-lg p-4 sm:p-6 sticky top-4 sm:top-6"
             >
               <h3 className="font-semibold text-gray-800 mb-4 text-md sm:text-lg">
                 Order Summary
@@ -1143,12 +1166,12 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
               <div className="flex flex-col md:flex-row">
                 <div className="flex-1 p-4 sm:p-6">
                   <div className="flex justify-between items-center mb-4 sm:mb-6">
-                    <h2 className="text-base sm:text-lg font-medium text-gray-800">
+                    <h2 className="text-base sm:text-lg font-medium text-black-800">
                       Photo Guidelines
                     </h2>
                     <button
                       onClick={() => setShowGuidelines(false)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                      className="text-black-400 hover:text-black-600 transition-colors"
                     >
                       <X size={20} />
                     </button>
@@ -1162,14 +1185,14 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
                         transition={{ delay: index * 0.05 }}
                         className="flex items-start space-x-3"
                       >
-                        <div className="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center text-gray-600 flex-shrink-0 mt-0.5">
+                        <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center text-gray-600 flex-shrink-0 mt-0.5">
                           {guideline.icon}
                         </div>
                         <div>
-                          <h3 className="font-medium text-gray-800 text-sm">
+                          <h3 className="font-medium text-black-800 text-sm">
                             {guideline.title}
                           </h3>
-                          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+                          <p className="text-xs sm:text-sm text-black-500 mt-0.5">
                             {guideline.description}
                           </p>
                         </div>
@@ -1178,7 +1201,7 @@ We’ll notify you once your artwork is ready to ship via WhatsApp and email.`,
                   </div>
                   <button
                     onClick={() => setShowGuidelines(false)}
-                    className="mt-4 sm:mt-6 w-full py-2 sm:py-2.5 bg-blue-400 text-white rounded-lg font-medium hover:bg-blue-500 transition-colors text-sm sm:text-base"
+                    className="mt-4 sm:mt-6 w-full py-2 sm:py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-accent transition-colors text-sm sm:text-base"
                   >
                     Got it
                   </button>
