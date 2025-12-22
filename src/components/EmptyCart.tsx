@@ -21,11 +21,11 @@ const EmptyCart = () => {
         Your cart is empty
       </h3>
       <p className="text-gray-500 text-center mb-6">
-        Looks like you haven't added any artwork to your cart yet.
+        Looks like you haven't added any products to your cart yet.
       </p>
       {/* <Button
         onClick={() => {
-          navigate("/artwork-browse");
+          navigate("/portraits");
           toggleCart();
         }}
         className="bg-pastel-pink hover:bg-pastel-pink/90 text-white"

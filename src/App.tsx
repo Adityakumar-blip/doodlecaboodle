@@ -36,6 +36,7 @@ import PhotoGuidelines from "./components/Photoguide";
 import OrderDetails from "./components/OrderDetail";
 import NavDetailBrowse from "./components/NavDetailBrowse";
 import { fetchConfigurations } from "./store/slices/ConfigurationSlice";
+import BestSellers from "./pages/BestSellers";
 
 const queryClient = new QueryClient();
 
@@ -169,12 +170,12 @@ const AppContent = () => {
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<LoginSignupPage />} />
-          <Route path="/artwork-browse" element={<ArtworkBrowse />} />
+          <Route path="/portraits" element={<ArtworkBrowse />} />
           <Route
-            path="/:categoryName/:categoryId"
+            path="/:categoryName"
             element={<NavDetailBrowse />}
           />
-          <Route path="/product-detail/:id" element={<ArtworkDetailPage />} />
+          <Route path="/product-detail/:productName" element={<ArtworkDetailPage />} />
           <Route path="/work-detail/:id" element={<WorkDetail />} />
           <Route path="/artists" element={<Artist />} />
           <Route path="/collection" element={<GalleryShowcase />} />
@@ -197,8 +198,9 @@ const AppContent = () => {
           />
           <Route path="/get-yours" element={<CustomSketchOrder />} />
           <Route path="/order/:orderId" element={<OrderDetails />} />
+          <Route path="/best-sellers" element={<BestSellers />} />
 
-          <Route path="/occasions/:id" element={<OccasionDetail />} />
+          {/* <Route path="/occasions/:id" element={<OccasionDetail />} /> */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

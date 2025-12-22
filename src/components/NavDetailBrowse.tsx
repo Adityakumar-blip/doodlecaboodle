@@ -13,7 +13,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import WorkCard from "./Ourworkcard";
 import { Button } from "@/components/ui/button";
 import { Search, ChevronDown, SlidersHorizontal, X } from "lucide-react";
@@ -166,7 +166,8 @@ const PriceRangeBox: React.FC<PriceRangeBoxProps> = ({
 };
 
 const NavDetailBrowse = () => {
-  const { categoryId } = useParams<{ categoryId: string }>();
+  const { categoryName } = useParams<{ categoryName: string }>();
+  const location = useLocation();
   const [category, setCategory] = useState<Category | null>(null);
   const [works, setWorks] = useState<WorkItem[]>([]);
   const [filteredWorks, setFilteredWorks] = useState<WorkItem[]>([]);
@@ -225,25 +226,36 @@ const NavDetailBrowse = () => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
-      if (!categoryId) {
-        setError("No category specified.");
-        setLoading(false);
-        return;
-      }
-      try {
-        const categoryRef = doc(db, "productCategories", categoryId);
-        const categorySnap = await getDoc(categoryRef);
 
-        if (!categorySnap.exists()) {
+      let actualCategoryId = location.state?.id;
+      let actualCategoryName = categoryName;
+
+      try {
+        let catData: Category | null = null;
+
+        if (actualCategoryId) {
+          const categoryRef = doc(db, "productCategories", actualCategoryId);
+          const categorySnap = await getDoc(categoryRef);
+          if (categorySnap.exists()) {
+            catData = { id: categorySnap.id, ...categorySnap.data() } as Category;
+          }
+        } else if (actualCategoryName) {
+          // Fallback: search by name
+          const col = collection(db, "productCategories");
+          const q = query(col, where("name", "==", actualCategoryName.charAt(0).toUpperCase() + actualCategoryName.slice(1)));
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            const d = snap.docs[0];
+            catData = { id: d.id, ...d.data() } as Category;
+          }
+        }
+
+        if (!catData) {
           setError("Category not found.");
           setLoading(false);
           return;
         }
 
-        const catData: Category = {
-          id: categorySnap.id,
-          ...categorySnap.data(),
-        };
         setCategory(catData);
 
         // Fetch products
@@ -287,22 +299,23 @@ const NavDetailBrowse = () => {
     };
 
     fetchData();
-  }, [categoryId]);
+  }, [categoryName, location.state?.id]);
 
   // Fetch dynamic filters
   useEffect(() => {
     const fetchFilters = async () => {
-      if (!categoryId) return;
+      const currentId = category?.id;
+      if (!currentId) return;
 
       const snap = await getDocs(
-        query(collection(db, "filters"), where("categoryId", "==", categoryId))
+        query(collection(db, "filters"), where("categoryId", "==", currentId))
       );
 
       const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       setDynamicFilters(list as FilterItem[]);
     };
     fetchFilters();
-  }, [categoryId]);
+  }, [category?.id]);
 
   // Initialize price range when works load
   useEffect(() => {

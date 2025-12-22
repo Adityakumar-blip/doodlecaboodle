@@ -43,7 +43,8 @@ const WorkCard = ({
   }, []);
 
   const handleCardClick = () => {
-    navigate(`/product-detail/${id}`, {
+    const slug = props.name?.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') || id;
+    navigate(`/product-detail/${slug}`, {
       state: props,
     });
   };

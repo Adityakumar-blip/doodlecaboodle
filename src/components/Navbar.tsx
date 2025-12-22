@@ -178,9 +178,9 @@ const Navbar = () => {
   const handleCategoryClick = (category: any) => {
     setIsOpen(false); // Close mobile menu
     if (category?.name === "Portrait") {
-      navigate("/artwork-browse");
+      navigate("/portraits");
     } else {
-      navigate(`/${category?.name}/${category?.id}`);
+      navigate(`/${category?.name?.toLowerCase()}`, { state: { id: category?.id } });
     }
   };
 
@@ -297,6 +297,12 @@ const Navbar = () => {
                       About
                     </a>
                     <a
+                      href="/best-sellers"
+                      className="block px-4 py-2 text-gray-700 hover:text-pastel-pink hover:bg-pastel-pink/10"
+                    >
+                      Best Sellers
+                    </a>
+                    <a
                       href="/photo-guideline"
                       className="block px-4 py-2 text-gray-700 hover:text-pastel-pink hover:bg-pastel-pink/10"
                     >
@@ -390,6 +396,12 @@ const Navbar = () => {
               </div>
             )} */}
 
+            <a
+              href="/best-sellers"
+              className="text-lg font-medium text-gray-900 hover:text-pastel-pink transition-colors duration-200"
+            >
+              Best Sellers
+            </a>
             <a
               href="/about"
               className="text-lg font-medium text-gray-900 hover:text-pastel-pink transition-colors duration-200"
@@ -535,7 +547,7 @@ const Navbar = () => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         @keyframes fade-in {
           from {
             opacity: 0;

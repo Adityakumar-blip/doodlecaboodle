@@ -177,7 +177,7 @@
 //         <div className="mt-12 text-center">
 //           <Button
 //             className="bg-transparent border border-gray-300 text-gray-700 hover:bg-pastel-blue px-8 py-6"
-//             onClick={() => navigate("/artwork-browse")}
+//             onClick={() => navigate("/portraits")}
 //           >
 //             Load More Artworks
 //           </Button>
@@ -358,7 +358,7 @@ filteredProducts = [...filteredProducts].sort(
           <div className="mt-12 text-center">
             <Button
               className="bg-transparent border border-gray-300 text-gray-700 hover:bg-blue-100 px-8 py-3 rounded-md transition-colors duration-300"
-              onClick={() => navigate("/artwork-browse")}
+              onClick={() => navigate("/portraits")}
             >
               Load More Artworks
             </Button>

@@ -73,7 +73,7 @@ const CategorySection = () => {
                 key={category.id}
                 className="relative group cursor-pointer overflow-hidden rounded-lg shadow-lg hover:shadow-2xl transition-all duration-500"
                 style={{ maxHeight: "700px" }}
-                onClick={() => navigate(`/${category?.name}/${category?.id}`)}
+                onClick={() => navigate(`/${category?.name?.toLowerCase()}`, { state: { id: category?.id } })}
               >
                 {/* Background Color Overlay */}
                 <div className={`${category.bgColor} absolute inset-0`} />

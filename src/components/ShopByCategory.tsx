@@ -68,9 +68,9 @@ const ShopByCategory = () => {
 
   const handleCategoryClick = (category: any) => {
     if (category?.name === "Portrait") {
-      navigate("/artwork-browse", { state: { id: category?.id } });
+      navigate("/portraits", { state: { id: category?.id } });
     } else {
-      navigate(`/${category?.name}/${category?.id}`);
+      navigate(`/${category?.name.toLowerCase()}`, { state: { id: category?.id } });
     }
   };
 

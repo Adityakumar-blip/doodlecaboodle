@@ -39,7 +39,7 @@ interface Variant {
 
 const ArtworkDetailPage = () => {
   const { addToCart, toggleCart } = useContext(CartContext);
-  const { id } = useParams();
+  const { productName } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const state = location.state;
@@ -95,7 +95,12 @@ const ArtworkDetailPage = () => {
       setIsLoading(true);
 
       // base object from route state
-      const base = state || {};
+      let base = state || {};
+
+      // If state is missing but we have a productName, we could theoretically fetch by name
+      // but the user specifically said "take the product id from state for data-fetching"
+      // So if state is missing, we might need a fallback or just handle partial data.
+      
       const productImages: DisplayImage[] = Array.isArray(base.images)
         ? base.images.map((i: any) => ({ url: i.url, type: i.type }))
         : [];
@@ -132,41 +137,45 @@ const ArtworkDetailPage = () => {
 
       setIsLoading(false);
 
-      if (base?.categoryId) {
-        try {
-          const categoryRef = doc(db, "productCategories", base.categoryId);
-          const categorySnap = await getDoc(categoryRef);
-          if (categorySnap.exists()) {
-            setCategoryData({
-              id: categorySnap.id,
-              ...categorySnap.data(),
+      // Fetch additional data using the ID from state
+      const actualId = base.id;
+      if (actualId) {
+        if (base?.categoryId) {
+          try {
+            const categoryRef = doc(db, "productCategories", base.categoryId);
+            const categorySnap = await getDoc(categoryRef);
+            if (categorySnap.exists()) {
+              setCategoryData({
+                id: categorySnap.id,
+                ...categorySnap.data(),
+              });
+            } else {
+              setCategoryData(null);
+            }
+          } catch (err) {
+            console.error("Error fetching category data:", err);
+          }
+        }
+
+        // load artist info (optional)
+        if (base?.artistId) {
+          const artistRef = doc(db, "artists", base.artistId);
+          const artistSnap = await getDoc(artistRef);
+          if (artistSnap.exists()) {
+            setArtist({
+              id: artistSnap.id,
+              name: artistSnap.data().name || "Unknown Artist",
+              description: artistSnap.data().bio || "No description available.",
             });
           } else {
-            setCategoryData(null);
+            setArtist(null);
           }
-        } catch (err) {
-          console.error("Error fetching category data:", err);
-        }
-      }
-
-      // load artist info (optional)
-      if (base?.artistId) {
-        const artistRef = doc(db, "artists", base.artistId);
-        const artistSnap = await getDoc(artistRef);
-        if (artistSnap.exists()) {
-          setArtist({
-            id: artistSnap.id,
-            name: artistSnap.data().name || "Unknown Artist",
-            description: artistSnap.data().bio || "No description available.",
-          });
-        } else {
-          setArtist(null);
         }
       }
     };
 
     fetchArtwork();
-  }, [id, state]);
+  }, [productName, state]);
 
   // When user picks a different color variant, switch hero to that variant's first image
   useEffect(() => {

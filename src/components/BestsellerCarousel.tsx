@@ -108,13 +108,22 @@ const BestsellerCarousel = () => {
     <div className="w-full mt-4">
       <div className=" mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-primary mb-3 font-['Jost']">
-            Shop Best Sellers
-          </h2>
-          {/* <p className="text-gray-800 text-lg">
-            Discover our most loved artworks
-          </p> */}
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 px-12">
+          <div className="text-center md:text-left">
+            <h2 className="text-4xl font-bold text-primary mb-1 font-['Jost']">
+              Shop Best Sellers
+            </h2>
+            <p className="text-gray-500 font-medium tracking-wide">
+              OUR MOST LOVED MASTERPIECES
+            </p>
+          </div>
+          <a 
+            href="/best-sellers" 
+            className="group flex items-center gap-2 bg-accent text-white px-6 py-2.5 rounded-full font-bold hover:bg-accent/90 transition-all shadow-md hover:shadow-lg"
+          >
+            View All
+            <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+          </a>
         </div>
 
         {/* Carousel Container */}

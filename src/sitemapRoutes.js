@@ -1,9 +1,9 @@
 export default [
   "/",
   "/login",
-  "/artwork-browse",
+  "/portraits",
   "/:categoryName/:categoryId",
-  "/product-detail/:id",
+  "/product-detail/:productName",
   "/work-detail/:id",
   "/artists",
   "/artists/:id",

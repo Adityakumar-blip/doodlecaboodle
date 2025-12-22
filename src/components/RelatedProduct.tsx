@@ -90,9 +90,10 @@ export default function RelatedProducts({ ids }: { ids: string[] }) {
               <button
                 key={p.id}
                 className="text-left"
-                onClick={() =>
-                  navigate(`/product-detail/${p.id}`, { state: p })
-                }
+                onClick={() => {
+                  const slug = p.name?.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') || p.id;
+                  navigate(`/product-detail/${slug}`, { state: p });
+                }}
               >
                 <div className="aspect-[3/4] rounded-lg overflow-hidden border">
                   {cover ? (
