@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import CategorySlice from "./slices/CategorySlice";
 import ProductSlice from "./slices/ProductSlice";
 import ConfigurationSlice from "./slices/ConfigurationSlice";
+import MenuSlice from "./slices/MenuSlice";
 
 // Configure the store
 const store = configureStore({
@@ -9,6 +10,7 @@ const store = configureStore({
     categories: CategorySlice,
     products: ProductSlice,
     configuration: ConfigurationSlice,
+    menus: MenuSlice,
   },
 });
 

@@ -229,67 +229,112 @@ const NavDetailBrowse = () => {
 
       let actualCategoryId = location.state?.id;
       let actualCategoryName = categoryName;
+      let isMenu = location.state?.isMenu || location.pathname.startsWith('/category/');
 
       try {
-        let catData: Category | null = null;
+        let catData: any = null;
 
-        if (actualCategoryId) {
-          const categoryRef = doc(db, "productCategories", actualCategoryId);
-          const categorySnap = await getDoc(categoryRef);
-          if (categorySnap.exists()) {
-            catData = { id: categorySnap.id, ...categorySnap.data() } as Category;
+        if (isMenu) {
+          // Logic for Menus collection
+          if (actualCategoryId) {
+            const menuRef = doc(db, "menus", actualCategoryId);
+            const menuSnap = await getDoc(menuRef);
+            if (menuSnap.exists()) {
+              catData = { id: menuSnap.id, ...menuSnap.data() };
+            }
+          } else if (actualCategoryName) {
+            const col = collection(db, "menus");
+            const q = query(col, where("slug", "==", actualCategoryName));
+            const snap = await getDocs(q);
+            if (!snap.empty) {
+              const d = snap.docs[0];
+              catData = { id: d.id, ...d.data() };
+            }
           }
-        } else if (actualCategoryName) {
-          // Fallback: search by name
-          const col = collection(db, "productCategories");
-          const q = query(col, where("name", "==", actualCategoryName.charAt(0).toUpperCase() + actualCategoryName.slice(1)));
-          const snap = await getDocs(q);
-          if (!snap.empty) {
-            const d = snap.docs[0];
-            catData = { id: d.id, ...d.data() } as Category;
+
+          if (!catData) {
+            setError("Menu category not found.");
+            setLoading(false);
+            return;
           }
-        }
 
-        if (!catData) {
-          setError("Category not found.");
-          setLoading(false);
-          return;
-        }
+          setCategory(catData);
 
-        setCategory(catData);
-
-        // Fetch products
-        const productsByNameQuery = query(
-          collection(db, "products"),
-          where("categoryName", "==", catData.name),
-          where("status", "==", "active")
-        );
-        const productsBySectionIdQuery = query(
-          collection(db, "products"),
-          where("sectionCategoryIds", "array-contains", catData.id),
-          where("status", "==", "active")
-        );
-
-        const [snapByName, snapBySection] = await Promise.all([
-          getDocs(productsByNameQuery),
-          getDocs(productsBySectionIdQuery),
-        ]);
-
-        const combinedDocs = [...snapByName.docs, ...snapBySection.docs];
-        const uniqueMap = new Map<string, any>();
-        combinedDocs.forEach((d) => {
-          if (!uniqueMap.has(d.id)) uniqueMap.set(d.id, d);
-        });
-
-        const worksData: WorkItem[] = Array.from(uniqueMap.values()).map(
-          (doc) => ({
+          // Fetch products for menu category
+          const productsQuery = query(
+            collection(db, "products"),
+            where("menuManagerCategoryIds", "array-contains", catData.id),
+            where("status", "==", "active")
+          );
+          const snap = await getDocs(productsQuery);
+          const worksData: WorkItem[] = snap.docs.map((doc) => ({
             id: doc.id,
             sales: doc.data()?.sales || 0,
             ...doc.data(),
-          })
-        );
-        setWorks(worksData);
-        setFilteredWorks(worksData);
+          })) as WorkItem[];
+
+          setWorks(worksData);
+          setFilteredWorks(worksData);
+        } else {
+          // Existing logic for productCategories
+          if (actualCategoryId) {
+            const categoryRef = doc(db, "productCategories", actualCategoryId);
+            const categorySnap = await getDoc(categoryRef);
+            if (categorySnap.exists()) {
+              catData = { id: categorySnap.id, ...categorySnap.data() } as Category;
+            }
+          } else if (actualCategoryName) {
+            // Fallback: search by name
+            const col = collection(db, "productCategories");
+            const q = query(col, where("name", "==", actualCategoryName.charAt(0).toUpperCase() + actualCategoryName.slice(1)));
+            const snap = await getDocs(q);
+            if (!snap.empty) {
+              const d = snap.docs[0];
+              catData = { id: d.id, ...d.data() } as Category;
+            }
+          }
+
+          if (!catData) {
+            setError("Category not found.");
+            setLoading(false);
+            return;
+          }
+
+          setCategory(catData);
+
+          // Fetch products
+          const productsByNameQuery = query(
+            collection(db, "products"),
+            where("categoryName", "==", catData.name),
+            where("status", "==", "active")
+          );
+          const productsBySectionIdQuery = query(
+            collection(db, "products"),
+            where("sectionCategoryIds", "array-contains", catData.id),
+            where("status", "==", "active")
+          );
+
+          const [snapByName, snapBySection] = await Promise.all([
+            getDocs(productsByNameQuery),
+            getDocs(productsBySectionIdQuery),
+          ]);
+
+          const combinedDocs = [...snapByName.docs, ...snapBySection.docs];
+          const uniqueMap = new Map<string, any>();
+          combinedDocs.forEach((d) => {
+            if (!uniqueMap.has(d.id)) uniqueMap.set(d.id, d);
+          });
+
+          const worksData: WorkItem[] = Array.from(uniqueMap.values()).map(
+            (doc) => ({
+              id: doc.id,
+              sales: doc.data()?.sales || 0,
+              ...doc.data(),
+            })
+          );
+          setWorks(worksData);
+          setFilteredWorks(worksData);
+        }
       } catch (err: any) {
         console.error(err);
         setError("Failed to load category or artworks.");

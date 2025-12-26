@@ -21,6 +21,8 @@ import { AppDispatch, RootState } from "@/store/store";
 import { CartContext } from "@/context/CartContext";
 import logo from "@/assets/LOGO.svg";
 import { useNavigate } from "react-router-dom";
+import CategoryBar from "./CategoryBar";
+import { fetchMenus } from "@/store/slices/MenuSlice";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -28,6 +30,7 @@ const Navbar = () => {
   const { categories: categoryData } = useSelector(
     (state: RootState) => state.categories
   );
+  const { menus } = useSelector((state: RootState) => state.menus);
   const { cartItems, isCartOpen, toggleCart } = useContext(CartContext);
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -39,6 +42,7 @@ const Navbar = () => {
   const [userData, setUserData] = useState<any>(null);
   const [loginButtonHovered, setLoginButtonHovered] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
 
   // Firebase Authentication State Listener
   useEffect(() => {
@@ -79,6 +83,7 @@ const Navbar = () => {
 
   useEffect(() => {
     dispatch(fetchCategories());
+    dispatch(fetchMenus());
   }, [dispatch]);
 
   useEffect(() => {
@@ -186,32 +191,31 @@ const Navbar = () => {
 
   return (
     <>
-      <header
-        className={cn(
-          "fixed top-0 left-0 right-0 z-40 transition-all duration-300",
-          scrolled
-            ? "bg-primary text-primary-foreground shadow-sm py-1.5" // Removed backdrop-blur-md to avoid transparency issues
-            : "bg-primary text-primary-foreground py-3"
-        )}
-      >
-        <div className="container mx-auto px-4 flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-40 transition-all duration-300">
+        <div
+          className={cn(
+            "w-full transition-all duration-300 bg-primary text-primary-foreground flex items-center relative z-20 h-16",
+            scrolled ? "shadow-md" : ""
+          )}
+        >
+          <div className="container mx-auto px-4 flex items-center justify-between h-full">
           <div className="flex-shrink-0">
             <a
               href="/"
-              className="text-2xl md:text-3xl font-playfair font-bold text-gray-900"
+              className="text-2xl md:text-3xl font-playfair font-bold text-gray-900 block"
             >
               {/* <img
                 src={logo}
                 className="w-10 md:w-12 h-10 md:h-12"
                 alt="doodlecaboodle"
               /> */}
-              <div className="w-10 sm:w-11 md:w-12 lg:w-14 xl:w-16">
-  <img
-    src={logo}
-    alt="doodlecaboodle"
-    className="w-full h-auto"
-  />
-</div>
+              <div className="w-12 md:w-14 lg:w-16">
+                <img
+                  src={logo}
+                  alt="doodlecaboodle"
+                  className="w-full h-auto"
+                />
+              </div>
             </a>
           </div>
 
@@ -347,6 +351,7 @@ const Navbar = () => {
             </button>
           </div>
         </div>
+      </div>
 
         {/* Mobile Sidebar */}
         <div
@@ -384,24 +389,111 @@ const Navbar = () => {
             </a>
 
             {/* Categories Section in Mobile */}
-            {/* {categoryData.length > 0 && (
+            {menus.length > 0 && (
               <div className="border-b border-gray-100 pb-4 mb-4">
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">
                   Categories
                 </h3>
-                <div className="space-y-2">
-                  {categoryData.map((category, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleCategoryClick(category)}
-                      className="block w-full text-left text-base font-medium text-gray-900 hover:text-pastel-pink transition-colors duration-200 py-1"
-                    >
-                      {category.name}
-                    </button>
-                  ))}
+                <div className="space-y-1">
+                  {/* Filter root level menus */}
+                  {menus
+                    .filter((m) => !m.parentId)
+                    .sort((a, b) => a.displayOrder - b.displayOrder)
+                    .map((menu) => (
+                      <div key={menu.id} className="space-y-1">
+                        <button
+                          onClick={() => {
+                            const hasChildren = menus.some(m => m.parentId === menu.id);
+                            if (hasChildren) {
+                              setExpandedMenus(prev => ({
+                                ...prev,
+                                [menu.id]: !prev[menu.id]
+                              }));
+                            } else {
+                              navigate(`/category/${menu.slug}`, { state: { id: menu.id, isMenu: true } });
+                              setIsOpen(false);
+                            }
+                          }}
+                          className="flex items-center justify-between w-full text-left text-lg font-medium text-gray-800 hover:text-primary transition-colors duration-200 py-3 px-2 rounded-lg hover:bg-gray-50"
+                        >
+                          {menu.name}
+                          {menus.some((m) => m.parentId === menu.id) && (
+                            <ChevronDown 
+                              size={18} 
+                              className={cn(
+                                "text-gray-400 transition-transform duration-300",
+                                expandedMenus[menu.id] && "rotate-180"
+                              )} 
+                            />
+                          )}
+                        </button>
+                        
+                        {/* Mobile Sub-menus (Collapsible) */}
+                        <div className={cn(
+                          "overflow-hidden transition-all duration-300 ease-in-out",
+                          expandedMenus[menu.id] ? "max-h-[1000px] opacity-100 mb-2" : "max-h-0 opacity-0"
+                        )}>
+                          {menus
+                            .filter((m) => m.parentId === menu.id)
+                            .sort((a, b) => a.displayOrder - b.displayOrder)
+                            .map((child) => (
+                              <div key={child.id} className="ml-4 border-l-2 border-gray-50">
+                                <button
+                                  onClick={() => {
+                                    const hasGrandChildren = menus.some(m => m.parentId === child.id);
+                                    if (hasGrandChildren) {
+                                      setExpandedMenus(prev => ({
+                                        ...prev,
+                                        [child.id]: !prev[child.id]
+                                      }));
+                                    } else {
+                                      navigate(`/category/${child.slug}`, { state: { id: child.id, isMenu: true } });
+                                      setIsOpen(false);
+                                    }
+                                  }}
+                                  className="flex items-center justify-between w-full text-left text-base font-medium text-gray-600 hover:text-primary transition-colors duration-200 py-2.5 pl-4 pr-2"
+                                >
+                                  {child.name}
+                                  {menus.some((m) => m.parentId === child.id) && (
+                                    <ChevronDown 
+                                      size={16} 
+                                      className={cn(
+                                        "text-gray-400 transition-transform duration-300",
+                                        expandedMenus[child.id] && "rotate-180"
+                                      )} 
+                                    />
+                                  )}
+                                </button>
+                                
+                                {/* Level 3 (Collapsible) */}
+                                <div className={cn(
+                                  "overflow-hidden transition-all duration-300 ease-in-out",
+                                  expandedMenus[child.id] ? "max-h-[500px] opacity-100 pb-2" : "max-h-0 opacity-0"
+                                )}>
+                                  {menus
+                                    .filter((m) => m.parentId === child.id)
+                                    .sort((a, b) => a.displayOrder - b.displayOrder)
+                                    .map((grandChild) => (
+                                      <button
+                                        key={grandChild.id}
+                                        onClick={() => {
+                                          navigate(`/category/${grandChild.slug}`, { state: { id: grandChild.id, isMenu: true } });
+                                          setIsOpen(false);
+                                        }}
+                                        className="block w-full text-left text-sm font-medium text-gray-400 hover:text-primary transition-colors duration-200 py-1.5 pl-8 pr-2"
+                                      >
+                                        {grandChild.name}
+                                      </button>
+                                    ))}
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    ))}
                 </div>
               </div>
-            )} */}
+            )}
 
             <a
               href="/best-sellers"
@@ -461,32 +553,11 @@ const Navbar = () => {
           ></div>
         )}
 
-        {/* Desktop Categories */}
-        {/* {categoryData.length > 1 && (
-          <div className="hidden md:block container pl-0 pt-4">
-            <div className="flex">
-              {categoryData?.map((category, index) => (
-                <div key={index} className="relative group px-4">
-                  <div className="flex items-center gap-2">
-                    <button
-                      className="text-black hover:text-pastel-pink py-2 transition-colors font-medium"
-                      onClick={() => handleCategoryClick(category)}
-                    >
-                      {category.name}
-                    </button>
-                    {category?.parentId !== null ||
-                      (category?.parentId && (
-                        <ChevronDown
-                          className="relative top-[1px] ml-1 h-3 w-3 transition duration-200 group-hover:rotate-180"
-                          aria-hidden="true"
-                        />
-                      ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+        {menus.length > 0 && (
+          <div className="relative z-10">
+            <CategoryBar />
           </div>
-        )} */}
+        )}
       </header>
 
       <Cart isOpen={isCartOpen} onClose={() => toggleCart()} />

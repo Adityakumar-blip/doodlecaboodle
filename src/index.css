@@ -137,6 +137,15 @@
   .btn-ghost {
     @apply px-6 py-3 rounded-md transition-all duration-300 bg-transparent text-foreground border border-border hover:bg-muted;
   }
+
+  /* Utility to hide scrollbar but keep functionality */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
 }
 
 /* Optional dotted wallpaper */
