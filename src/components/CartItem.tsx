@@ -40,7 +40,9 @@ const CartItem = ({
           </h4>
           <p className="text-xs text-gray-500">{item.artistName}</p>
           <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-          <p className="text-xs text-gray-500">Size: {item.size.name}</p>
+          {item.size?.name && (
+            <p className="text-xs text-gray-500">Size: {item.size.name}</p>
+          )}
         </div>
       </div>
       <div className="flex flex-col items-end space-y-1">

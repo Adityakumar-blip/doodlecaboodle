@@ -185,7 +185,7 @@ const Navbar = () => {
     if (category?.name === "Portrait") {
       navigate("/portraits");
     } else {
-      navigate(`/${category?.name?.toLowerCase()}`, { state: { id: category?.id } });
+      navigate(`/${category?.name?.toLowerCase().replace(/\s+/g, "-")}`, { state: { id: category?.id } });
     }
   };
 
@@ -410,7 +410,7 @@ const Navbar = () => {
                                 [menu.id]: !prev[menu.id]
                               }));
                             } else {
-                              navigate(`/category/${menu.slug}`, { state: { id: menu.id, isMenu: true } });
+                              navigate(`/category/${menu.slug.replace(/\s+/g, "-")}`, { state: { id: menu.id, isMenu: true } });
                               setIsOpen(false);
                             }
                           }}
@@ -447,7 +447,7 @@ const Navbar = () => {
                                         [child.id]: !prev[child.id]
                                       }));
                                     } else {
-                                      navigate(`/category/${child.slug}`, { state: { id: child.id, isMenu: true } });
+                                      navigate(`/category/${child.slug.replace(/\s+/g, "-")}`, { state: { id: child.id, isMenu: true } });
                                       setIsOpen(false);
                                     }
                                   }}
@@ -477,7 +477,7 @@ const Navbar = () => {
                                       <button
                                         key={grandChild.id}
                                         onClick={() => {
-                                          navigate(`/category/${grandChild.slug}`, { state: { id: grandChild.id, isMenu: true } });
+                                          navigate(`/category/${grandChild.slug.replace(/\s+/g, "-")}`, { state: { id: grandChild.id, isMenu: true } });
                                           setIsOpen(false);
                                         }}
                                         className="block w-full text-left text-sm font-medium text-gray-400 hover:text-primary transition-colors duration-200 py-1.5 pl-8 pr-2"

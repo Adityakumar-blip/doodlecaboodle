@@ -18,10 +18,11 @@ export interface CartItem {
     length: number;
     unit: string;
     priceAdjustment: number;
-  };
+  } | null;
   uploadedImageUrl: string;
   timestamp: number;
   userId?: string; // Optional userId for Firebase storage
+  categoryId?: string;
 }
 
 // Define the CartContext interface

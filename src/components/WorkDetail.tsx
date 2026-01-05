@@ -47,6 +47,7 @@ interface ArtworkDetailProps {
   additionalImages?: string[];
   artistId?: string;
   categoryId?: string;
+  createdAt?: any;
 }
 
 interface Artist {
@@ -196,7 +197,12 @@ const WorkDetail = () => {
   };
 
   const handleAddToCart = async () => {
-    if (!artwork || !selectedSize || !uploadedPhoto || !id) return;
+    if (!artwork || !uploadedPhoto || !id) return;
+
+    // If dimensions exist, a size MUST be selected
+    if (Array.isArray(artwork.dimensions) && artwork.dimensions.length > 0 && !selectedSize) {
+      return;
+    }
 
     setIsAddingToCart(true);
     try {
@@ -205,7 +211,7 @@ const WorkDetail = () => {
 
       // Calculate final priceleven
       const basePrice = parseFloat(artwork.price);
-      const adjustedPrice = basePrice + selectedSize.priceAdjustment;
+      const adjustedPrice = basePrice + (selectedSize?.priceAdjustment || 0);
 
       // Create cart item
       const cartItem: CartItem = {
@@ -215,7 +221,7 @@ const WorkDetail = () => {
         artistName: artwork.artistName,
         price: adjustedPrice,
         quantity,
-        size: selectedSize,
+        size: selectedSize || ({} as any), // Use empty object or null based on your CartItem definition
         uploadedImageUrl: imageUrl,
         timestamp: Date.now(),
         categoryId: artwork?.categoryId,
@@ -241,9 +247,9 @@ const WorkDetail = () => {
   };
 
   const calculatePrice = () => {
-    if (!artwork || !selectedSize) return artwork?.price || "$0";
+    if (!artwork) return "₹0";
     const basePrice = parseFloat(artwork.price);
-    const adjustedPrice = basePrice + selectedSize.priceAdjustment;
+    const adjustedPrice = basePrice + (selectedSize?.priceAdjustment || 0);
     return `₹${adjustedPrice.toLocaleString()}`;
   };
 
@@ -256,7 +262,9 @@ const WorkDetail = () => {
     }
   };
 
-  const canAddToCart = uploadedPhoto !== null && selectedSize !== null;
+  const canAddToCart = 
+    uploadedPhoto !== null && 
+    (Array.isArray(artwork?.dimensions) && artwork.dimensions.length > 0 ? selectedSize !== null : true);
 
   if (isLoading) {
     return (
@@ -515,12 +523,16 @@ const WorkDetail = () => {
           <div className="py-4 border-t border-gray-200">
             <h3 className="font-medium text-lg mb-3">Details</h3>
             <div className="grid grid-cols-2 gap-y-2">
-              <div className="text-gray-600">Dimensions</div>
-              <div>
-                {selectedSize
-                  ? `${selectedSize.length}${selectedSize.unit} × ${selectedSize.width}${selectedSize.unit}`
-                  : "Select a size"}
-              </div>
+              {Array.isArray(artwork.dimensions) && artwork.dimensions.length > 0 && (
+                <>
+                  <div className="text-gray-600">Dimensions</div>
+                  <div>
+                    {selectedSize
+                      ? `${selectedSize.length}${selectedSize.unit} × ${selectedSize.width}${selectedSize.unit}`
+                      : "Select a size"}
+                  </div>
+                </>
+              )}
               <div className="text-gray-600">Medium</div>
               <div>{state?.materials?.[0]}</div>
               <div className="text-gray-600">Year</div>

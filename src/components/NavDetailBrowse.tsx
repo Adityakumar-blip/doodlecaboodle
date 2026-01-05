@@ -228,6 +228,7 @@ const NavDetailBrowse = () => {
       setError(null);
 
       let actualCategoryId = location.state?.id;
+      console.log("categoryName", categoryName);
       let actualCategoryName = categoryName;
       let isMenu = location.state?.isMenu || location.pathname.startsWith('/category/');
 

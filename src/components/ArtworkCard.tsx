@@ -92,26 +92,31 @@ const ArtworkCard = ({
   // Modified to prevent event propagation
   const handleAddToCartClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (artwork && selectedSize) {
-      const cartItem: any = {
-        id: `${artwork?.id}-${Date.now()}`,
-        artworkId: artwork?.id,
-        title: artwork?.name,
-        price: artwork?.price,
-        quantity: 1,
-        artistName: artwork?.artistName,
-        size: {
-          value: `${artwork?.dimensions[0]?.length}x${artwork?.dimensions[0]?.width}`,
-          label: artwork?.dimensions[0]?.name,
-          priceAdjustment: selectedSize.priceAdjustment || 0,
-        },
-        uploadedImageUrl: artwork?.images[0]?.url,
-        timestamp: Date.now(),
-        deliveryNote: "",
-        productCategory: artwork?.categoryName,
-      };
-      addToCart(cartItem);
+    if (!artwork) return;
+
+    // If dimensions exist, a size MUST be selected
+    if (Array.isArray(artwork.dimensions) && artwork.dimensions.length > 0 && !selectedSize) {
+      return;
     }
+
+    const cartItem: any = {
+      id: `${artwork?.id}-${Date.now()}`,
+      artworkId: artwork?.id,
+      title: artwork?.name,
+      price: artwork?.price,
+      quantity: 1,
+      artistName: artwork?.artistName,
+      size: selectedSize ? {
+        value: `${selectedSize.length}x${selectedSize.width}`,
+        label: selectedSize.name,
+        priceAdjustment: selectedSize.priceAdjustment || 0,
+      } : null,
+      uploadedImageUrl: artwork?.images?.[0]?.url,
+      timestamp: Date.now(),
+      deliveryNote: "",
+      productCategory: artwork?.categoryName,
+    };
+    addToCart(cartItem);
   };
 
   // Heart click handler to prevent card navigation

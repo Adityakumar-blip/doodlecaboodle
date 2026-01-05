@@ -70,7 +70,7 @@ const ShopByCategory = () => {
     if (category?.name === "Portrait") {
       navigate("/portraits", { state: { id: category?.id } });
     } else {
-      navigate(`/${category?.name.toLowerCase()}`, { state: { id: category?.id } });
+      navigate(`/${category?.name.toLowerCase().replace(/\s+/g, "-")}`, { state: { id: category?.id } });
     }
   };
 

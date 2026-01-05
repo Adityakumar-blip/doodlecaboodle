@@ -227,7 +227,12 @@ const ArtworkDetailPage = () => {
         artwork?.isOutOfStock ?? false;
 
   const handleAddToCart = () => {
-    if (!artwork || !selectedSize) return;
+    if (!artwork) return;
+
+    // If dimensions exist, a size MUST be selected
+    if (Array.isArray(artwork.dimensions) && artwork.dimensions.length > 0 && !selectedSize) {
+      return;
+    }
 
     const price =
       Number(artwork?.price || 0) +
@@ -241,11 +246,11 @@ const ArtworkDetailPage = () => {
       price,
       quantity,
       artistName: artwork?.artistName,
-      size: {
+      size: selectedSize ? {
         value: `${selectedSize.length}x${selectedSize.width}`,
         label: selectedSize.name,
         priceAdjustment: selectedSize.priceAdjustment || 0,
-      },
+      } : null,
       variant: selectedVariant
         ? {
             id: selectedVariant.id,
@@ -454,34 +459,36 @@ const ArtworkDetailPage = () => {
           </div>
 
           {/* Size Selector */}
-          <div>
-            <div className="mb-6">
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Size</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {(artwork.dimensions || []).map((size: SizeOption) => (
-                  <button
-                    key={size.name}
-                    onClick={() => setSelectedSize(size)}
-                    className={`p-3 border rounded-lg text-left transition-all ${
-                      selectedSize?.name === size.name
-                        ? "border-gray-900 bg-gray-50 ring-1 ring-gray-900"
-                        : "border-gray-300 hover:border-gray-400"
-                    }`}
-                  >
-                    <div className="font-medium">{size.name}</div>
-                    <div className="text-sm text-gray-500">
-                      {size.length} inch × {size.width} inch
-                    </div>
-                    <div className="text-sm font-medium text-gray-900 mt-1">
-                      {size.priceAdjustment > 0
-                        ? `+₹${size.priceAdjustment}`
-                        : "Base Price"}
-                    </div>
-                  </button>
-                ))}
+          {Array.isArray(artwork.dimensions) && artwork.dimensions.length > 0 && (
+            <div>
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-gray-900 mb-3">Size</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {(artwork.dimensions || []).map((size: SizeOption) => (
+                    <button
+                      key={size.name}
+                      onClick={() => setSelectedSize(size)}
+                      className={`p-3 border rounded-lg text-left transition-all ${
+                        selectedSize?.name === size.name
+                          ? "border-gray-900 bg-gray-50 ring-1 ring-gray-900"
+                          : "border-gray-300 hover:border-gray-400"
+                      }`}
+                    >
+                      <div className="font-medium">{size.name}</div>
+                      <div className="text-sm text-gray-500">
+                        {size.length} inch × {size.width} inch
+                      </div>
+                      <div className="text-sm font-medium text-gray-900 mt-1">
+                        {size.priceAdjustment > 0
+                          ? `+₹${size.priceAdjustment}`
+                          : "Base Price"}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Color Selector (no default selected) */}
           {Array.isArray(artwork?.variants) && artwork.variants.length > 0 && (
@@ -565,12 +572,16 @@ const ArtworkDetailPage = () => {
             <div className="py-4 border-t border-gray-200">
               <h2 className="font-medium text-lg mb-3">Details</h2>
               <div className="grid grid-cols-2 gap-y-2">
-                <div className="text-gray-600">Dimensions</div>
-                <div>
-                  {selectedSize
-                    ? `${selectedSize.length} inch × ${selectedSize.width} inch`
-                    : "Select a size"}
-                </div>
+                {Array.isArray(artwork.dimensions) && artwork.dimensions.length > 0 && (
+                  <>
+                    <div className="text-gray-600">Dimensions</div>
+                    <div>
+                      {selectedSize
+                        ? `${selectedSize.length} inch × ${selectedSize.width} inch`
+                        : "Select a size"}
+                    </div>
+                  </>
+                )}
 
                 <div className="text-gray-600">Medium</div>
                 <div>{state?.materials?.[0]}</div>
