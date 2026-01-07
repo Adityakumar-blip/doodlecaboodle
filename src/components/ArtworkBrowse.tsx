@@ -352,9 +352,9 @@ const ArtworkBrowse = () => {
               >
                 <Checkbox
                   id={`${type}-${option}`}
-                  checked={activeFilters[
+                  checked={(activeFilters[
                     type as keyof typeof activeFilters
-                  ].includes(option)}
+                  ] as string[]).includes(option)}
                   onCheckedChange={() =>
                     toggleFilterItem(type as keyof typeof activeFilters, option)
                   }
@@ -562,7 +562,7 @@ const ArtworkBrowse = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes slideInRight {
           from {
             transform: translateX(100%);

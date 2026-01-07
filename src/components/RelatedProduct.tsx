@@ -92,7 +92,7 @@ export default function RelatedProducts({ ids }: { ids: string[] }) {
                 className="text-left"
                 onClick={() => {
                   const slug = p.name?.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') || p.id;
-                  navigate(`/product-detail/${slug}`, { state: p });
+                  navigate(`/product-detail/${slug}`, { state: { id: p.id } });
                 }}
               >
                 <div className="aspect-[3/4] rounded-lg overflow-hidden border">

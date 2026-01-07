@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { ShoppingCart, ArrowLeft, Plus, Minus } from "lucide-react";
 import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { CartContext } from "@/context/CartContext";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/firebase/firebaseconfig";
 import RelatedProducts from "./RelatedProduct";
 
@@ -64,10 +64,6 @@ const ArtworkDetailPage = () => {
         firstVariantImgs.push({ ...img, variantId: v.id });
       }
     });
-    console.log('Base images data:', baseImgs);
-    console.log('Total base images:', baseImgs.length);
-    console.log('First variant images data:', firstVariantImgs);
-    console.log('Total variant images:', firstVariantImgs.length);
     // Deduplicate by URL
     const allImgs = [...baseImgs, ...firstVariantImgs];
     const seen = new Set<string>();
@@ -76,8 +72,6 @@ const ArtworkDetailPage = () => {
       seen.add(img.url);
       return true;
     });
-    console.log('Unique images data:', uniqueImgs);
-    console.log('Total unique images:', uniqueImgs.length);
     return uniqueImgs;
   };
 
@@ -93,73 +87,83 @@ const ArtworkDetailPage = () => {
   useEffect(() => {
     const fetchArtwork = async () => {
       setIsLoading(true);
-
-      // base object from route state
-      let base = state || {};
-
-      // If state is missing but we have a productName, we could theoretically fetch by name
-      // but the user specifically said "take the product id from state for data-fetching"
-      // So if state is missing, we might need a fallback or just handle partial data.
       
-      const productImages: DisplayImage[] = Array.isArray(base.images)
-        ? base.images.map((i: any) => ({ url: i.url, type: i.type }))
-        : [];
+      const stateId = (state as any)?.id;
+      let artworkData: any = null;
 
-      // merge variant images (if any) INTO artwork.images
-      const variantImages: DisplayImage[] = Array.isArray(base.variants)
-        ? base.variants.flatMap((v: Variant) =>
-            (v.images || []).map((img) => ({
-              url: img.url,
-              type: img.type,
-              variantId: v.id,
-            }))
-          )
-        : [];
+      console.log("state id", stateId)
 
-      const mergedImages = uniqueBaseAndVariantImages(productImages, Array.isArray(base.variants) ? base.variants : []);
-
-      // initialize selected size
-      const firstSize: SizeOption | null =
-        Array.isArray(base?.dimensions) && base.dimensions.length > 0
-          ? base.dimensions[0]
-          : null;
-
-      // construct the final artwork for UI (with merged images)
-      const finalArtwork = {
-        ...base,
-        images: mergedImages,
-      };
-
-      setArtwork(finalArtwork);
-      setSelectedSize(firstSize);
-      setSelectedVariant(null); // no preselect
-      setActiveImage(mergedImages?.[0]?.url || "");
-
-      setIsLoading(false);
-
-      // Fetch additional data using the ID from state
-      const actualId = base.id;
-      if (actualId) {
-        if (base?.categoryId) {
-          try {
-            const categoryRef = doc(db, "productCategories", base.categoryId);
-            const categorySnap = await getDoc(categoryRef);
-            if (categorySnap.exists()) {
-              setCategoryData({
-                id: categorySnap.id,
-                ...categorySnap.data(),
-              });
-            } else {
-              setCategoryData(null);
+      try {
+        if (stateId) {
+          // Primary: Fetch by ID from products collection
+          const productRef = doc(db, "products", stateId);
+          const productSnap = await getDoc(productRef);
+          if (productSnap.exists()) {
+            artworkData = { id: productSnap.id, ...productSnap.data() };
+          }
+        } else if (productName) {
+          const transformedName = productName.replace(/-/g, " ").toLowerCase();
+          const productsRef = collection(db, "products");
+          const q = query(productsRef, where("name", "==", transformedName));
+          const snap = await getDocs(q);
+          
+          if (!snap.empty) {
+            artworkData = { id: snap.docs[0].id, ...snap.docs[0].data() };
+          } else {
+            const capitalizedName = transformedName.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+            const q2 = query(productsRef, where("name", "==", capitalizedName));
+            const snap2 = await getDocs(q2);
+            if (!snap2.empty) {
+              artworkData = { id: snap2.docs[0].id, ...snap2.docs[0].data() };
             }
-          } catch (err) {
-            console.error("Error fetching category data:", err);
           }
         }
 
-        // load artist info (optional)
-        if (base?.artistId) {
-          const artistRef = doc(db, "artists", base.artistId);
+        if (!artworkData && state) {
+          artworkData = state;
+        }
+
+        if (!artworkData) {
+          setIsLoading(false);
+          return;
+        }
+
+        const productImages: DisplayImage[] = Array.isArray(artworkData.images)
+          ? artworkData.images.map((i: any) => ({ url: i.url, type: i.type }))
+          : [];
+
+        const mergedImages = uniqueBaseAndVariantImages(
+          productImages,
+          Array.isArray(artworkData.variants) ? artworkData.variants : []
+        );
+
+        const firstSize: SizeOption | null =
+          Array.isArray(artworkData?.dimensions) && artworkData.dimensions.length > 0
+            ? artworkData.dimensions[0]
+            : null;
+
+        const finalArtwork = {
+          ...artworkData,
+          images: mergedImages,
+        };
+
+        setArtwork(finalArtwork);
+        setSelectedSize(firstSize);
+        setSelectedVariant(null);
+        setActiveImage(mergedImages?.[0]?.url || "");
+
+        // Fetch category info
+        if (artworkData?.categoryId) {
+          const categoryRef = doc(db, "productCategories", artworkData.categoryId);
+          const categorySnap = await getDoc(categoryRef);
+          if (categorySnap.exists()) {
+            setCategoryData({ id: categorySnap.id, ...categorySnap.data() });
+          }
+        }
+
+        // Fetch artist info
+        if (artworkData?.artistId) {
+          const artistRef = doc(db, "artists", artworkData.artistId);
           const artistSnap = await getDoc(artistRef);
           if (artistSnap.exists()) {
             setArtist({
@@ -167,10 +171,12 @@ const ArtworkDetailPage = () => {
               name: artistSnap.data().name || "Unknown Artist",
               description: artistSnap.data().bio || "No description available.",
             });
-          } else {
-            setArtist(null);
           }
         }
+      } catch (err) {
+        console.error("Error fetching artwork details:", err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -289,19 +295,6 @@ const ArtworkDetailPage = () => {
     return `₹${total.toLocaleString()}`;
   };
 
-  const isNotSketch =
-    artwork?.categoryName?.toLowerCase().includes("sketch") ||
-    artwork?.categoryName?.toLowerCase().includes("painting")
-      ? false
-      : true;
-  const isEmptyArtist = state?.artistName.toLowerCase().includes("none")
-    ? true
-    : false;
-
-  const isCandle = artwork?.categoryName?.toLowerCase().includes("candle")
-    ? true
-    : false;
-
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-12 flex justify-center">
@@ -317,6 +310,19 @@ const ArtworkDetailPage = () => {
       </div>
     );
   }
+
+  const isNotSketch =
+    artwork?.categoryName?.toLowerCase().includes("sketch") ||
+    artwork?.categoryName?.toLowerCase().includes("painting")
+      ? false
+      : true;
+  const isEmptyArtist = artwork?.artistName?.toLowerCase().includes("none")
+    ? true
+    : false;
+
+  const isCandle = artwork?.categoryName?.toLowerCase().includes("candle")
+    ? true
+    : false;
 
   function convertToWeight(value: number) {
     if (value >= 1) {
@@ -399,25 +405,25 @@ const ArtworkDetailPage = () => {
             {!isNotSketch && !isEmptyArtist && (
               <p
                 onClick={() =>
-                  navigate(`/artists/${state.artistId}`, {
+                  navigate(`/artists/${artwork.artistId}`, {
                     state: { collection: "products" },
                   })
                 }
                 className="text-gray-600 hover:underline hover:text-red-400 cursor-pointer"
               >
-                {state.artistName}
+                {artwork.artistName}
               </p>
             )}
             <h1 className="font-playfair text-2xl md:text-3xl font-medium text-gray-900 mb-2">
-              {state?.name}
+              {artwork?.name}
             </h1>
             <div className="flex items-center gap-2">
               <p className="text-xl font-medium text-gray-900">
                 {calculatePrice()}
               </p>
-              {state?.slashedPrice && (
+              {artwork?.slashedPrice && (
                 <p className="text-sm text-gray-500 line-through">
-                  ₹{state?.slashedPrice}
+                  ₹{artwork?.slashedPrice}
                 </p>
               )}
             </div>
@@ -550,7 +556,7 @@ const ArtworkDetailPage = () => {
           {/* Description */}
           <div className="mb-8">
             <h2 className="font-medium text-lg mb-2">Description</h2>
-            <p className="text-gray-600">{state?.description || ""}</p>
+            <p className="text-gray-600">{artwork?.description || ""}</p>
           </div>
 
           {/* Details */}
@@ -584,11 +590,11 @@ const ArtworkDetailPage = () => {
                 )}
 
                 <div className="text-gray-600">Medium</div>
-                <div>{state?.materials?.[0]}</div>
+                <div>{artwork?.materials?.[0]}</div>
 
                 {!isNotSketch && <div className="text-gray-600">Year</div>}
                 {!isNotSketch && (
-                  <div>{getYearFromCreatedAt(state?.createdAt)}</div>
+                  <div>{getYearFromCreatedAt(artwork?.createdAt)}</div>
                 )}
 
                 <div className="text-gray-600">Category</div>

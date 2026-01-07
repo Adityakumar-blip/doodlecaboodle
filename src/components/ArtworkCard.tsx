@@ -85,7 +85,7 @@ const ArtworkCard = ({
 
   const handleCardClick = () => {
     navigate(`/work-detail/${id}`, {
-      state: props,
+      state: { id: id },
     });
   };
 

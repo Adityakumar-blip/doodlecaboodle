@@ -102,28 +102,41 @@ const WorkDetail = () => {
     const fetchArtworkAndArtist = async () => {
       setIsLoading(true);
       try {
-        // Set artwork from location state
-        setArtwork(state || null);
-        setActiveImage(state?.images?.[0]?.url || "");
-        setSelectedSize(state?.dimensions?.[0] || null);
+        const stateId = (state as any)?.id || id;
+        let artworkData: any = null;
 
-        // Fetch artist data if artistId exists
-        if (state?.artistId) {
-          const artistRef = doc(db, "artists", state.artistId);
-          const artistSnap = await getDoc(artistRef);
-          if (artistSnap.exists()) {
-            setArtist({
-              id: artistSnap.id,
-              name: artistSnap.data().name || "Unknown Artist",
-              description: artistSnap.data().bio || "No description available.",
-            });
-          } else {
-            setArtist(null);
+        if (stateId) {
+          const artworkRef = doc(db, "ourworks", stateId);
+          const artworkSnap = await getDoc(artworkRef);
+          if (artworkSnap.exists()) {
+            artworkData = { id: artworkSnap.id, ...artworkSnap.data() } as ArtworkDetailProps;
+          }
+        }
+
+        if (!artworkData && state) {
+          artworkData = state as ArtworkDetailProps;
+        }
+
+        if (artworkData) {
+          setArtwork(artworkData);
+          setActiveImage(artworkData.images?.[0]?.url || artworkData.imageUrl || "");
+          setSelectedSize(artworkData.dimensions?.[0] || null);
+
+          // Fetch artist data if artistId exists
+          if (artworkData.artistId) {
+            const artistRef = doc(db, "artists", artworkData.artistId);
+            const artistSnap = await getDoc(artistRef);
+            if (artistSnap.exists()) {
+              setArtist({
+                id: artistSnap.id,
+                name: artistSnap.data().name || "Unknown Artist",
+                description: artistSnap.data().bio || "No description available.",
+              });
+            }
           }
         }
       } catch (error) {
-        console.error("Error fetching artist data:", error);
-        setArtist(null);
+        console.error("Error fetching artwork details:", error);
       } finally {
         setIsLoading(false);
       }
@@ -303,9 +316,9 @@ const WorkDetail = () => {
               className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
             />
           </div>
-          {state?.images && state.images.length > 0 && (
+          {artwork.images && artwork.images.length > 0 && (
             <div className="grid grid-cols-4 gap-2">
-              {state?.images?.map((img, index) => (
+              {artwork.images?.map((img, index) => (
                 <div
                   key={index}
                   className={`aspect-square cursor-pointer rounded overflow-hidden ${
@@ -328,20 +341,20 @@ const WorkDetail = () => {
           <div className="mb-4 flex items-center justify-between">
             <div>
               <p
-                onClick={() => navigate(`/artists/${state?.artistId}`)}
+                onClick={() => navigate(`/artists/${artwork?.artistId}`)}
                 className="text-gray-600 hover:underline hover:text-blue-600 cursor-pointer transition-colors"
               >
-                {state?.artistName}
+                {artwork?.artistName}
               </p>
               <h1 className="font-serif text-2xl md:text-3xl font-medium text-gray-900 mb-2">
-                {state?.name}
+                {artwork?.name}
               </h1>
             </div>
             <div className="mb-6">
               <Button
                 onClick={() =>
                   navigate("/get-yours", {
-                    state: state.categoryId,
+                    state: artwork.categoryId,
                   })
                 }
                 className={` ${showUploadSection ? "hidden" : ""}`}
@@ -517,7 +530,7 @@ const WorkDetail = () => {
 
           <div className="mb-6">
             <h3 className="font-medium text-lg mb-2">Description</h3>
-            <p className="text-gray-600">{state?.description || ""}</p>
+            <p className="text-gray-600">{artwork?.description || ""}</p>
           </div>
 
           <div className="py-4 border-t border-gray-200">
@@ -534,7 +547,7 @@ const WorkDetail = () => {
                 </>
               )}
               <div className="text-gray-600">Medium</div>
-              <div>{state?.materials?.[0]}</div>
+              <div>{artwork?.materials?.[0]}</div>
               <div className="text-gray-600">Year</div>
               <div>{getYearFromFirebaseTimestamp(artwork.createdAt)}</div>
               <div className="text-gray-600">Category</div>
@@ -551,7 +564,7 @@ const WorkDetail = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;
