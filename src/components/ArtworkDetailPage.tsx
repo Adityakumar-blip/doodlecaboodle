@@ -39,7 +39,7 @@ interface Variant {
 
 const ArtworkDetailPage = () => {
   const { addToCart, toggleCart } = useContext(CartContext);
-  const { productName } = useParams();
+  const { category, productName } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const state = location.state;
@@ -336,17 +336,18 @@ const ArtworkDetailPage = () => {
   const hasDynamicDetails =
     Array.isArray(artwork?.descriptionFields) &&
     (artwork?.descriptionFields as DescriptionField[]).length > 0;
+    
 
   return (
     <div className="container mx-auto px-4 py-6  md:py-12">
       {/* Back button */}
-      <Link
-        to="/"
+      <button
+        onClick={() => navigate(`/${category || ""}`)}
         className="inline-flex items-center mb-6 text-gray-600 hover:text-gray-900 transition-colors"
       >
         <ArrowLeft size={18} className="mr-2" />
         <span>Back to Gallery</span>
-      </Link>
+      </button>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
         {/* Left Column - Images */}

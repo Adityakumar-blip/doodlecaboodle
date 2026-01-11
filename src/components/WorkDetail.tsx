@@ -299,13 +299,13 @@ const WorkDetail = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-12">
-      <Link
-        to="/"
+      <button
+        onClick={() => navigate(-1)}
         className="inline-flex items-center mb-6 text-gray-600 hover:text-gray-900 transition-colors"
       >
         <ArrowLeft size={18} className="mr-2" />
         <span>Back to Gallery</span>
-      </Link>
+      </button>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
         <div>

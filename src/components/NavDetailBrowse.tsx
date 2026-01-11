@@ -234,33 +234,63 @@ const NavDetailBrowse = () => {
 
       try {
         let catData: any = null;
+        let foundInMenu = false;
 
+        // 1. Try to fetch category data (either from menus or productCategories)
+        if (actualCategoryId) {
+          // Try menus first
+          const menuRef = doc(db, "menus", actualCategoryId);
+          const menuSnap = await getDoc(menuRef);
+          if (menuSnap.exists()) {
+            catData = { id: menuSnap.id, ...menuSnap.data() };
+            foundInMenu = true;
+          } else {
+            // Try productCategories
+            const categoryRef = doc(db, "productCategories", actualCategoryId);
+            const categorySnap = await getDoc(categoryRef);
+            if (categorySnap.exists()) {
+              catData = { id: categorySnap.id, ...categorySnap.data() };
+              foundInMenu = false;
+            }
+          }
+        } 
+        
+        if (!catData && actualCategoryName) {
+          // Try menus by slug
+          const colMenus = collection(db, "menus");
+          const qMenus = query(colMenus, where("slug", "==", actualCategoryName));
+          const snapMenus = await getDocs(qMenus);
+          if (!snapMenus.empty) {
+            const d = snapMenus.docs[0];
+            catData = { id: d.id, ...d.data() };
+            foundInMenu = true;
+          } else {
+            // Try productCategories by name (matching slugified name)
+            const colCats = collection(db, "productCategories");
+            const snapCats = await getDocs(colCats);
+            const foundCat = snapCats.docs.find(d => {
+              const name = d.data().name || "";
+              const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]+/g, "");
+              return slug === actualCategoryName || name.toLowerCase() === actualCategoryName.toLowerCase();
+            });
+            if (foundCat) {
+              catData = { id: foundCat.id, ...foundCat.data() };
+              foundInMenu = false;
+            }
+          }
+        }
+
+        if (!catData) {
+          setError("Category not found.");
+          setLoading(false);
+          return;
+        }
+
+        setCategory(catData);
+        isMenu = foundInMenu;
+
+        // 2. Fetch products based on whether it's a menu category or a standard category
         if (isMenu) {
-          // Logic for Menus collection
-          if (actualCategoryId) {
-            const menuRef = doc(db, "menus", actualCategoryId);
-            const menuSnap = await getDoc(menuRef);
-            if (menuSnap.exists()) {
-              catData = { id: menuSnap.id, ...menuSnap.data() };
-            }
-          } else if (actualCategoryName) {
-            const col = collection(db, "menus");
-            const q = query(col, where("slug", "==", actualCategoryName));
-            const snap = await getDocs(q);
-            if (!snap.empty) {
-              const d = snap.docs[0];
-              catData = { id: d.id, ...d.data() };
-            }
-          }
-
-          if (!catData) {
-            setError("Menu category not found.");
-            setLoading(false);
-            return;
-          }
-
-          setCategory(catData);
-
           // Fetch products for menu category
           const productsQuery = query(
             collection(db, "products"),
@@ -277,33 +307,7 @@ const NavDetailBrowse = () => {
           setWorks(worksData);
           setFilteredWorks(worksData);
         } else {
-          // Existing logic for productCategories
-          if (actualCategoryId) {
-            const categoryRef = doc(db, "productCategories", actualCategoryId);
-            const categorySnap = await getDoc(categoryRef);
-            if (categorySnap.exists()) {
-              catData = { id: categorySnap.id, ...categorySnap.data() } as Category;
-            }
-          } else if (actualCategoryName) {
-            // Fallback: search by name
-            const col = collection(db, "productCategories");
-            const q = query(col, where("name", "==", actualCategoryName.charAt(0).toUpperCase() + actualCategoryName.slice(1)));
-            const snap = await getDocs(q);
-            if (!snap.empty) {
-              const d = snap.docs[0];
-              catData = { id: d.id, ...d.data() } as Category;
-            }
-          }
-
-          if (!catData) {
-            setError("Category not found.");
-            setLoading(false);
-            return;
-          }
-
-          setCategory(catData);
-
-          // Fetch products
+          // Fetch products for standard category
           const productsByNameQuery = query(
             collection(db, "products"),
             where("categoryName", "==", catData.name),

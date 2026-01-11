@@ -91,8 +91,9 @@ export default function RelatedProducts({ ids }: { ids: string[] }) {
                 key={p.id}
                 className="text-left"
                 onClick={() => {
-                  const slug = p.name?.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') || p.id;
-                  navigate(`/product-detail/${slug}`, { state: { id: p.id } });
+                  const productSlug = p.name?.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') || p.id;
+                  const categorySlug = p.categoryName?.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') || 'product';
+                  navigate(`/${categorySlug}/${productSlug}`, { state: { id: p.id } });
                 }}
               >
                 <div className="aspect-[3/4] rounded-lg overflow-hidden border">

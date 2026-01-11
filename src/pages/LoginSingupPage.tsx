@@ -19,16 +19,24 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/firebase/firebaseconfig";
 
 const LoginSignupPage = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [view, setView] = useState<"login" | "signup" | "forgotPassword">(
+    "login"
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [serverError, setServerError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  const isLogin = view === "login";
+  const isSignup = view === "signup";
+  const isForgotPassword = view === "forgotPassword";
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,12 +46,26 @@ const LoginSignupPage = () => {
     "/";
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
+
+  const handleResetPassword = async (email: string) => {
+    setServerError("");
+    setSuccessMessage("");
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setSuccessMessage("Password reset email sent! Please check your inbox.");
+      // Optional: switch back to login after some time
+      // setTimeout(() => setView("login"), 5000);
+    } catch (error: any) {
+      console.error("Reset password error:", error);
+      setServerError(error.message || "Failed to send reset email");
+    }
+  };
 
   const createUserDocument = async (user, additionalData) => {
     if (!user) return;
@@ -106,7 +128,15 @@ const LoginSignupPage = () => {
     },
     validate: (values) => {
       const errors: any = {};
-      if (!isLogin) {
+      
+      if (isForgotPassword) {
+        if (!values.email.trim()) errors.email = "Email is required";
+        else if (!/\S+@\S+\.\S+/.test(values.email))
+          errors.email = "Email is invalid";
+        return errors;
+      }
+
+      if (isSignup) {
         if (!values.name.trim()) errors.name = "Name is required";
         if (!values.phone.trim()) errors.phone = "Phone number is required";
         if (!/^\+?\d{10,15}$/.test(values.phone))
@@ -122,15 +152,22 @@ const LoginSignupPage = () => {
       if (!values.email.trim()) errors.email = "Email is required";
       else if (!/\S+@\S+\.\S+/.test(values.email))
         errors.email = "Email is invalid";
-      if (!values.password.trim()) errors.password = "Password is required";
-      else if (values.password.length < 6)
-        errors.password = "Password must be at least 6 characters";
+      
+      if (!isForgotPassword) {
+        if (!values.password.trim()) errors.password = "Password is required";
+        else if (values.password.length < 6)
+          errors.password = "Password must be at least 6 characters";
+      }
+      
       return errors;
     },
     onSubmit: async (values, { setSubmitting }) => {
       setServerError("");
+      setSuccessMessage("");
       try {
-        if (isLogin) {
+        if (isForgotPassword) {
+          await handleResetPassword(values.email);
+        } else if (isLogin) {
           const userCredential = await signInWithEmailAndPassword(
             auth,
             values.email,
@@ -164,9 +201,10 @@ const LoginSignupPage = () => {
   });
 
   const toggleMode = () => {
-    setIsLogin(!isLogin);
+    setView(isLogin ? "signup" : "login");
     formik.resetForm();
     setServerError("");
+    setSuccessMessage("");
   };
 
   return (
@@ -241,26 +279,33 @@ const LoginSignupPage = () => {
               <Sparkles className="w-8 h-8 text-white" />
             </div> */}
             <h1 className="text-3xl font-bold text-black font-['Jost']">
-              {isLogin ? "Welcome Back!" : "Join Our Doodle Crew!"}
-            </h1>
-            {/* <p className="text-brown-600 font-handwritten text-[20px]">
               {isLogin
-                ? "Sign in to sketch your masterpiece"
-                : "Start your doodly adventure today"}
-            </p> */}
+                ? "Welcome Back!"
+                : isSignup
+                ? "Join Our Doodle Crew!"
+                : "Reset Your Password"}
+            </h1>
           </div>
 
           <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-brown-300 p-8 transition-all duration-300 hover:shadow-2xl">
             {serverError && (
               <p
-                className="text-red-600 text-sm mb-4 font-handwritten"
+                className="text-red-600 text-sm mb-4 font-['Jost']"
                 role="alert"
               >
                 {serverError}
               </p>
             )}
+            {successMessage && (
+              <p
+                className="text-green-600 text-sm mb-4 font-['Jost'] font-medium"
+                role="alert"
+              >
+                {successMessage}
+              </p>
+            )}
             <div className="space-y-6">
-              {!isLogin && (
+              {isSignup && (
                 <div className="space-y-2">
                     <label className="text-lg font-medium text-black font-['Jost'] flex items-center gap-2">
                     <User size={16} className="text-brown-700" /> Full Name
@@ -318,7 +363,7 @@ const LoginSignupPage = () => {
                 )}
               </div>
 
-              {!isLogin && (
+              {isSignup && (
                 <div className="space-y-2">
                   <label className="text-lg font-medium text-black font-['Jost'] flex items-center gap-2">
                     <Phone size={16} className="text-brown-700" /> Phone Number
@@ -348,7 +393,7 @@ const LoginSignupPage = () => {
                 </div>
               )}
 
-              {!isLogin && (
+              {isSignup && (
                 <div className="space-y-2">
                   <label className="text-lg font-medium text-black font-['Jost'] flex items-center gap-2">
                     <Calendar size={16} className="text-brown-700" /> Date of
@@ -378,45 +423,47 @@ const LoginSignupPage = () => {
                 </div>
               )}
 
-              <div className="space-y-2">
-                <label className="text-lg font-medium text-black font-['Jost'] flex items-center gap-2">
-                  <Lock size={16} className="text-brown-700" /> Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    value={formik.values.password}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    className={`w-full px-4 py-3 pr-12 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-['Jost'] ${
-                      formik.touched.password && formik.errors.password
-                        ? "border-red-600"
-                        : ""
-                    }`}
-                    placeholder="Your secret code"
-                    aria-label="Password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-brown-600 hover:text-brown-800"
-                    aria-label="Toggle password visibility"
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
+              {!isForgotPassword && (
+                <div className="space-y-2">
+                  <label className="text-lg font-medium text-black font-['Jost'] flex items-center gap-2">
+                    <Lock size={16} className="text-brown-700" /> Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={formik.values.password}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className={`w-full px-4 py-3 pr-12 border border-brown-300 rounded-lg focus:ring-2 focus:ring-brown-500 focus:border-transparent transition-all duration-200 bg-white/50 font-['Jost'] ${
+                        formik.touched.password && formik.errors.password
+                          ? "border-red-600"
+                          : ""
+                      }`}
+                      placeholder="Your secret code"
+                      aria-label="Password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-brown-600 hover:text-brown-800"
+                      aria-label="Toggle password visibility"
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
+                  {formik.touched.password && formik.errors.password && (
+                    <p
+                      className="text-red-600 text-sm font-['Jost']"
+                      role="alert"
+                    >
+                      {formik.errors.password}
+                    </p>
+                  )}
                 </div>
-                {formik.touched.password && formik.errors.password && (
-                  <p
-                    className="text-red-600 text-sm font-handwritten"
-                    role="alert"
-                  >
-                    {formik.errors.password}
-                  </p>
-                )}
-              </div>
+              )}
 
-              {!isLogin && (
+              {isSignup && (
                 <div className="space-y-2">
                   <label className="text-lg font-medium text-black font-['Jost'] flex items-center gap-2">
                     <Lock size={16} className="text-brown-700" /> Confirm
@@ -456,7 +503,7 @@ const LoginSignupPage = () => {
                   {formik.touched.confirmPassword &&
                     formik.errors.confirmPassword && (
                       <p
-                        className="text-red-600 text-sm font-handwritten"
+                        className="text-red-600 text-sm font-['Jost']"
                         role="alert"
                       >
                         {formik.errors.confirmPassword}
@@ -465,7 +512,7 @@ const LoginSignupPage = () => {
                 </div>
               )}
 
-              {!isLogin && (
+              {isSignup && (
                 <div className="space-y-2">
                   <label className="flex items-start gap-3 cursor-pointer">
                     <input
@@ -496,7 +543,7 @@ const LoginSignupPage = () => {
                   {formik.touched.agreeToTerms &&
                     formik.errors.agreeToTerms && (
                       <p
-                        className="text-red-600 text-sm font-handwritten"
+                        className="text-red-600 text-sm font-['Jost']"
                         role="alert"
                       >
                         {formik.errors.agreeToTerms}
@@ -516,6 +563,17 @@ const LoginSignupPage = () => {
                       Remember me
                     </span>
                   </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setView("forgotPassword");
+                      setServerError("");
+                      setSuccessMessage("");
+                    }}
+                    className="text-md text-brown-800 hover:underline font-medium font-['Jost']"
+                  >
+                    Forgot password?
+                  </button>
                 </div>
               )}
 
@@ -531,7 +589,11 @@ const LoginSignupPage = () => {
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin font-['Jost']"></div>
                 ) : (
                   <span className="font-['Jost'] flex items-center gap-2">
-                    {isLogin ? "Sign In" : "Create Account"}
+                    {isLogin
+                      ? "Sign In"
+                      : isSignup
+                      ? "Create Account"
+                      : "Send Reset Link"}
                     <ArrowRight
                       size={16}
                       className="transition-transform group-hover:translate-x-1"
@@ -543,13 +605,28 @@ const LoginSignupPage = () => {
 
             <div className="mt-6 text-center">
               <p className="text-brown-600 font-['Jost']">
-                {isLogin ? "New to the doodle crew?" : "Already a doodler?"}
-                <button
-                  onClick={toggleMode}
-                  className="ml-2 text-brown-800 hover:underline font-medium transition-colors font-['Jost']"
-                >
-                  {isLogin ? "Sign up" : "Sign in"}
-                </button>
+                {isForgotPassword ? (
+                  <button
+                    onClick={() => {
+                      setView("login");
+                      setServerError("");
+                      setSuccessMessage("");
+                    }}
+                    className="text-brown-800 hover:underline font-medium transition-colors font-['Jost']"
+                  >
+                    Back to Sign In
+                  </button>
+                ) : (
+                  <>
+                    {isLogin ? "New to the doodle crew?" : "Already a doodler?"}
+                    <button
+                      onClick={toggleMode}
+                      className="ml-2 text-brown-800 hover:underline font-medium transition-colors font-['Jost']"
+                    >
+                      {isLogin ? "Sign up" : "Sign in"}
+                    </button>
+                  </>
+                )}
               </p>
             </div>
           </div>

@@ -186,7 +186,7 @@ const AppContent = () => {
             path="/category/:categoryName"
             element={<NavDetailBrowse />}
           />
-          <Route path="/product-detail/:productName" element={<ArtworkDetailPage />} />
+          <Route path="/:category/:productName" element={<ArtworkDetailPage />} />
           <Route path="/work-detail/:id" element={<WorkDetail />} />
           <Route path="/artists" element={<Artist />} />
           <Route path="/collection" element={<GalleryShowcase />} />
