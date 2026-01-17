@@ -342,7 +342,9 @@ const ArtworkDetailPage = () => {
     <div className="container mx-auto px-4 py-6  md:py-12">
       {/* Back button */}
       <button
-        onClick={() => navigate(`/${category || ""}`)}
+        onClick={() => navigate(`/${category}`, {
+          state: { id: artwork?.categoryId, isCategory: true }
+        })}
         className="inline-flex items-center mb-6 text-gray-600 hover:text-gray-900 transition-colors"
       >
         <ArrowLeft size={18} className="mr-2" />

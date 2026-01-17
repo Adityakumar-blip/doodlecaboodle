@@ -228,16 +228,16 @@ const NavDetailBrowse = () => {
       setError(null);
 
       let actualCategoryId = location.state?.id;
-      console.log("categoryName", categoryName);
+      console.log("categoryName 123123", categoryName);
       let actualCategoryName = categoryName;
-      let isMenu = location.state?.isMenu || location.pathname.startsWith('/category/');
-
+      const isFromCategory = location.state?.isCategory;
+      let isMenu = (location.state?.isMenu || location.pathname.startsWith('/category/')) && !isFromCategory;
       try {
         let catData: any = null;
         let foundInMenu = false;
 
         // 1. Try to fetch category data (either from menus or productCategories)
-        if (actualCategoryId) {
+        if (actualCategoryId && !isFromCategory) {
           // Try menus first
           const menuRef = doc(db, "menus", actualCategoryId);
           const menuSnap = await getDoc(menuRef);
@@ -256,11 +256,12 @@ const NavDetailBrowse = () => {
         } 
         
         if (!catData && actualCategoryName) {
+          console.log("came here")
           // Try menus by slug
           const colMenus = collection(db, "menus");
           const qMenus = query(colMenus, where("slug", "==", actualCategoryName));
           const snapMenus = await getDocs(qMenus);
-          if (!snapMenus.empty) {
+          if (!snapMenus.empty && !isFromCategory) {
             const d = snapMenus.docs[0];
             catData = { id: d.id, ...d.data() };
             foundInMenu = true;
@@ -287,7 +288,7 @@ const NavDetailBrowse = () => {
         }
 
         setCategory(catData);
-        isMenu = foundInMenu;
+        isMenu = foundInMenu && !isFromCategory;
 
         // 2. Fetch products based on whether it's a menu category or a standard category
         if (isMenu) {

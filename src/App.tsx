@@ -178,15 +178,6 @@ const AppContent = () => {
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<LoginSignupPage />} />
           <Route path="/portraits" element={<ArtworkBrowse />} />
-          <Route
-            path="/:categoryName"
-            element={<NavDetailBrowse />}
-          />
-          <Route
-            path="/category/:categoryName"
-            element={<NavDetailBrowse />}
-          />
-          <Route path="/:category/:productName" element={<ArtworkDetailPage />} />
           <Route path="/work-detail/:id" element={<WorkDetail />} />
           <Route path="/artists" element={<Artist />} />
           <Route path="/collection" element={<GalleryShowcase />} />
@@ -210,6 +201,15 @@ const AppContent = () => {
           <Route path="/get-yours" element={<CustomSketchOrder />} />
           <Route path="/order/:orderId" element={<OrderDetails />} />
           <Route path="/best-sellers" element={<BestSellers />} />
+          <Route
+            path="/:categoryName"
+            element={<NavDetailBrowse />}
+          />
+          <Route
+            path="/category/:categoryName"
+            element={<NavDetailBrowse />}
+          />
+          <Route path="/:category/:productName" element={<ArtworkDetailPage />} />
 
           {/* <Route path="/occasions/:id" element={<OccasionDetail />} /> */}
           <Route path="*" element={<NotFound />} />
