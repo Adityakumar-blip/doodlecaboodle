@@ -62,8 +62,8 @@ const DiscountModal = () => {
         <p className="text-lg font-kalam text-gray-700 mb-6">
           We’re thrilled to have you here.
           <br />
-          As a special welcome gift, enjoy <strong>20% OFF</strong> on your
-          first portrait!
+          Enjoy <strong>20% OFF</strong> on your
+          first portrait! + <strong> Free Shipping</strong> on all products.
         </p>
 
         {/* Coupon code */}
