@@ -169,7 +169,7 @@ const Footer = () => {
         <div className="border-t border-gray-200 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-accent text-sm mb-4 md:mb-0">
-              © 2025 Doodle Caboodle. All rights reserved.
+              © {new Date().getFullYear()} Doodle Caboodle. All rights reserved.
             </p>
             <div className="flex items-center">
               {/* <img

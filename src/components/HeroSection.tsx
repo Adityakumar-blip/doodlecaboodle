@@ -101,8 +101,8 @@ const HeroSection: React.FC = () => {
         >
           {index === currentIndex && image.url ? (
             <a
-              href={image.url}
-              target="_blank"
+              href={image.url.startsWith('http') ? image.url : image.url.toLowerCase().replace(/\s+/g, '-')}
+              target={image.url.startsWith('http') ? "_blank" : "_self"}
               rel="noopener noreferrer"
               style={{ display: 'block', width: '100%', height: '100%' }}
             >

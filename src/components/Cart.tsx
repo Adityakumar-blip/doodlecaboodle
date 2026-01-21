@@ -24,7 +24,7 @@ import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 import CheckoutForm from "./CheckoutForm";
 import EmptyCart from "./EmptyCart";
-import CartItem from "./CartItem";
+import CartItemUI from "./CartItem";
 import {
   generateOrderEmailHTML,
   generateThankYouEmailHTML,
@@ -32,18 +32,19 @@ import {
 import { getWorkingBaseUrl } from "@/lib/utils";
 import { name } from "@cloudinary/url-gen/actions/namedTransformation";
 
-interface CartItem {
+interface CartItemData {
   id: string;
   price: number;
   quantity: number;
   image: string;
   name: string;
+  categoryId?: string;
   [key: string]: any;
 }
 
 interface Order {
   orderId: string;
-  items: CartItem[];
+  items: CartItemData[];
   total: number;
   timestamp: number;
   status: string;
@@ -59,6 +60,7 @@ interface Coupon {
   status: "active" | "inactive";
   validFrom: any;
   validUntil: any;
+  categoryIds?: string[];
 }
 
 const Cart = ({
@@ -159,7 +161,7 @@ const Cart = ({
             const parsedItems = JSON.parse(localCart);
             if (Array.isArray(parsedItems) && parsedItems.length > 0) {
               const cartRef = collection(db, "users", user.uid, "cart");
-              const addToFirebase = parsedItems.map((item: CartItem) =>
+              const addToFirebase = parsedItems.map((item: CartItemData) =>
                 setDoc(doc(cartRef, item.id), {
                   ...item,
                   price: item.price,
@@ -210,9 +212,9 @@ const Cart = ({
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        const items: CartItem[] = [];
+        const items: CartItemData[] = [];
         snapshot.forEach((doc) => {
-          items.push({ id: doc.id, ...doc.data() } as CartItem);
+          items.push({ id: doc.id, ...doc.data() } as CartItemData);
         });
         setCartItems(items as any);
       },
@@ -362,7 +364,7 @@ const Cart = ({
       0
     );
     const baseTotal = cartItems.reduce(
-      (total, item) => total + item.size.priceAdjustment * item.quantity,
+      (total, item) => total + (item.size?.priceAdjustment || 0) * item.quantity,
       0
     );
     let deliveryCharges = 0;
@@ -391,7 +393,7 @@ const Cart = ({
     return {
       subtotal: subtotal.toFixed(2),
       deliveryCharges: deliveryCharges.toFixed(2),
-      // packagingCharges: packagingCharges.toFixed(2),
+      packagingCharges: packagingCharges.toFixed(2),
       discount: discount.toFixed(2),
       total: total.toFixed(2),
     };
@@ -718,9 +720,9 @@ const Cart = ({
               ) : cartItems.length > 0 ? (
                 <div className="p-4">
                   {cartItems.map((item) => (
-                    <CartItem
+                    <CartItemUI
                       key={item.id}
-                      item={item}
+                      item={item as any}
                       removeFromCart={removeFromCart}
                     />
                   ))}

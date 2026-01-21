@@ -42,7 +42,7 @@ const ArtworkBrowse = () => {
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [displayCount, setDisplayCount] = useState(12);
+
   const [sortBy, setSortBy] = useState("featured");
   const [expandedFilterSection, setExpandedFilterSection] = useState<
     string | null
@@ -218,12 +218,7 @@ const ArtworkBrowse = () => {
     }
 
     setFilteredWorks(filtered);
-    setDisplayCount(12); // Reset display count when filters change
   }, [activeFilters, searchQuery, sortBy, works]);
-
-  const loadMore = () => {
-    setDisplayCount((prev) => Math.min(prev + 8, filteredWorks.length));
-  };
 
   const clearFilters = () => {
     setActiveFilters({
@@ -352,9 +347,9 @@ const ArtworkBrowse = () => {
               >
                 <Checkbox
                   id={`${type}-${option}`}
-                  checked={activeFilters[
+                  checked={(activeFilters[
                     type as keyof typeof activeFilters
-                  ].includes(option)}
+                  ] as string[]).includes(option)}
                   onCheckedChange={() =>
                     toggleFilterItem(type as keyof typeof activeFilters, option)
                   }
@@ -506,7 +501,7 @@ const ArtworkBrowse = () => {
                 {filteredWorks.length > 0 ? (
                   <>
                     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6">
-                      {filteredWorks.slice(0, displayCount).map((work) => (
+                      {filteredWorks.map((work) => (
                         <ArtworkCard
                           key={work.id}
                           id={work.id}
@@ -523,18 +518,7 @@ const ArtworkBrowse = () => {
                       ))}
                     </div>
 
-                    {/* Load More Button */}
-                    {displayCount < filteredWorks.length && (
-                      <div className="mt-12 text-center">
-                        <Button
-                          onClick={loadMore}
-                          className="bg-transparent border border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-300 px-8 py-3 rounded-md transition-colors duration-300"
-                        >
-                          Load More Artworks (
-                          {filteredWorks.length - displayCount} remaining)
-                        </Button>
-                      </div>
-                    )}
+
                   </>
                 ) : (
                   <div className="py-16 text-center border border-gray-200 rounded-lg bg-gray-50">
@@ -562,7 +546,7 @@ const ArtworkBrowse = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes slideInRight {
           from {
             transform: translateX(100%);

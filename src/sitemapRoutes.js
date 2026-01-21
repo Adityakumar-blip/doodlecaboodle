@@ -3,7 +3,7 @@ export default [
   "/login",
   "/portraits",
   "/:categoryName/:categoryId",
-  "/product-detail/:productName",
+  "/:categoryName/:productName",
   "/work-detail/:id",
   "/artists",
   "/artists/:id",

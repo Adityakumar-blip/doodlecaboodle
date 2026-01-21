@@ -228,25 +228,56 @@ const NavDetailBrowse = () => {
       setError(null);
 
       let actualCategoryId = location.state?.id;
+      console.log("categoryName 123123", categoryName);
       let actualCategoryName = categoryName;
-
+      const isFromCategory = location.state?.isCategory;
+      let isMenu = (location.state?.isMenu || location.pathname.startsWith('/category/')) && !isFromCategory;
       try {
-        let catData: Category | null = null;
+        let catData: any = null;
+        let foundInMenu = false;
 
-        if (actualCategoryId) {
-          const categoryRef = doc(db, "productCategories", actualCategoryId);
-          const categorySnap = await getDoc(categoryRef);
-          if (categorySnap.exists()) {
-            catData = { id: categorySnap.id, ...categorySnap.data() } as Category;
+        // 1. Try to fetch category data (either from menus or productCategories)
+        if (actualCategoryId && !isFromCategory) {
+          // Try menus first
+          const menuRef = doc(db, "menus", actualCategoryId);
+          const menuSnap = await getDoc(menuRef);
+          if (menuSnap.exists()) {
+            catData = { id: menuSnap.id, ...menuSnap.data() };
+            foundInMenu = true;
+          } else {
+            // Try productCategories
+            const categoryRef = doc(db, "productCategories", actualCategoryId);
+            const categorySnap = await getDoc(categoryRef);
+            if (categorySnap.exists()) {
+              catData = { id: categorySnap.id, ...categorySnap.data() };
+              foundInMenu = false;
+            }
           }
-        } else if (actualCategoryName) {
-          // Fallback: search by name
-          const col = collection(db, "productCategories");
-          const q = query(col, where("name", "==", actualCategoryName.charAt(0).toUpperCase() + actualCategoryName.slice(1)));
-          const snap = await getDocs(q);
-          if (!snap.empty) {
-            const d = snap.docs[0];
-            catData = { id: d.id, ...d.data() } as Category;
+        } 
+        
+        if (!catData && actualCategoryName) {
+          console.log("came here")
+          // Try menus by slug
+          const colMenus = collection(db, "menus");
+          const qMenus = query(colMenus, where("slug", "==", actualCategoryName));
+          const snapMenus = await getDocs(qMenus);
+          if (!snapMenus.empty && !isFromCategory) {
+            const d = snapMenus.docs[0];
+            catData = { id: d.id, ...d.data() };
+            foundInMenu = true;
+          } else {
+            // Try productCategories by name (matching slugified name)
+            const colCats = collection(db, "productCategories");
+            const snapCats = await getDocs(colCats);
+            const foundCat = snapCats.docs.find(d => {
+              const name = d.data().name || "";
+              const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]+/g, "");
+              return slug === actualCategoryName || name.toLowerCase() === actualCategoryName.toLowerCase();
+            });
+            if (foundCat) {
+              catData = { id: foundCat.id, ...foundCat.data() };
+              foundInMenu = false;
+            }
           }
         }
 
@@ -257,39 +288,59 @@ const NavDetailBrowse = () => {
         }
 
         setCategory(catData);
+        isMenu = foundInMenu && !isFromCategory;
 
-        // Fetch products
-        const productsByNameQuery = query(
-          collection(db, "products"),
-          where("categoryName", "==", catData.name),
-          where("status", "==", "active")
-        );
-        const productsBySectionIdQuery = query(
-          collection(db, "products"),
-          where("sectionCategoryIds", "array-contains", catData.id),
-          where("status", "==", "active")
-        );
-
-        const [snapByName, snapBySection] = await Promise.all([
-          getDocs(productsByNameQuery),
-          getDocs(productsBySectionIdQuery),
-        ]);
-
-        const combinedDocs = [...snapByName.docs, ...snapBySection.docs];
-        const uniqueMap = new Map<string, any>();
-        combinedDocs.forEach((d) => {
-          if (!uniqueMap.has(d.id)) uniqueMap.set(d.id, d);
-        });
-
-        const worksData: WorkItem[] = Array.from(uniqueMap.values()).map(
-          (doc) => ({
+        // 2. Fetch products based on whether it's a menu category or a standard category
+        if (isMenu) {
+          // Fetch products for menu category
+          const productsQuery = query(
+            collection(db, "products"),
+            where("menuManagerCategoryIds", "array-contains", catData.id),
+            where("status", "==", "active")
+          );
+          const snap = await getDocs(productsQuery);
+          const worksData: WorkItem[] = snap.docs.map((doc) => ({
             id: doc.id,
             sales: doc.data()?.sales || 0,
             ...doc.data(),
-          })
-        );
-        setWorks(worksData);
-        setFilteredWorks(worksData);
+          })) as WorkItem[];
+
+          setWorks(worksData);
+          setFilteredWorks(worksData);
+        } else {
+          // Fetch products for standard category
+          const productsByNameQuery = query(
+            collection(db, "products"),
+            where("categoryName", "==", catData.name),
+            where("status", "==", "active")
+          );
+          const productsBySectionIdQuery = query(
+            collection(db, "products"),
+            where("sectionCategoryIds", "array-contains", catData.id),
+            where("status", "==", "active")
+          );
+
+          const [snapByName, snapBySection] = await Promise.all([
+            getDocs(productsByNameQuery),
+            getDocs(productsBySectionIdQuery),
+          ]);
+
+          const combinedDocs = [...snapByName.docs, ...snapBySection.docs];
+          const uniqueMap = new Map<string, any>();
+          combinedDocs.forEach((d) => {
+            if (!uniqueMap.has(d.id)) uniqueMap.set(d.id, d);
+          });
+
+          const worksData: WorkItem[] = Array.from(uniqueMap.values()).map(
+            (doc) => ({
+              id: doc.id,
+              sales: doc.data()?.sales || 0,
+              ...doc.data(),
+            })
+          );
+          setWorks(worksData);
+          setFilteredWorks(worksData);
+        }
       } catch (err: any) {
         console.error(err);
         setError("Failed to load category or artworks.");

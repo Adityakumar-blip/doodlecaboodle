@@ -70,7 +70,7 @@ const ShopByCategory = () => {
     if (category?.name === "Portrait") {
       navigate("/portraits", { state: { id: category?.id } });
     } else {
-      navigate(`/${category?.name.toLowerCase()}`, { state: { id: category?.id } });
+      navigate(`/${category?.name.toLowerCase().replace(/\s+/g, "-")}`, { state: { id: category?.id } });
     }
   };
 
@@ -95,21 +95,31 @@ const ShopByCategory = () => {
         ) : error ? (
           <div className="text-center py-12 text-red-600">{error}</div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {categories.map((category) => (
               <div
                 key={category.id}
-                className="relative group cursor-pointer overflow-hidden aspect-square bg-gray-100 rounded-lg"
+                className="flex flex-col group cursor-pointer"
                 onClick={() => handleCategoryClick(category)}
               >
-                <img
-                  src={category.image}
-                  alt={category.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
+                <div className="relative overflow-hidden aspect-square bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                  <img
+                    src={category.image}
+                    alt={category.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
 
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <h3 className="text-white font-bold text-xl md:text-2xl text-center px-4">
+                  {/* Desktop Hover Overlay */}
+                  <div className="hidden md:flex absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center">
+                    <h2 className="text-white font-bold text-2xl text-center px-4 tracking-wide font-['Jost']">
+                      {category.name}
+                    </h2>
+                  </div>
+                </div>
+
+                {/* Mobile Category Name */}
+                <div className="mt-3 text-center md:hidden">
+                  <h3 className="text-gray-900 font-bold text-base font-['Jost']">
                     {category.name}
                   </h3>
                 </div>

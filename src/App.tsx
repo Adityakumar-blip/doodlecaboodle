@@ -37,6 +37,9 @@ import OrderDetails from "./components/OrderDetail";
 import NavDetailBrowse from "./components/NavDetailBrowse";
 import { fetchConfigurations } from "./store/slices/ConfigurationSlice";
 import BestSellers from "./pages/BestSellers";
+import { fetchMenus } from "./store/slices/MenuSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "./store/store";
 
 const queryClient = new QueryClient();
 
@@ -158,24 +161,23 @@ const AppContent = () => {
 
   useEffect(() => {
     dispatch(fetchConfigurations());
+    dispatch(fetchMenus());
   }, [dispatch]);
+
+  const { menus } = useSelector((state: RootState) => state.menus);
+  const hasMenus = menus && menus.length > 0;
 
   return (
     <>
       <Toaster />
       <Sonner />
       {!hideNavbarAndFooter && <Navbar />}
-      <div className={`${!hideNavbarAndFooter ? "mt-14" : ""}`}>
+      <div className={`${!hideNavbarAndFooter ? (hasMenus ? "mt-14 md:mt-[108px]" : "mt-14") : ""}`}>
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<LoginSignupPage />} />
           <Route path="/portraits" element={<ArtworkBrowse />} />
-          <Route
-            path="/:categoryName"
-            element={<NavDetailBrowse />}
-          />
-          <Route path="/product-detail/:productName" element={<ArtworkDetailPage />} />
           <Route path="/work-detail/:id" element={<WorkDetail />} />
           <Route path="/artists" element={<Artist />} />
           <Route path="/collection" element={<GalleryShowcase />} />
@@ -199,6 +201,15 @@ const AppContent = () => {
           <Route path="/get-yours" element={<CustomSketchOrder />} />
           <Route path="/order/:orderId" element={<OrderDetails />} />
           <Route path="/best-sellers" element={<BestSellers />} />
+          <Route
+            path="/:categoryName"
+            element={<NavDetailBrowse />}
+          />
+          <Route
+            path="/category/:categoryName"
+            element={<NavDetailBrowse />}
+          />
+          <Route path="/:category/:productName" element={<ArtworkDetailPage />} />
 
           {/* <Route path="/occasions/:id" element={<OccasionDetail />} /> */}
           <Route path="*" element={<NotFound />} />
