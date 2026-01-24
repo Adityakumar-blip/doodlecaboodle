@@ -55,7 +55,6 @@ const CategoryBar = () => {
   }, [menus]);
 
   const handleCategoryClick = (item: MenuItem) => {
-    console.log("item", item);
     navigate(`/${item.slug.replace(/\s+/g, "-")}`, { state: { id: item.id, isMenu: true, isCategory: item.isCategory } });
   };
 
