@@ -100,18 +100,38 @@ const HeroSection: React.FC = () => {
           style={{ pointerEvents: index === currentIndex ? 'auto' : 'none' }}
         >
           {index === currentIndex && image.url ? (
-            <a
-              href={image.url.startsWith('http') ? image.url : image.url.toLowerCase().replace(/\s+/g, '-')}
-              target={image.url.startsWith('http') ? "_blank" : "_self"}
-              rel="noopener noreferrer"
-              style={{ display: 'block', width: '100%', height: '100%' }}
+            <div 
+              onClick={() => {
+                let targetUrl = image.url!.trim();
+                
+                // If it's a full URL to our domain, convert to relative path for SPA navigation
+                const domain = "doodlecaboodle.com";
+                if (targetUrl.includes(domain)) {
+                  try {
+                    const urlObj = new URL(targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`);
+                    targetUrl = urlObj.pathname + urlObj.search;
+                  } catch (e) {
+                    console.error("URL parsing error:", e);
+                  }
+                }
+
+                if (targetUrl.startsWith('http')) {
+                  // External link: Enforce HTTPS and open in new tab
+                  window.open(targetUrl.replace(/^http:/i, 'https:'), '_blank');
+                } else {
+                  // Internal link: Navigate within SPA
+                  const path = targetUrl.startsWith('/') ? targetUrl : `/${targetUrl.toLowerCase().replace(/\s+/g, '-')}`;
+                  navigate(path);
+                }
+              }}
+              className="w-full h-full cursor-pointer"
             >
               <img
                 src={isMobile ? image.mobileUrl : image.desktopUrl}
                 alt={image.title}
-                className="object-cover object-center w-full h-full cursor-pointer"
+                className="object-cover object-center w-full h-full"
               />
-            </a>
+            </div>
           ) : (
             <img
               src={isMobile ? image.mobileUrl : image.desktopUrl}

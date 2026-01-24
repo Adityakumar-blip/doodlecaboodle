@@ -228,57 +228,61 @@ const NavDetailBrowse = () => {
       setError(null);
 
       let actualCategoryId = location.state?.id;
-      console.log("categoryName 123123", categoryName);
       let actualCategoryName = categoryName;
       const isFromCategory = location.state?.isCategory;
       let isMenu = (location.state?.isMenu || location.pathname.startsWith('/category/')) && !isFromCategory;
+      
       try {
         let catData: any = null;
-        let foundInMenu = false;
+        let allRelatedMenuIds: string[] = [];
+        let allRelatedCategoryIds: string[] = [];
+        let allRelatedCategoryNames: string[] = [];
 
-        // 1. Try to fetch category data (either from menus or productCategories)
-        if (actualCategoryId && !isFromCategory) {
-          // Try menus first
-          const menuRef = doc(db, "menus", actualCategoryId);
-          const menuSnap = await getDoc(menuRef);
+        // 1. Resolve Category Data
+        if (actualCategoryId) {
+          // Try to determine if it's a menu or category
+          const [menuSnap, categorySnap] = await Promise.all([
+            getDoc(doc(db, "menus", actualCategoryId)),
+            getDoc(doc(db, "productCategories", actualCategoryId))
+          ]);
+
           if (menuSnap.exists()) {
             catData = { id: menuSnap.id, ...menuSnap.data() };
-            foundInMenu = true;
-          } else {
-            // Try productCategories
-            const categoryRef = doc(db, "productCategories", actualCategoryId);
-            const categorySnap = await getDoc(categoryRef);
-            if (categorySnap.exists()) {
-              catData = { id: categorySnap.id, ...categorySnap.data() };
-              foundInMenu = false;
-            }
+            allRelatedMenuIds.push(menuSnap.id);
+            if (catData.name) allRelatedCategoryNames.push(catData.name);
+          } else if (categorySnap.exists()) {
+            catData = { id: categorySnap.id, ...categorySnap.data() };
+            allRelatedCategoryIds.push(categorySnap.id);
+            if (catData.name) allRelatedCategoryNames.push(catData.name);
           }
-        } 
-        
-        if (!catData && actualCategoryName) {
-          console.log("came here")
-          // Try menus by slug
-          const colMenus = collection(db, "menus");
-          const qMenus = query(colMenus, where("slug", "==", actualCategoryName));
-          const snapMenus = await getDocs(qMenus);
-          if (!snapMenus.empty && !isFromCategory) {
-            const d = snapMenus.docs[0];
-            catData = { id: d.id, ...d.data() };
-            foundInMenu = true;
-          } else {
-            // Try productCategories by name (matching slugified name)
-            const colCats = collection(db, "productCategories");
-            const snapCats = await getDocs(colCats);
-            const foundCat = snapCats.docs.find(d => {
-              const name = d.data().name || "";
-              const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]+/g, "");
-              return slug === actualCategoryName || name.toLowerCase() === actualCategoryName.toLowerCase();
-            });
-            if (foundCat) {
-              catData = { id: foundCat.id, ...foundCat.data() };
-              foundInMenu = false;
+        }
+
+        if (actualCategoryName) {
+          const slugToMatch = actualCategoryName.toLowerCase();
+          
+          // Initial Menu Search
+          const snapMenus = await getDocs(query(collection(db, "menus"), where("slug", "==", slugToMatch)));
+          snapMenus.docs.forEach(d => {
+            if (!allRelatedMenuIds.includes(d.id)) {
+              allRelatedMenuIds.push(d.id);
+              if (d.data().name) allRelatedCategoryNames.push(d.data().name);
             }
-          }
+            if (!catData) catData = { id: d.id, ...d.data() };
+          });
+
+          // Category Search by name/slug
+          const snapCats = await getDocs(collection(db, "productCategories"));
+          snapCats.docs.forEach(d => {
+            const name = d.data().name || "";
+            const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]+/g, "");
+            if (slug === slugToMatch || name.toLowerCase() === slugToMatch) {
+              if (!allRelatedCategoryIds.includes(d.id)) {
+                allRelatedCategoryIds.push(d.id);
+                allRelatedCategoryNames.push(name);
+              }
+              if (!catData) catData = { id: d.id, ...d.data() };
+            }
+          });
         }
 
         if (!catData) {
@@ -288,61 +292,93 @@ const NavDetailBrowse = () => {
         }
 
         setCategory(catData);
-        isMenu = foundInMenu && !isFromCategory;
 
-        // 2. Fetch products based on whether it's a menu category or a standard category
-        if (isMenu) {
-          // Fetch products for menu category
-          const productsQuery = query(
-            collection(db, "products"),
-            where("menuManagerCategoryIds", "array-contains", catData.id),
-            where("status", "==", "active")
-          );
-          const snap = await getDocs(productsQuery);
-          const worksData: WorkItem[] = snap.docs.map((doc) => ({
-            id: doc.id,
-            sales: doc.data()?.sales || 0,
-            ...doc.data(),
-          })) as WorkItem[];
-
-          setWorks(worksData);
-          setFilteredWorks(worksData);
-        } else {
-          // Fetch products for standard category
-          const productsByNameQuery = query(
-            collection(db, "products"),
-            where("categoryName", "==", catData.name),
-            where("status", "==", "active")
-          );
-          const productsBySectionIdQuery = query(
-            collection(db, "products"),
-            where("sectionCategoryIds", "array-contains", catData.id),
-            where("status", "==", "active")
-          );
-
-          const [snapByName, snapBySection] = await Promise.all([
-            getDocs(productsByNameQuery),
-            getDocs(productsBySectionIdQuery),
-          ]);
-
-          const combinedDocs = [...snapByName.docs, ...snapBySection.docs];
-          const uniqueMap = new Map<string, any>();
-          combinedDocs.forEach((d) => {
-            if (!uniqueMap.has(d.id)) uniqueMap.set(d.id, d);
-          });
-
-          const worksData: WorkItem[] = Array.from(uniqueMap.values()).map(
-            (doc) => ({
-              id: doc.id,
-              sales: doc.data()?.sales || 0,
-              ...doc.data(),
-            })
-          );
-          setWorks(worksData);
-          setFilteredWorks(worksData);
+        // 2. Expand Menu IDs to include all children
+        if (allRelatedMenuIds.length > 0) {
+          const allMenusSnap = await getDocs(collection(db, "menus"));
+          const menus = allMenusSnap.docs.map(d => ({ id: d.id, ...d.data() } as any));
+          
+          const findChildren = (parentIds: string[]) => {
+            let children: string[] = [];
+            parentIds.forEach(pid => {
+              menus.filter(m => m.parentId === pid).forEach(child => {
+                if (!allRelatedMenuIds.includes(child.id)) {
+                  children.push(child.id);
+                  allRelatedMenuIds.push(child.id);
+                  if (child.name) allRelatedCategoryNames.push(child.name);
+                }
+              });
+            });
+            if (children.length > 0) findChildren(children);
+          };
+          
+          findChildren([...allRelatedMenuIds]);
         }
+
+        // 3. Fetch Products
+        const productQueries: any[] = [];
+        const uniqueNames = [...new Set(allRelatedCategoryNames)];
+        const uniqueMenuIds = [...new Set(allRelatedMenuIds)];
+        const uniqueCatIds = [...new Set(allRelatedCategoryIds)];
+
+        // Search by categoryName
+        if (uniqueNames.length > 0) {
+          // Firestore 'in' query has limit of 10 for some reason? Let's chunk if needed, but usually categories are few.
+          for (let i = 0; i < uniqueNames.length; i += 10) {
+            const chunk = uniqueNames.slice(i, i + 10);
+            productQueries.push(getDocs(query(
+              collection(db, "products"),
+              where("categoryName", "in", chunk),
+              where("status", "==", "active")
+            )));
+          }
+        }
+
+        // Search by menuManagerCategoryIds (array-contains-any)
+        if (uniqueMenuIds.length > 0) {
+          for (let i = 0; i < uniqueMenuIds.length; i += 10) {
+            const chunk = uniqueMenuIds.slice(i, i + 10);
+            productQueries.push(getDocs(query(
+              collection(db, "products"),
+              where("menuManagerCategoryIds", "array-contains-any", chunk),
+              where("status", "==", "active")
+            )));
+          }
+        }
+
+        // Search by sectionCategoryIds (array-contains-any)
+        if (uniqueCatIds.length > 0) {
+          for (let i = 0; i < uniqueCatIds.length; i += 10) {
+            const chunk = uniqueCatIds.slice(i, i + 10);
+            productQueries.push(getDocs(query(
+              collection(db, "products"),
+              where("sectionCategoryIds", "array-contains-any", chunk),
+              where("status", "==", "active")
+            )));
+          }
+        }
+
+        const results = await Promise.all(productQueries);
+        const uniqueMap = new Map<string, WorkItem>();
+        
+        results.forEach(snap => {
+          snap.docs.forEach((doc: any) => {
+            if (!uniqueMap.has(doc.id)) {
+              uniqueMap.set(doc.id, {
+                id: doc.id,
+                sales: doc.data()?.sales || 0,
+                ...doc.data(),
+              } as WorkItem);
+            }
+          });
+        });
+
+        const worksData = Array.from(uniqueMap.values());
+        setWorks(worksData);
+        setFilteredWorks(worksData);
+
       } catch (err: any) {
-        console.error(err);
+        console.error("Error in fetchData:", err);
         setError("Failed to load category or artworks.");
       } finally {
         setLoading(false);
