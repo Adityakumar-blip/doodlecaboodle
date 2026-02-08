@@ -32,8 +32,8 @@ export const fetchMenus = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const menusRef = collection(db, "menus");
-      // Simplify query: remove filters and order to debug if data is fetched at all
-      const snapshot = await getDocs(menusRef);
+      const q = query(menusRef, where("isActive", "==", true));
+      const snapshot = await getDocs(q);
       const menus: MenuItem[] = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),

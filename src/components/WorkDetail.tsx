@@ -19,6 +19,14 @@ import { uploadImagesToCloudinary } from "@/lib/UplaodCloudinary";
 import { db } from "@/firebase/firebaseconfig";
 import { CartContext } from "@/context/CartContext";
 import { getYearFromFirebaseTimestamp } from "@/lib/utils";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 interface SizeOption {
   name: string;
@@ -48,6 +56,8 @@ interface ArtworkDetailProps {
   artistId?: string;
   categoryId?: string;
   createdAt?: any;
+  metaTitle?: string;
+  metaDescription?: string;
 }
 
 interface Artist {
@@ -299,13 +309,31 @@ const WorkDetail = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-12">
-      <button
-        onClick={() => navigate(-1)}
-        className="inline-flex items-center mb-6 text-gray-600 hover:text-gray-900 transition-colors"
-      >
-        <ArrowLeft size={18} className="mr-2" />
-        <span>Back to Gallery</span>
-      </button>
+      {/* Breadcrumb */}
+      <Breadcrumb className="mb-6">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to="/">Home</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link 
+                to={`/category/${artwork?.category}`}
+                state={{ id: artwork?.categoryId, isCategory: true }}
+              >
+                {artwork?.category}
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{artwork?.metaTitle || artwork?.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
         <div>
@@ -349,6 +377,11 @@ const WorkDetail = () => {
               <h1 className="font-serif text-2xl md:text-3xl font-medium text-gray-900 mb-2">
                 {artwork?.name}
               </h1>
+              {artwork?.metaDescription && (
+                <p className="text-gray-500 text-sm mb-4">
+                  {artwork.metaDescription}
+                </p>
+              )}
             </div>
             <div className="mb-6">
               <Button

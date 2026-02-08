@@ -5,6 +5,14 @@ import { CartContext } from "@/context/CartContext";
 import { doc, getDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/firebase/firebaseconfig";
 import RelatedProducts from "./RelatedProduct";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 interface SizeOption {
   name: string;
@@ -340,16 +348,31 @@ const ArtworkDetailPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-6  md:py-12">
-      {/* Back button */}
-      <button
-        onClick={() => navigate(`/${category}`, {
-          state: { id: artwork?.categoryId, isCategory: true }
-        })}
-        className="inline-flex items-center mb-6 text-gray-600 hover:text-gray-900 transition-colors"
-      >
-        <ArrowLeft size={18} className="mr-2" />
-        <span>Back to Gallery</span>
-      </button>
+      {/* Breadcrumb */}
+      <Breadcrumb className="mb-6">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to="/">Home</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link 
+                to={`/${category}`}
+                state={{ id: artwork?.categoryId, isCategory: true }}
+              >
+                {artwork.categoryName}
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{artwork?.metaTitle || artwork?.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
         {/* Left Column - Images */}
@@ -420,6 +443,11 @@ const ArtworkDetailPage = () => {
             <h1 className="font-playfair text-2xl md:text-3xl font-medium text-gray-900 mb-2">
               {artwork?.name}
             </h1>
+            {artwork?.metaDescription && (
+              <p className="text-gray-500 text-sm mb-4">
+                {artwork.metaDescription}
+              </p>
+            )}
             <div className="flex items-center gap-2">
               <p className="text-xl font-medium text-gray-900">
                 {calculatePrice()}
