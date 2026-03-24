@@ -75,14 +75,14 @@ const ShopByCategory = () => {
   };
 
   return (
-    <div className="w-full py-16 px-4 bg-primary-foreground">
-      <div className="container px-4 mx-auto">
+    <div className="w-full pt-1 md:pt-16 pb-8 md:pb-16 px-2 md:px-4 bg-primary-foreground">
+      <div className="container px-2 md:px-4 mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-primary mb-3 font-['Jost']">
+        <div className="text-center mb-6 md:mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-2 md:mb-3 font-['Jost']">
             Shop By Category
           </h2>
-          <p className="text-gray-600 text-xl font-['Jost']">
+          <p className="text-gray-600 text-base md:text-xl font-['Jost']">
             Explore our curated collections
           </p>
         </div>
@@ -95,7 +95,7 @@ const ShopByCategory = () => {
         ) : error ? (
           <div className="text-center py-12 text-red-600">{error}</div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
             {categories.map((category) => (
               <div
                 key={category.id}
@@ -118,8 +118,8 @@ const ShopByCategory = () => {
                 </div>
 
                 {/* Mobile Category Name */}
-                <div className="mt-3 text-center md:hidden">
-                  <h3 className="text-gray-900 font-bold text-base font-['Jost']">
+                <div className="mt-2 text-center md:hidden">
+                  <h3 className="text-gray-900 font-bold text-sm font-['Jost'] line-clamp-1">
                     {category.name}
                   </h3>
                 </div>

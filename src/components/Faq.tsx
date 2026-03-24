@@ -63,12 +63,12 @@ const FAQPage = () => {
   }
 
   return (
-    <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-primary-foreground min-h-screen">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-playfair font-bold text-center tracking-wide mb-8 sm:mb-12 md:mb-16 text-gray-800">
+    <section className="py-6 md:py-16 lg:py-20 bg-primary-foreground min-h-screen">
+      <div className="container mx-auto px-2 md:px-6 lg:px-8">
+        <h2 className="text-2xl md:text-4xl lg:text-5xl font-playfair font-bold text-center tracking-wide mb-6 md:mb-16 text-gray-800">
           Frequently Asked Questions
         </h2>
-        <div className="max-w-full sm:max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto">
+        <div className="max-w-full md:max-w-3xl lg:max-w-4xl mx-auto">
           {faqs.length === 0 ? (
             <div className="text-center text-gray-600 text-base sm:text-lg">
               No FAQs available at the moment.

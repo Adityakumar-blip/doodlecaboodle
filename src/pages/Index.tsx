@@ -78,11 +78,11 @@ const Index = () => {
 
       {/* Divider Image Section */}
       <a
-        className="w-full bg-primary-foreground pb-8 md:pb-12 cursor-pointer"
+        className="w-full bg-primary-foreground pb-4 md:pb-12 cursor-pointer"
         target="_blank"
         href="https://forms.gle/9ATNoaCByeqANusZ8"
       >
-        <div className="px-4 md:px-6 lg:px-8">
+        <div className="px-2 md:px-6 lg:px-8">
           <img
             src={configurations[0]?.heroBanner || BGDoodle}
             alt="Doodle Art Showcase"

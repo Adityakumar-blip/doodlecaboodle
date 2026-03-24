@@ -29,10 +29,10 @@ const NextArrow: React.FC<ArrowProps> = ({ onClick, show = true }) => {
   return (
     <button
       onClick={onClick}
-      className="w-12 h-12 absolute right-0 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/80 flex items-center justify-center shadow-md hover:bg-white transition-all"
+      className="w-8 h-8 md:w-12 md:h-12 absolute right-0 md:-right-4 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white flex items-center justify-center shadow-lg hover:bg-gray-50 transition-all"
       aria-label="Next"
     >
-      <ChevronRight size={24} className="text-gray-900" />
+      <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-gray-900" />
     </button>
   );
 };
@@ -42,10 +42,10 @@ const PrevArrow: React.FC<ArrowProps> = ({ onClick, show = true }) => {
   return (
     <button
       onClick={onClick}
-      className="w-12 h-12 absolute left-0 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/80 flex items-center justify-center shadow-md hover:bg-white transition-all"
+      className="w-8 h-8 md:w-12 md:h-12 absolute left-0 md:-left-4 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white flex items-center justify-center shadow-lg hover:bg-gray-50 transition-all"
       aria-label="Previous"
     >
-      <ChevronLeft size={24} className="text-gray-900" />
+      <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-gray-900" />
     </button>
   );
 };
@@ -61,7 +61,7 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({
   useEffect(() => {
     const updateSlidesToShow = () => {
       if (window.innerWidth < 640) {
-        setSlidesToShow(1);
+        setSlidesToShow(2);
       } else if (window.innerWidth < 1024) {
         setSlidesToShow(2);
       } else {
@@ -98,7 +98,7 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({
   }, [currentSlide, maxSlide]);
 
   return (
-    <div className="py-16 bg-primary-foreground">
+    <div className="pt-2 md:pt-16 pb-16 bg-primary-foreground">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
           <h2 className="text-4xl font-bold font-poppins text-gray-800 mb-3">
@@ -120,12 +120,12 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({
         </div>
 
         {/* Carousel Container */}
-        <div className="relative px-12">
+        <div className="relative px-2 md:px-12">
           <PrevArrow onClick={prevSlide} show={currentSlide > 0} />
 
           <div className="overflow-hidden">
             <div
-              className="flex transition-transform duration-700 ease-in-out"
+              className="flex items-stretch transition-transform duration-700 ease-in-out"
               style={{
                 transform: `translateX(-${
                   currentSlide * (100 / slidesToShow)
@@ -135,46 +135,43 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({
               {items.map((item, index) => (
                 <div
                   key={`${item.src}-${index}`}
-                  className="flex-shrink-0 px-3"
+                  className="flex-shrink-0 px-1 md:px-3 h-full"
                   style={{ width: `${100 / slidesToShow}%` }}
                 >
-                  <div className="bg-primary rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl">
-                    <img
-                      src={item.src}
-                      alt={`Review ${index + 1}`}
-                      className="w-full h-[420px] object-cover rounded-t-2xl"
-                    />
-                    <div className="p-6 flex flex-col items-center text-center">
-                      <div className="flex flex-col items-center gap-3 mb-4">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-lg text-primary-foreground">
+                  <div className="bg-primary rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl h-full flex flex-col overflow-hidden border border-white/10">
+                    <div className="aspect-[4/5] sm:aspect-[3/4] overflow-hidden">
+                      <img
+                        src={item.src}
+                        alt={`Review ${index + 1}`}
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      />
+                    </div>
+                    <div className="p-3 md:p-6 flex flex-col items-center text-center flex-1">
+                      <div className="w-full flex flex-col items-center">
+                        <div className="flex flex-col items-center gap-1 md:gap-2 mb-2 md:mb-3">
+                          <span className="font-bold text-sm md:text-lg text-primary-foreground tracking-wide font-['Jost']">
                             {item.name}
                           </span>
-                          {/* {item.verified && (
-                            <img
-                              src={FaCheckCircle}
-                              alt="Verified"
-                              className="w-5 h-5"
-                            />
-                          )} */}
+                          <div className="flex justify-center gap-0.5">
+                            {[...Array(5)].map((_, i) => (
+                              <svg
+                                key={i}
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                                fill={i < item.rating ? "#FFD600" : "#E5E7EB"}
+                                className="w-3.5 h-3.5 md:w-5 md:h-5"
+                              >
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.175 0l-3.37 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.174 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.286-3.957z" />
+                              </svg>
+                            ))}
+                          </div>
                         </div>
-                        <div className="flex justify-center">
-                          {[...Array(5)].map((_, i) => (
-                            <svg
-                              key={i}
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 20 20"
-                              fill={i < item.rating ? "#FFD600" : "#E5E7EB"}
-                              className="w-5 h-5"
-                            >
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.175 0l-3.37 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.174 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.286-3.957z" />
-                            </svg>
-                          ))}
+                        <div className="min-h-[60px] md:min-h-[100px] flex items-center">
+                          <p className="text-white/90 text-[10px] md:text-base leading-relaxed italic line-clamp-3 md:line-clamp-4 overflow-hidden text-ellipsis">
+                            "{item.review}"
+                          </p>
                         </div>
                       </div>
-                      <p className="text-accent text-center max-w-prose mx-auto">
-                        {item.review}
-                      </p>
                     </div>
                   </div>
                 </div>
@@ -185,7 +182,7 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({
           <NextArrow onClick={nextSlide} show={currentSlide < maxSlide} />
 
           {/* Dots indicator */}
-          <div className="flex justify-center gap-2 mt-8">
+          <div className="hidden md:flex justify-center gap-2 mt-8">
             {Array.from({ length: maxSlide + 1 }).map((_, index) => (
               <button
                 key={index}

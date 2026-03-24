@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 const QuoteSection = () => {
   const { configurations } = useSelector((state: any) => state.configuration);
   return (
-    <section className="py-6 md:py-20 lg:py-24 bg-background">
+    <section className="pt-6 md:pt-20 pb-2 md:pb-24 bg-background">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl md:max-w-4xl mx-auto text-center">
           <div className="mb-8 md:mb-10 flex items-center justify-center">

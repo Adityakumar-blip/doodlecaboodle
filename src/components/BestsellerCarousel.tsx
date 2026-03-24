@@ -9,10 +9,10 @@ const NextArrow = ({ onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-3 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-all"
+      className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1.5 md:p-3 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-all"
       aria-label="Next"
     >
-      <ChevronRight size={24} className="text-gray-900" />
+      <ChevronRight className="w-4 h-4 md:w-6 md:h-6 text-gray-900" />
     </button>
   );
 };
@@ -21,10 +21,10 @@ const PrevArrow = ({ onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-3 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-all"
+      className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1.5 md:p-3 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-all"
       aria-label="Previous"
     >
-      <ChevronLeft size={24} className="text-gray-900" />
+      <ChevronLeft className="w-4 h-4 md:w-6 md:h-6 text-gray-900" />
     </button>
   );
 };
@@ -41,7 +41,7 @@ const BestsellerCarousel = () => {
   useEffect(() => {
     const updateSlidesToShow = () => {
       if (window.innerWidth < 640) {
-        setSlidesToShow(1);
+        setSlidesToShow(2);
       } else if (window.innerWidth < 768) {
         setSlidesToShow(2);
       } else if (window.innerWidth < 1024) {
@@ -105,21 +105,21 @@ const BestsellerCarousel = () => {
   }, []);
 
   return (
-    <div className="w-full mt-4">
-      <div className=" mx-auto px-4">
+    <div className="w-full mt-0 md:mt-4">
+      <div className=" mx-auto px-2 sm:px-4">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 px-12">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-4 md:mb-8 gap-4 px-4 md:px-12">
           <div className="text-center md:text-left">
-            <h2 className="text-4xl font-bold text-primary mb-1 font-['Jost']">
+            <h2 className="text-3xl md:text-4xl font-bold text-primary mb-1 font-['Jost']">
               Shop Best Sellers
             </h2>
-            <p className="text-gray-500 font-medium tracking-wide">
+            <p className="text-xs md:text-base text-gray-500 font-medium tracking-wide">
               OUR MOST LOVED MASTERPIECES
             </p>
           </div>
           <a 
             href="/best-sellers" 
-            className="group flex items-center gap-2 bg-accent text-white px-6 py-2.5 rounded-full font-bold hover:bg-accent/90 transition-all shadow-md hover:shadow-lg"
+            className="group flex items-center gap-2 bg-accent text-white px-6 py-2.5 rounded-full font-bold hover:bg-accent/90 transition-all shadow-md hover:shadow-lg text-sm md:text-base"
           >
             View All
             <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -127,7 +127,7 @@ const BestsellerCarousel = () => {
         </div>
 
         {/* Carousel Container */}
-        <div className="relative px-12">
+        <div className="relative px-2 md:px-12">
           <PrevArrow onClick={prevSlide} />
 
           {loading ? (
@@ -150,7 +150,7 @@ const BestsellerCarousel = () => {
                 {products.map((product) => (
                   <div
                     key={product.id}
-                    className="flex-shrink-0 gap-6 px-3 py-6"
+                    className="flex-shrink-0 gap-6 px-1 md:px-3 py-6"
                     style={{ width: `${100 / slidesToShow}%` }}
                   >
                     <WorkCard
@@ -169,7 +169,7 @@ const BestsellerCarousel = () => {
         </div>
 
         {/* Dots Indicator */}
-        <div className="flex justify-center gap-2 mt-10">
+        <div className="hidden md:flex justify-center gap-2 mt-10">
           {Array.from({ length: maxSlide + 1 }).map((_, index) => (
             <button
               key={index}

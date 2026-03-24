@@ -57,8 +57,8 @@ const CategorySection = () => {
   }, []);
 
   return (
-    <div className="w-full py-16 px-4">
-      <div className="container px-4 mx-auto">
+    <div className="w-full pt-8 md:pt-16 pb-2 md:pb-16 px-2 md:px-4">
+      <div className="container px-2 md:px-4 mx-auto">
         {/* Two Column Grid */}
         {loading ? (
           <div className="text-center py-12 text-gray-600">
@@ -67,7 +67,7 @@ const CategorySection = () => {
         ) : error ? (
           <div className="text-center py-12 text-red-600">{error}</div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-2 md:gap-6">
             {categories.map((category) => (
               
               <div
@@ -95,7 +95,7 @@ const CategorySection = () => {
                   <div className="bg-orange-100 px-3 py-1 sm:px-4 sm:py-1.5 md:px-5 md:py-2">
                     <span
                       className="text-gray-800 font-semibold 
-      text-xs sm:text-sm md:text-base lg:text-lg 
+      text-[10px] sm:text-sm md:text-base lg:text-lg 
       uppercase tracking-wider"
                     >
                       {category.label}
