@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import WorkCard from "./Ourworkcard";
 import { collection, getDocs, query, where } from "firebase/firestore";
@@ -33,6 +33,7 @@ const PrevArrow = ({ onClick }) => {
 const BestsellerCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slidesToShow, setSlidesToShow] = useState(4);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -56,14 +57,85 @@ const BestsellerCarousel = () => {
     return () => window.removeEventListener("resize", updateSlidesToShow);
   }, []);
 
+  // Mouse Drag to Scroll Logic
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeftStart = useRef(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    isDragging.current = true;
+    startX.current = e.pageX - scrollRef.current.offsetLeft;
+    scrollLeftStart.current = scrollRef.current.scrollLeft;
+    scrollRef.current.style.scrollSnapType = "none"; // Disable snapping while dragging
+    scrollRef.current.style.scrollBehavior = "auto"; // Disable smooth scroll while dragging
+  };
+
+  const handleMouseLeave = () => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    if (scrollRef.current) {
+      scrollRef.current.style.scrollSnapType = "x mandatory";
+      scrollRef.current.style.scrollBehavior = "smooth";
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    if (scrollRef.current) {
+      scrollRef.current.style.scrollSnapType = "x mandatory";
+      scrollRef.current.style.scrollBehavior = "smooth";
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX.current) * 1.5; // multiplier for speed
+    scrollRef.current.scrollLeft = scrollLeftStart.current - walk;
+  };
+
   const maxSlide = Math.max(0, products.length - slidesToShow);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev >= maxSlide ? 0 : prev + 1));
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const cardWidth = clientWidth / slidesToShow;
+      const isAtEnd = scrollLeft + clientWidth >= scrollRef.current.scrollWidth - 10;
+      
+      if (isAtEnd) {
+        scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        scrollRef.current.scrollBy({ left: cardWidth, behavior: "smooth" });
+      }
+    }
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev <= 0 ? maxSlide : prev - 1));
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const cardWidth = clientWidth / slidesToShow;
+      const isAtStart = scrollLeft <= 10;
+      
+      if (isAtStart) {
+        scrollRef.current.scrollTo({ left: scrollRef.current.scrollWidth, behavior: "smooth" });
+      } else {
+        scrollRef.current.scrollBy({ left: -cardWidth, behavior: "smooth" });
+      }
+    }
+  };
+
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const cardWidth = clientWidth / slidesToShow;
+      const newIndex = Math.round(scrollLeft / cardWidth);
+      if (newIndex !== currentSlide) {
+        setCurrentSlide(newIndex);
+      }
+    }
   };
 
   // Auto-play functionality
@@ -73,7 +145,7 @@ const BestsellerCarousel = () => {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [currentSlide, maxSlide]);
+  }, [products, slidesToShow]);
 
   // Fetch bestsellers from Firestore
   useEffect(() => {
@@ -138,19 +210,21 @@ const BestsellerCarousel = () => {
           ) : error ? (
             <div className="text-center text-red-600 py-8">{error}</div>
           ) : (
-            <div className="overflow-hidden">
-              <div
-                className="flex transition-transform duration-700 ease-in-out"
-                style={{
-                  transform: `translateX(-${
-                    currentSlide * (100 / slidesToShow)
-                  }%)`,
-                }}
+            <div 
+                className="overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory cursor-grab active:cursor-grabbing"
+                ref={scrollRef}
+                onScroll={handleScroll}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseLeave}
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
+              <div className="flex">
                 {products.map((product) => (
                   <div
                     key={product.id}
-                    className="flex-shrink-0 gap-6 px-1 md:px-3 py-6"
+                    className="flex-shrink-0 gap-6 px-1 md:px-3 py-6 snap-start"
                     style={{ width: `${100 / slidesToShow}%` }}
                   >
                     <WorkCard
@@ -170,10 +244,15 @@ const BestsellerCarousel = () => {
 
         {/* Dots Indicator */}
         <div className="hidden md:flex justify-center gap-2 mt-10">
-          {Array.from({ length: maxSlide + 1 }).map((_, index) => (
+          {Array.from({ length: products.length - slidesToShow + 1 }).map((_, index) => (
             <button
               key={index}
-              onClick={() => setCurrentSlide(index)}
+              onClick={() => {
+                if (scrollRef.current) {
+                  const cardWidth = scrollRef.current.clientWidth / slidesToShow;
+                  scrollRef.current.scrollTo({ left: index * cardWidth, behavior: 'smooth' });
+                }
+              }}
               className={`h-2 rounded-full transition-all duration-300 ${
                 currentSlide === index
                   ? "bg-accent w-8"

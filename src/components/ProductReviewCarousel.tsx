@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ReviewModal from "./ReviewModal";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import FaCheckCircle from "../assets/FaCheckCircle.png";
@@ -56,6 +56,7 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slidesToShow, setSlidesToShow] = useState(3);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Responsive slides logic
   useEffect(() => {
@@ -74,18 +75,92 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({
     return () => window.removeEventListener("resize", updateSlidesToShow);
   }, []);
 
+  // Mouse Drag to Scroll Logic
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeftStart = useRef(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    isDragging.current = true;
+    startX.current = e.pageX - scrollRef.current.offsetLeft;
+    scrollLeftStart.current = scrollRef.current.scrollLeft;
+    scrollRef.current.style.scrollSnapType = "none";
+    scrollRef.current.style.scrollBehavior = "auto";
+  };
+
+  const handleMouseLeave = () => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    if (scrollRef.current) {
+      scrollRef.current.style.scrollSnapType = "x mandatory";
+      scrollRef.current.style.scrollBehavior = "smooth";
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    if (scrollRef.current) {
+      scrollRef.current.style.scrollSnapType = "x mandatory";
+      scrollRef.current.style.scrollBehavior = "smooth";
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX.current) * 1.5;
+    scrollRef.current.scrollLeft = scrollLeftStart.current - walk;
+  };
+
   const maxSlide = Math.max(0, items.length - slidesToShow);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev >= maxSlide ? 0 : prev + 1));
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const cardWidth = clientWidth / slidesToShow;
+      const isAtEnd = scrollLeft + clientWidth >= scrollRef.current.scrollWidth - 10;
+      
+      if (isAtEnd) {
+        scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        scrollRef.current.scrollBy({ left: cardWidth, behavior: "smooth" });
+      }
+    }
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev <= 0 ? maxSlide : prev - 1));
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const cardWidth = clientWidth / slidesToShow;
+      const isAtStart = scrollLeft <= 10;
+      
+      if (isAtStart) {
+        scrollRef.current.scrollTo({ left: scrollRef.current.scrollWidth, behavior: "smooth" });
+      } else {
+        scrollRef.current.scrollBy({ left: -cardWidth, behavior: "smooth" });
+      }
+    }
+  };
+
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const cardWidth = clientWidth / slidesToShow;
+      const newIndex = Math.round(scrollLeft / cardWidth);
+      if (newIndex !== currentSlide) {
+        setCurrentSlide(newIndex);
+      }
+    }
   };
 
   const goToSlide = (index: number) => {
-    setCurrentSlide(index);
+    if (scrollRef.current) {
+      const cardWidth = scrollRef.current.clientWidth / slidesToShow;
+      scrollRef.current.scrollTo({ left: index * cardWidth, behavior: 'smooth' });
+    }
   };
 
   // Auto-play functionality
@@ -95,7 +170,7 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [currentSlide, maxSlide]);
+  }, [items, slidesToShow]);
 
   return (
     <div className="pt-2 md:pt-16 pb-16 bg-primary-foreground">
@@ -123,19 +198,21 @@ const ProductReviewCarousel: React.FC<ProductReviewCarouselProps> = ({
         <div className="relative px-2 md:px-12">
           <PrevArrow onClick={prevSlide} show={currentSlide > 0} />
 
-          <div className="overflow-hidden">
-            <div
-              className="flex items-stretch transition-transform duration-700 ease-in-out"
-              style={{
-                transform: `translateX(-${
-                  currentSlide * (100 / slidesToShow)
-                }%)`,
-              }}
-            >
+          <div 
+            className="overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory cursor-grab active:cursor-grabbing"
+            ref={scrollRef}
+            onScroll={handleScroll}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            <div className="flex items-stretch">
               {items.map((item, index) => (
                 <div
                   key={`${item.src}-${index}`}
-                  className="flex-shrink-0 px-1 md:px-3 h-full"
+                  className="flex-shrink-0 px-1 md:px-3 h-full snap-start"
                   style={{ width: `${100 / slidesToShow}%` }}
                 >
                   <div className="bg-primary rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl h-full flex flex-col overflow-hidden border border-white/10">
