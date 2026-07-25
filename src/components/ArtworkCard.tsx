@@ -119,11 +119,17 @@ const ArtworkCard = ({
     addToCart(cartItem);
   };
 
-  // Heart click handler to prevent card navigation
-  const handleHeartClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onLike) onLike();
+  // Calculate discount percentage based on price and slashedPrice
+  const getDiscountPercentage = () => {
+    if (!price || !props?.slashedPrice) return 0;
+    const cleanPrice = parseFloat(String(price).replace(/[^0-9.]/g, "")) || 0;
+    const cleanSlashed = parseFloat(String(props.slashedPrice).replace(/[^0-9.]/g, "")) || 0;
+    if (cleanSlashed > cleanPrice && cleanPrice > 0) {
+      return Math.round(((cleanSlashed - cleanPrice) / cleanSlashed) * 100);
+    }
+    return 0;
   };
+  const discountPercentage = getDiscountPercentage();
 
   return (
     <div
@@ -150,7 +156,7 @@ const ArtworkCard = ({
         onClick={isClickable ? handleCardClick : undefined}
       >
         {/* Image Container with hover effect */}
-        <div className="relative overflow-hidden aspect square">
+        <div className="relative overflow-hidden aspect-square">
           {/* Primary image */}
           <img
             src={props?.images?.[0]?.url}
@@ -167,6 +173,13 @@ const ArtworkCard = ({
               alt={`${title} - alternate`}
               className="w-full h-full object-cover absolute top-0 left-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
             />
+          )}
+
+          {/* Discount Badge */}
+          {discountPercentage > 0 && (
+            <div className="absolute top-2.5 right-2.5 z-20 bg-brand-charcoal/90 backdrop-blur-[2px] text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-md border border-white/10 shadow-md">
+              {discountPercentage}% OFF
+            </div>
           )}
         </div>
       </div>

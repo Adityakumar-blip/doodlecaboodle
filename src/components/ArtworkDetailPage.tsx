@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
-import { ShoppingCart, ArrowLeft, Plus, Minus } from "lucide-react";
+import { ShoppingCart, ArrowLeft, Plus, Minus, CreditCard } from "lucide-react";
 import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { CartContext } from "@/context/CartContext";
+import { toast } from "sonner";
 import { doc, getDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/firebase/firebaseconfig";
 import RelatedProducts from "./RelatedProduct";
@@ -46,7 +47,7 @@ interface Variant {
 }
 
 const ArtworkDetailPage = () => {
-  const { addToCart, toggleCart } = useContext(CartContext);
+  const { addToCart, toggleCart, openCart, setIsCheckoutRequested } = useContext(CartContext);
   const { category, productName } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -285,6 +286,58 @@ const ArtworkDetailPage = () => {
     toggleCart?.();
   };
 
+  const handleBuyNow = async () => {
+    if (!artwork) return;
+
+    // If dimensions exist, a size MUST be selected
+    if (Array.isArray(artwork.dimensions) && artwork.dimensions.length > 0 && !selectedSize) {
+      toast.error("Please select a size");
+      return;
+    }
+
+    const price =
+      Number(artwork?.price || 0) +
+      Number(selectedSize?.priceAdjustment || 0) +
+      Number(selectedVariant?.priceAdjustment || 0);
+
+    const cartItem: any = {
+      id: `${artwork?.id}-${selectedVariant?.id || "base"}-${Date.now()}`,
+      artworkId: artwork?.id,
+      title: artwork?.name,
+      price,
+      quantity,
+      artistName: artwork?.artistName,
+      size: selectedSize ? {
+        value: `${selectedSize.length}x${selectedSize.width}`,
+        label: selectedSize.name,
+        priceAdjustment: selectedSize.priceAdjustment || 0,
+      } : null,
+      variant: selectedVariant
+        ? {
+            id: selectedVariant.id,
+            colorName: selectedVariant.colorName,
+            colorHex: selectedVariant.colorHex,
+            priceAdjustment: selectedVariant.priceAdjustment || 0,
+            sku: selectedVariant.sku || null,
+          }
+        : null,
+      uploadedImageUrl: activeImage || artwork.images?.[0]?.url,
+      timestamp: Date.now(),
+      deliveryNote: "",
+      productCategory: artwork?.categoryName,
+      categoryId: artwork?.categoryId,
+    };
+
+    try {
+      await addToCart(cartItem);
+      setIsCheckoutRequested(true);
+      openCart();
+    } catch (error) {
+      console.error("Error in Buy Now:", error);
+      toast.error("Failed to proceed to buy");
+    }
+  };
+
   const getVariantTotalPrice = (variant: Variant) => {
     const base = Number(artwork.price) || 0;
     const colorAdj = Number(variant.priceAdjustment) || 0;
@@ -345,6 +398,12 @@ const ArtworkDetailPage = () => {
     Array.isArray(artwork?.descriptionFields) &&
     (artwork?.descriptionFields as DescriptionField[]).length > 0;
     
+
+  const cleanPrice = artwork?.price ? parseFloat(String(artwork.price).replace(/[^0-9.]/g, "")) : 0;
+  const cleanSlashed = artwork?.slashedPrice ? parseFloat(String(artwork.slashedPrice).replace(/[^0-9.]/g, "")) : 0;
+  const discountPercentage = cleanSlashed > cleanPrice && cleanPrice > 0
+    ? Math.round(((cleanSlashed - cleanPrice) / cleanSlashed) * 100)
+    : 0;
 
   return (
     <div className="container mx-auto px-4 py-6  md:py-12">
@@ -440,59 +499,91 @@ const ArtworkDetailPage = () => {
                 {artwork.artistName}
               </p>
             )}
-            <h1 className="font-playfair text-2xl md:text-3xl font-medium text-gray-900 mb-2">
-              {artwork?.name}
-            </h1>
+            <div className="flex justify-between items-start gap-4 mb-2">
+              <h1 className="font-playfair text-2xl md:text-3xl font-semibold text-gray-900 leading-tight">
+                {artwork?.name}
+              </h1>
+              {discountPercentage > 0 && (
+                <div className="bg-red-500 text-white font-extrabold px-3 py-2 text-center rounded-sm shrink-0 shadow-sm leading-none flex flex-col justify-center min-w-[56px] border border-red-600">
+                  <span className="text-sm md:text-base block">{discountPercentage}%</span>
+                  <span className="text-[9px] uppercase tracking-wider block mt-0.5 font-sans">OFF</span>
+                </div>
+              )}
+            </div>
             {artwork?.metaDescription && (
               <p className="text-gray-500 text-sm mb-4">
                 {artwork.metaDescription}
               </p>
             )}
-            <div className="flex items-center gap-2">
-              <p className="text-xl font-medium text-gray-900">
-                {calculatePrice()}
-              </p>
-              {artwork?.slashedPrice && (
-                <p className="text-sm text-gray-500 line-through">
-                  ₹{artwork?.slashedPrice}
-                </p>
-              )}
+          </div>
+
+          {/* Price and Quantity Row */}
+          <div className="flex items-center justify-between my-4 py-3 border-y border-gray-200/80">
+            {/* Price display */}
+            <div>
+              <div className="flex items-baseline gap-2.5">
+                {artwork?.slashedPrice && (
+                  <span className="text-sm md:text-base text-red-500/80 line-through font-normal">
+                    MRP: ₹{artwork.slashedPrice}
+                  </span>
+                )}
+                <span className="text-xl md:text-2xl font-bold text-gray-900 font-sans">
+                  {calculatePrice()}
+                </span>
+              </div>
+              <span className="text-[11px] text-gray-400 block mt-0.5">(incl. of all taxes)</span>
+            </div>
+
+            {/* Quantity Selector */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-500 font-medium font-sans">Quantity</span>
+              <div className="flex items-center border border-gray-300 rounded-md overflow-hidden bg-white shadow-sm">
+                <button
+                  onClick={() => handleQuantityChange(quantity - 1)}
+                  className="px-2.5 py-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+                  disabled={quantity <= 1}
+                >
+                  <Minus size={14} />
+                </button>
+                <span className="px-3 py-1 text-sm font-semibold text-gray-800 min-w-[32px] text-center select-none font-sans">
+                  {quantity}
+                </span>
+                <button
+                  onClick={() => handleQuantityChange(quantity + 1)}
+                  className="px-2.5 py-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-50 transition-colors"
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex flex-col md:flex-row gap-3 my-6">
-            {/* (Optional) Quantity Selector
-            <div className="flex items-center border border-gray-300 rounded-md">
-              <button
-                onClick={() => handleQuantityChange(quantity - 1)}
-                className="px-3 py-2 text-gray-500 hover:text-gray-700"
-                disabled={quantity <= 1}
-              >
-                <Minus size={16} />
-              </button>
-              <span className="px-3 py-2 border-x border-gray-300">
-                {quantity}
-              </span>
-              <button
-                onClick={() => handleQuantityChange(quantity + 1)}
-                className="px-3 py-2 text-gray-500 hover:text-gray-700"
-              >
-                <Plus size={16} />
-              </button>
-            </div> */}
-
-            {/* Add to Cart Button */}
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 my-6">
+            {/* Add to Cart — outline style */}
             <button
               onClick={handleAddToCart}
               disabled={isOutOfStock}
-              className={`flex-1 py-2 px-4 rounded-md flex items-center justify-center gap-2 font-medium text-white ${
-                isOutOfStock ? "bg-gray-500" : "bg-primary hover:bg-primary/90"
+              className={`flex-1 border-2 py-2 px-4 rounded-md font-medium text-sm flex items-center justify-center gap-2 transition-all duration-300 ${
+                isOutOfStock
+                  ? "border-gray-300 text-gray-400 bg-gray-50 cursor-not-allowed"
+                  : "border-primary text-primary bg-transparent hover:bg-primary/5"
               }`}
             >
               <ShoppingCart size={18} />
               <span>{isOutOfStock ? "Out of Stock" : "Add to Cart"}</span>
             </button>
+
+            {/* Buy Now — solid filled style */}
+            {!isOutOfStock && (
+              <button
+                onClick={handleBuyNow}
+                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground py-2 px-4 rounded-md font-medium text-sm transition-all duration-300 flex flex-col items-center justify-center gap-0.5 shadow-sm"
+              >
+                <span>Buy Now</span>
+                <span className="text-[8px] text-white/60 font-normal tracking-normal">Secure checkout powered by Razorpay</span>
+              </button>
+            )}
           </div>
 
           {/* Size Selector */}

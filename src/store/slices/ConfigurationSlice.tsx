@@ -7,6 +7,7 @@ export interface Configuration {
   id: string;
   quote: string;
   heroBanner: string;
+  announcementMessages?: string[];
   createdAt?: any;
   updatedAt?: any;
 }

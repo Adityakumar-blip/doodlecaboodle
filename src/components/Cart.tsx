@@ -70,7 +70,7 @@ const Cart = ({
   isOpen: boolean;
   onClose: () => void;
 }) => {
-  const { cartItems, setCartItems } = useContext(CartContext);
+  const { cartItems, setCartItems, isCheckoutRequested, setIsCheckoutRequested } = useContext(CartContext);
   const [loading, setLoading] = useState(false);
   const [showCheckoutForm, setShowCheckoutForm] = useState(false);
   const [showLoginForm, setShowLoginForm] = useState(false);
@@ -432,6 +432,29 @@ const Cart = ({
       document.body.style.overflow = "";
     };
   }, [isOpen]);
+
+  // Auto-proceed to checkout if Buy Now was clicked
+  useEffect(() => {
+    if (isOpen && isCheckoutRequested) {
+      if (isAuthenticated !== null) {
+        if (isAuthenticated) {
+          setShowCheckoutForm(true);
+        } else {
+          setShowLoginForm(true);
+        }
+      }
+    }
+  }, [isOpen, isCheckoutRequested, isAuthenticated]);
+
+  // Reset checkout request state when cart is closed
+  useEffect(() => {
+    if (!isOpen) {
+      setIsCheckoutRequested(false);
+      setShowCheckoutForm(false);
+      setShowLoginForm(false);
+      setShowSignupForm(false);
+    }
+  }, [isOpen, setIsCheckoutRequested]);
 
   // Load Razorpay script dynamically
   const loadRazorpayScript = () => {

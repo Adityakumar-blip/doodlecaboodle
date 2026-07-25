@@ -165,14 +165,27 @@ const AppContent = () => {
   }, [dispatch]);
 
   const { menus } = useSelector((state: RootState) => state.menus);
+  const { configurations } = useSelector((state: RootState) => state.configuration);
+  
   const hasMenus = menus && menus.length > 0;
+  const hasAnnouncement = configurations && configurations.length > 0 && 
+                          configurations[0]?.announcementMessages && 
+                          configurations[0]?.announcementMessages.length > 0;
+
+  const getMarginClass = () => {
+    if (hideNavbarAndFooter) return "";
+    if (hasAnnouncement) {
+      return hasMenus ? "mt-[92px] md:mt-[144px]" : "mt-[92px] md:mt-[100px]";
+    }
+    return hasMenus ? "mt-14 md:mt-[108px]" : "mt-14";
+  };
 
   return (
     <>
       <Toaster />
       <Sonner />
       {!hideNavbarAndFooter && <Navbar />}
-      <div className={`${!hideNavbarAndFooter ? (hasMenus ? "mt-14 md:mt-[108px]" : "mt-14") : ""}`}>
+      <div className={getMarginClass()}>
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />

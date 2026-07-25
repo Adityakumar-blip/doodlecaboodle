@@ -11,6 +11,7 @@ import {
   CheckCircle,
   AlertCircle,
   Camera,
+  CreditCard,
 } from "lucide-react";
 import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
@@ -18,6 +19,7 @@ import { doc, setDoc, collection, addDoc, getDoc } from "firebase/firestore"; //
 import { uploadImagesToCloudinary } from "@/lib/UplaodCloudinary";
 import { db } from "@/firebase/firebaseconfig";
 import { CartContext } from "@/context/CartContext";
+import { toast } from "sonner";
 import { getYearFromFirebaseTimestamp } from "@/lib/utils";
 import {
   Breadcrumb,
@@ -82,7 +84,7 @@ interface CartItem {
 const WorkDetail = () => {
   const { id } = useParams();
   const location = useLocation();
-  const { cartItems, addToCart, setCartItems } = useContext(CartContext);
+  const { cartItems, addToCart, setCartItems, openCart, setIsCheckoutRequested } = useContext(CartContext);
   const navigate = useNavigate();
   const state = location.state as ArtworkDetailProps | undefined;
   const [artwork, setArtwork] = useState<ArtworkDetailProps | null>(null);
@@ -264,6 +266,56 @@ const WorkDetail = () => {
     } catch (error) {
       console.error("Error adding to cart:", error);
       setUploadError("Failed to add item to cart. Please try again.");
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!artwork || !uploadedPhoto || !id) return;
+
+    // If dimensions exist, a size MUST be selected
+    if (Array.isArray(artwork.dimensions) && artwork.dimensions.length > 0 && !selectedSize) {
+      toast.error("Please select a size");
+      return;
+    }
+
+    setIsAddingToCart(true);
+    try {
+      // Upload image to Cloudinary
+      const imageUrl = await uploadImagesToCloudinary(uploadedPhoto);
+
+      // Calculate final price
+      const basePrice = parseFloat(artwork.price);
+      const adjustedPrice = basePrice + (selectedSize?.priceAdjustment || 0);
+
+      // Create cart item
+      const cartItem: CartItem = {
+        id: `${id}-${Date.now()}`,
+        artworkId: id,
+        title: artwork.title,
+        artistName: artwork.artistName,
+        price: adjustedPrice,
+        quantity,
+        size: selectedSize || ({} as any),
+        uploadedImageUrl: imageUrl,
+        timestamp: Date.now(),
+        categoryId: artwork?.categoryId,
+      };
+
+      await addToCart(cartItem);
+      setCartItems([cartItem]);
+      setIsCheckoutRequested(true);
+      openCart();
+
+      // Reset upload section
+      setShowUploadSection(false);
+      setUploadedPhoto(null);
+      setPhotoPreview("");
+      setQuantity(1);
+    } catch (error) {
+      console.error("Error in Buy Now:", error);
+      toast.error("Failed to add item to cart. Please try again.");
     } finally {
       setIsAddingToCart(false);
     }
@@ -534,20 +586,31 @@ const WorkDetail = () => {
                   </div>
 
                   <div className="mb-6 animate-fade-in">
-                    <Button
-                      onClick={handleAddToCart}
-                      disabled={!canAddToCart || isAddingToCart}
-                      className={`w-full py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center ${
-                        canAddToCart && !isAddingToCart
-                          ? "bg-blue-600 hover:bg-blue-700 text-white"
-                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      }`}
-                    >
-                      <ShoppingCart size={20} className="mr-2" />
-                      {isAddingToCart
-                        ? "Adding to Cart..."
-                        : `Add to Cart (${calculatePrice()} × ${quantity})`}
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button
+                        onClick={handleAddToCart}
+                        disabled={!canAddToCart || isAddingToCart}
+                        className={`flex-1 py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center ${
+                          canAddToCart && !isAddingToCart
+                            ? "bg-blue-600 hover:bg-blue-700 text-white"
+                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        }`}
+                      >
+                        <ShoppingCart size={20} className="mr-2" />
+                        {isAddingToCart
+                          ? "Adding to Cart..."
+                          : `Add to Cart (${calculatePrice()} × ${quantity})`}
+                      </Button>
+                      {canAddToCart && !isAddingToCart && (
+                        <button
+                          onClick={handleBuyNow}
+                          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 font-medium text-sm py-3 px-6 rounded-lg shadow-md flex flex-col items-center justify-center gap-0.5"
+                        >
+                          <span>Buy Now</span>
+                          <span className="text-[8px] text-white/60 font-normal tracking-normal">Secure checkout powered by Razorpay</span>
+                        </button>
+                      )}
+                    </div>
                     {!canAddToCart && (
                       <p className="text-sm text-gray-500 mt-2 text-center">
                         {uploadedPhoto &&

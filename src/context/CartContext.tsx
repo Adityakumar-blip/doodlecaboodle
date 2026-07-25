@@ -36,6 +36,8 @@ interface CartContextType {
   toggleCart: () => void;
   openCart: () => void;
   closeCart: () => void;
+  isCheckoutRequested: boolean;
+  setIsCheckoutRequested: (val: boolean) => void;
 }
 
 // Create the CartContext with default values
@@ -49,6 +51,8 @@ export const CartContext = createContext<CartContextType>({
   toggleCart: () => {},
   openCart: () => {},
   closeCart: () => {},
+  isCheckoutRequested: false,
+  setIsCheckoutRequested: () => {},
 });
 
 // Utility to manage local storage
@@ -71,6 +75,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCheckoutRequested, setIsCheckoutRequested] = useState(false);
   const auth = getAuth();
 
   // Monitor authentication state and sync cart
@@ -200,6 +205,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         toggleCart,
         openCart,
         closeCart,
+        isCheckoutRequested,
+        setIsCheckoutRequested,
       }}
     >
       {children}

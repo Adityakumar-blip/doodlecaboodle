@@ -31,6 +31,10 @@ const Navbar = () => {
     (state: RootState) => state.categories
   );
   const { menus } = useSelector((state: RootState) => state.menus);
+  const { configurations } = useSelector((state: RootState) => state.configuration);
+  
+  const announcementMessages = configurations && configurations.length > 0 ? configurations[0]?.announcementMessages || [] : [];
+
   const { cartItems, isCartOpen, toggleCart } = useContext(CartContext);
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -192,6 +196,30 @@ const Navbar = () => {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-40 transition-all duration-300">
+        {/* Announcement Bar */}
+        {announcementMessages.length > 0 && (
+          <div className="w-full bg-[#161616] text-[#D1B17A] h-9 flex items-center overflow-hidden border-b border-neutral-800 text-[11px] font-bold uppercase tracking-widest font-poppins">
+            <div className="flex whitespace-nowrap animate-marquee">
+              <div className="flex items-center space-x-12 px-6 flex-shrink-0">
+                {announcementMessages.map((msg, idx) => (
+                  <span key={idx} className="flex items-center gap-12">
+                    <span>{msg}</span>
+                    <span className="text-[#B6B3AE]/40">•</span>
+                  </span>
+                ))}
+              </div>
+              <div className="flex items-center space-x-12 px-6 flex-shrink-0">
+                {announcementMessages.map((msg, idx) => (
+                  <span key={idx} className="flex items-center gap-12">
+                    <span>{msg}</span>
+                    <span className="text-[#B6B3AE]/40">•</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div
           className={cn(
             "w-full transition-all duration-300 bg-primary text-primary-foreground flex items-center relative z-20 h-16",
@@ -626,6 +654,20 @@ const Navbar = () => {
       )}
 
       <style>{`
+        @keyframes marquee {
+          0% {
+            transform: translateX(-50%);
+          }
+          100% {
+            transform: translateX(0%);
+          }
+        }
+
+        .animate-marquee {
+          display: inline-flex;
+          animation: marquee 20s linear infinite;
+        }
+
         @keyframes fade-in {
           from {
             opacity: 0;
