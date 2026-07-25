@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Heart, ShoppingCart } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { CartContext } from "@/context/CartContext";
 
 interface WorkCardProps {
   id?: string | number; // Added ID prop for navigation
@@ -27,6 +28,7 @@ const WorkCard = ({
   isClickable = true,
   showPrice = true,
 }: WorkCardProps) => {
+  const { addToCart, toggleCart } = useContext(CartContext);
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
 
@@ -50,23 +52,55 @@ const WorkCard = ({
     });
   };
 
-  // Modified to prevent event propagation
+  // Add to cart — uses prop if provided, otherwise builds item from props data directly
   const handleAddToCartClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent the click from bubbling up to the card
+    e.stopPropagation();
     if (onAddToCart) {
       onAddToCart(e);
+      return;
     }
+    // Fallback: build cart item from props and add via context
+    if (!props) return;
+    const firstSize =
+      Array.isArray(props.dimensions) && props.dimensions.length > 0
+        ? props.dimensions[0]
+        : null;
+    const cartItem: any = {
+      id: `${props.id}-${Date.now()}`,
+      artworkId: props.id,
+      title: props.name,
+      price: props.price,
+      quantity: 1,
+      artistName: props.artistName,
+      size: firstSize
+        ? {
+            value: `${firstSize.length}x${firstSize.width}`,
+            label: firstSize.name,
+            priceAdjustment: firstSize.priceAdjustment || 0,
+          }
+        : null,
+      uploadedImageUrl: props.images?.[0]?.url,
+      timestamp: Date.now(),
+      deliveryNote: "",
+      productCategory: props.categoryName,
+    };
+    addToCart(cartItem);
+    toggleCart(); // open cart drawer for feedback
   };
 
   // Calculate discount percentage based on price and slashedPrice
+  // Show badge ONLY when both real price AND slashed price are present, valid, and slashed > real
   const getDiscountPercentage = () => {
     if (!price || !props?.slashedPrice) return 0;
-    const cleanPrice = parseFloat(String(price).replace(/[^0-9.]/g, "")) || 0;
-    const cleanSlashed = parseFloat(String(props.slashedPrice).replace(/[^0-9.]/g, "")) || 0;
-    if (cleanSlashed > cleanPrice && cleanPrice > 0) {
-      return Math.round(((cleanSlashed - cleanPrice) / cleanSlashed) * 100);
-    }
-    return 0;
+    const cleanPrice = parseFloat(String(price).replace(/[^0-9.]/g, ""));
+    const cleanSlashed = parseFloat(String(props.slashedPrice).replace(/[^0-9.]/g, ""));
+    // Guard: both must be positive finite numbers, and slashed must be strictly greater
+    if (
+      !isFinite(cleanPrice) || cleanPrice <= 0 ||
+      !isFinite(cleanSlashed) || cleanSlashed <= 0 ||
+      cleanSlashed <= cleanPrice
+    ) return 0;
+    return Math.round(((cleanSlashed - cleanPrice) / cleanSlashed) * 100);
   };
   const discountPercentage = getDiscountPercentage();
 
@@ -158,10 +192,21 @@ const WorkCard = ({
 
           {/* Discount Badge */}
           {discountPercentage > 0 && (
-            <div className="absolute top-2.5 right-2.5 z-20 bg-brand-charcoal/90 backdrop-blur-[2px] text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-md border border-white/10 shadow-md">
+            <div className="absolute top-0 right-0 z-20 bg-brand-charcoal text-white text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-bl-lg shadow-md">
               {discountPercentage}% OFF
             </div>
           )}
+
+          {/* Hover Add to Cart */}
+          <div className="absolute bottom-0 left-0 right-0 z-20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out">
+            <button
+              onClick={handleAddToCartClick}
+              className="w-full flex items-center justify-center gap-2 bg-primary/95 hover:bg-primary text-primary-foreground text-xs font-semibold py-2.5 backdrop-blur-sm transition-colors duration-200"
+            >
+              <ShoppingCart size={14} />
+              <span>Add to Cart</span>
+            </button>
+          </div>
         </div>
       </div>
       {/* Card details */}

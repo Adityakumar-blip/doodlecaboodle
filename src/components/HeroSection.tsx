@@ -13,6 +13,7 @@ interface HeroImage {
   tag: string;
   displayOrder?: number;
   url?: string;
+  mediaType?: "image" | "video";
 }
 
 const HeroSection: React.FC = () => {
@@ -35,6 +36,7 @@ const HeroSection: React.FC = () => {
           tag: doc.data().tag,
           displayOrder: doc.data().displayOrder,
           url: doc.data().url,
+          mediaType: doc.data().mediaType || "image",
         }));
         // Sort by displayOrder (ascending, undefined last)
         const sortedBanners = bannersData.sort((a, b) => {
@@ -126,18 +128,40 @@ const HeroSection: React.FC = () => {
               }}
               className="w-full h-full cursor-pointer"
             >
+              {image.mediaType === "video" ? (
+                <video
+                  src={isMobile ? image.mobileUrl : image.desktopUrl}
+                  className="object-cover object-center w-full h-full"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                />
+              ) : (
+                <img
+                  src={isMobile ? image.mobileUrl : image.desktopUrl}
+                  alt={image.title}
+                  className="object-cover object-center w-full h-full"
+                />
+              )}
+            </div>
+          ) : (
+            image.mediaType === "video" ? (
+              <video
+                src={isMobile ? image.mobileUrl : image.desktopUrl}
+                className="object-cover object-center w-full h-full"
+                autoPlay
+                muted
+                loop
+                playsInline
+              />
+            ) : (
               <img
                 src={isMobile ? image.mobileUrl : image.desktopUrl}
                 alt={image.title}
                 className="object-cover object-center w-full h-full"
               />
-            </div>
-          ) : (
-            <img
-              src={isMobile ? image.mobileUrl : image.desktopUrl}
-              alt={image.title}
-              className="object-cover object-center w-full h-full"
-            />
+            )
           )}
         </div>
       ))}

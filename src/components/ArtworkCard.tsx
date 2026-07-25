@@ -94,10 +94,12 @@ const ArtworkCard = ({
     e.stopPropagation();
     if (!artwork) return;
 
-    // If dimensions exist, a size MUST be selected
-    if (Array.isArray(artwork.dimensions) && artwork.dimensions.length > 0 && !selectedSize) {
-      return;
-    }
+    // Auto-use first dimension if none selected — never silently fail on the card
+    const sizeToUse =
+      selectedSize ??
+      (Array.isArray(artwork.dimensions) && artwork.dimensions.length > 0
+        ? artwork.dimensions[0]
+        : null);
 
     const cartItem: any = {
       id: `${artwork?.id}-${Date.now()}`,
@@ -106,28 +108,34 @@ const ArtworkCard = ({
       price: artwork?.price,
       quantity: 1,
       artistName: artwork?.artistName,
-      size: selectedSize ? {
-        value: `${selectedSize.length}x${selectedSize.width}`,
-        label: selectedSize.name,
-        priceAdjustment: selectedSize.priceAdjustment || 0,
-      } : null,
+      size: sizeToUse
+        ? {
+            value: `${sizeToUse.length}x${sizeToUse.width}`,
+            label: sizeToUse.name,
+            priceAdjustment: sizeToUse.priceAdjustment || 0,
+          }
+        : null,
       uploadedImageUrl: artwork?.images?.[0]?.url,
       timestamp: Date.now(),
       deliveryNote: "",
       productCategory: artwork?.categoryName,
     };
     addToCart(cartItem);
+    toggleCart(); // open cart drawer for feedback
   };
 
-  // Calculate discount percentage based on price and slashedPrice
+  // Show badge ONLY when both real price AND slashed price are present, valid, and slashed > real
   const getDiscountPercentage = () => {
     if (!price || !props?.slashedPrice) return 0;
-    const cleanPrice = parseFloat(String(price).replace(/[^0-9.]/g, "")) || 0;
-    const cleanSlashed = parseFloat(String(props.slashedPrice).replace(/[^0-9.]/g, "")) || 0;
-    if (cleanSlashed > cleanPrice && cleanPrice > 0) {
-      return Math.round(((cleanSlashed - cleanPrice) / cleanSlashed) * 100);
-    }
-    return 0;
+    const cleanPrice = parseFloat(String(price).replace(/[^0-9.]/g, ""));
+    const cleanSlashed = parseFloat(String(props.slashedPrice).replace(/[^0-9.]/g, ""));
+    // Guard: both must be positive finite numbers, and slashed must be strictly greater
+    if (
+      !isFinite(cleanPrice) || cleanPrice <= 0 ||
+      !isFinite(cleanSlashed) || cleanSlashed <= 0 ||
+      cleanSlashed <= cleanPrice
+    ) return 0;
+    return Math.round(((cleanSlashed - cleanPrice) / cleanSlashed) * 100);
   };
   const discountPercentage = getDiscountPercentage();
 
@@ -177,10 +185,21 @@ const ArtworkCard = ({
 
           {/* Discount Badge */}
           {discountPercentage > 0 && (
-            <div className="absolute top-2.5 right-2.5 z-20 bg-brand-charcoal/90 backdrop-blur-[2px] text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-md border border-white/10 shadow-md">
+            <div className="absolute top-0 right-0 z-20 bg-brand-charcoal text-white text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-bl-lg shadow-md">
               {discountPercentage}% OFF
             </div>
           )}
+
+          {/* Hover Add to Cart */}
+          <div className="absolute bottom-0 left-0 right-0 z-20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out">
+            <button
+              onClick={handleAddToCartClick}
+              className="w-full flex items-center justify-center gap-2 bg-primary/95 hover:bg-primary text-primary-foreground text-xs font-semibold py-2.5 backdrop-blur-sm transition-colors duration-200"
+            >
+              <ShoppingCart size={14} />
+              <span>Add to Cart</span>
+            </button>
+          </div>
         </div>
       </div>
       {/* Card details */}
