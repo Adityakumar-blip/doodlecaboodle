@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Pencil,
@@ -13,21 +13,55 @@ import {
   ShieldCheck,
   Instagram,
   CheckCircle2,
-  Send
+  Send,
+  Star,
 } from "lucide-react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/firebase/firebaseconfig";
 import boyDrawing from "@/assets/doodle1.png";
 import girlFlowers from "@/assets/doodle2.png";
 import boyCrafting from "@/assets/doodle3.png";
 import childrenCrafting from "@/assets/doodle4.png";
 import founder from "@/assets/founder.png";
 
+interface MiniReview {
+  name: string;
+  rating: number;
+  review: string;
+  src: string;
+}
+
 const About = () => {
+  const [miniReviews, setMiniReviews] = useState<MiniReview[]>([]);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const snap = await getDocs(collection(db, "reviews"));
+        const data: MiniReview[] = snap.docs.map((doc) => {
+          const d = doc.data();
+          return {
+            name: d.name,
+            rating: d.rating,
+            review: d.reviewText,
+            src: d.image,
+          };
+        });
+        setMiniReviews(data);
+      } catch (e) {
+        console.error("About reviews fetch error", e);
+      }
+    };
+    fetchReviews();
+  }, []);
   useEffect(() => {
     // Dynamic SEO update
-    document.title = "Doodle Caboodle | Handmade Gifts & Custom Portraits — India";
-    
+    document.title =
+      "Doodle Caboodle | Handmade Gifts & Custom Portraits — India";
+
     let metaDesc = document.querySelector('meta[name="description"]');
-    const descContent = "Doodle Caboodle, Pencil portraits, crochet, candles, paintings, pipe cleaner art & hampers. Handcrafted gifts that feel personal. Order from India.";
+    const descContent =
+      "Doodle Caboodle, Pencil portraits, crochet, candles, paintings, pipe cleaner art & hampers. Handcrafted gifts that feel personal. Order from India.";
     if (metaDesc) {
       metaDesc.setAttribute("content", descContent);
     } else {
@@ -51,8 +85,13 @@ const About = () => {
             <span className="text-gray-900 font-medium">Every single one.</span>
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Some gifts are bought in five minutes and forgotten in five days. <br />
-            And then there are gifts that make someone stop, hold it close, and say <span className="font-semibold text-primary">"how did you know?"</span>
+            Some gifts are bought in five minutes and forgotten in five days.{" "}
+            <br />
+            And then there are gifts that make someone stop, hold it close, and
+            say{" "}
+            <span className="font-semibold text-primary">
+              "how did you know?"
+            </span>
           </p>
         </div>
 
@@ -65,7 +104,10 @@ const About = () => {
       <section className="px-4 pb-24">
         <div className="max-w-4xl mx-auto bg-white border border-neutral-100/60 rounded-3xl p-8 sm:p-12 shadow-sm text-center relative">
           <p className="text-lg sm:text-xl md:text-2xl text-primary font-medium leading-relaxed italic">
-            "We are a handmade gifting brand from India, creating personalised, handcrafted gifts that carry real emotion. Every product we make is built around one person, one moment, and one feeling — the feeling that someone truly cared enough to create something just for you."
+            "We are a handmade gifting brand from India, creating personalised,
+            handcrafted gifts that carry real emotion. Every product we make is
+            built around one person, one moment, and one feeling — the feeling
+            that someone truly cared enough to create something just for you."
           </p>
         </div>
       </section>
@@ -88,7 +130,9 @@ const About = () => {
             <div className="grid md:grid-cols-12 gap-12 items-center">
               <div className="md:col-span-7 order-2 md:order-1">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="text-xs font-semibold text-accent uppercase tracking-widest">Phase 01</span>
+                  <span className="text-xs font-semibold text-accent uppercase tracking-widest">
+                    Phase 01
+                  </span>
                   <div className="h-px bg-neutral-100 flex-grow"></div>
                 </div>
                 <h3 className="text-2xl font-semibold text-primary mb-4">
@@ -96,10 +140,17 @@ const About = () => {
                 </h3>
                 <div className="space-y-4 text-gray-600 text-sm sm:text-base leading-relaxed">
                   <p>
-                    Doodle Caboodle began with a simple pencil and a lot of love. What started as custom pencil portraits — hand-drawn, deeply personal — quickly grew into something bigger.
+                    Doodle Caboodle began with a simple pencil and a lot of
+                    love. What started as custom pencil portraits — hand-drawn,
+                    deeply personal — quickly grew into something bigger.
                   </p>
                   <p>
-                    We realised that people weren't just looking for a product. They were looking for a way to express what words sometimes can't. A way to say: <span className="font-semibold text-primary">"I see you. I know you. This was made for you."</span>
+                    We realised that people weren't just looking for a product.
+                    They were looking for a way to express what words sometimes
+                    can't. A way to say:{" "}
+                    <span className="font-semibold text-primary">
+                      "I see you. I know you. This was made for you."
+                    </span>
                   </p>
                 </div>
               </div>
@@ -127,7 +178,9 @@ const About = () => {
               </div>
               <div className="md:col-span-7">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="text-xs font-semibold text-accent uppercase tracking-widest">Phase 02</span>
+                  <span className="text-xs font-semibold text-accent uppercase tracking-widest">
+                    Phase 02
+                  </span>
                   <div className="h-px bg-neutral-100 flex-grow"></div>
                 </div>
                 <h3 className="text-2xl font-semibold text-primary mb-4">
@@ -135,10 +188,13 @@ const About = () => {
                 </h3>
                 <div className="space-y-4 text-gray-600 text-sm sm:text-base leading-relaxed">
                   <p>
-                    So we grew. We added crochet gifts, hand-poured candles, original paintings, pipe cleaner art, and thoughtfully curated hampers.
+                    So we grew. We added crochet gifts, hand-poured candles,
+                    original paintings, pipe cleaner art, and thoughtfully
+                    curated hampers.
                   </p>
                   <p>
-                    Each creation is handcrafted with the exact same care and intention that went into that very first portrait.
+                    Each creation is handcrafted with the exact same care and
+                    intention that went into that very first portrait.
                   </p>
                 </div>
               </div>
@@ -148,7 +204,9 @@ const About = () => {
             <div className="grid md:grid-cols-12 gap-12 items-center">
               <div className="md:col-span-7 order-2 md:order-1">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="text-xs font-semibold text-accent uppercase tracking-widest">Phase 03</span>
+                  <span className="text-xs font-semibold text-accent uppercase tracking-widest">
+                    Phase 03
+                  </span>
                   <div className="h-px bg-neutral-100 flex-grow"></div>
                 </div>
                 <h3 className="text-2xl font-semibold text-primary mb-4">
@@ -156,10 +214,13 @@ const About = () => {
                 </h3>
                 <div className="space-y-4 text-gray-600 text-sm sm:text-base leading-relaxed">
                   <p>
-                    One year later, we are still a small, passionate team — and that's exactly how we like it.
+                    One year later, we are still a small, passionate team — and
+                    that's exactly how we like it.
                   </p>
                   <p>
-                    Because small means personal. Small means every order gets our full attention. Small means the gift you receive was made by hands that cared.
+                    Because small means personal. Small means every order gets
+                    our full attention. Small means the gift you receive was
+                    made by hands that cared.
                   </p>
                 </div>
               </div>
@@ -185,17 +246,24 @@ const About = () => {
               Our Belief
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-primary mb-8 leading-tight tracking-tight">
-              "In a world full of mass-produced everything, <br className="hidden sm:inline" />
+              "In a world full of mass-produced everything,{" "}
+              <br className="hidden sm:inline" />
               handmade means someone slowed down for you."
             </h2>
             <div className="h-px w-16 bg-neutral-200 mx-auto mb-8"></div>
-            
+
             <div className="grid md:grid-cols-2 gap-8 text-left text-gray-600 text-sm sm:text-base leading-relaxed">
               <p>
-                It means time, thought, and genuine care went into every detail. When you gift something handmade, you're not just giving a product, you're giving a piece of someone's creativity and effort. That's what makes it land differently. That's what makes it memorable.
+                It means time, thought, and genuine care went into every detail.
+                When you gift something handmade, you're not just giving a
+                product, you're giving a piece of someone's creativity and
+                effort. That's what makes it land differently. That's what makes
+                it memorable.
               </p>
               <p>
-                At Doodle Caboodle, every item is made by hand, made with intention, and made to feel personal, because that's the only kind of gift worth giving.
+                At Doodle Caboodle, every item is made by hand, made with
+                intention, and made to feel personal, because that's the only
+                kind of gift worth giving.
               </p>
             </div>
           </div>
@@ -225,7 +293,10 @@ const About = () => {
                 Custom Pencil Portraits
               </h3>
               <p className="text-gray-500 text-xs sm:text-sm leading-relaxed">
-                Our signature offering. Hand-drawn pencil portraits crafted from your photos, of people, couples, families, and pets. A timeless, personalised gift for birthdays, anniversaries, and milestones. No two portraits are ever the same.
+                Our signature offering. Hand-drawn pencil portraits crafted from
+                your photos, of people, couples, families, and pets. A timeless,
+                personalised gift for birthdays, anniversaries, and milestones.
+                No two portraits are ever the same.
               </p>
             </div>
 
@@ -238,7 +309,9 @@ const About = () => {
                 Crochet Gifts
               </h3>
               <p className="text-gray-500 text-xs sm:text-sm leading-relaxed">
-                Soft, handmade, and full of warmth. Our crochet collection includes personalised keepsakes and decorative pieces, each one crocheted by hand with attention to every stitch.
+                Soft, handmade, and full of warmth. Our crochet collection
+                includes personalised keepsakes and decorative pieces, each one
+                crocheted by hand with attention to every stitch.
               </p>
             </div>
 
@@ -251,7 +324,9 @@ const About = () => {
                 Hand-Poured Candles
               </h3>
               <p className="text-gray-500 text-xs sm:text-sm leading-relaxed">
-                Scented candles made with care, perfect for gifting and home decor. Clean, calming, and crafted to create a mood. A thoughtful gift that brings warmth to any space.
+                Scented candles made with care, perfect for gifting and home
+                decor. Clean, calming, and crafted to create a mood. A
+                thoughtful gift that brings warmth to any space.
               </p>
             </div>
 
@@ -264,7 +339,9 @@ const About = () => {
                 Original Paintings
               </h3>
               <p className="text-gray-500 text-xs sm:text-sm leading-relaxed">
-                From portraits to abstract art, our handpainted pieces are one-of-a-kind artworks that make a statement. A gift that doubles as decor, personal, beautiful, and lasting.
+                From portraits to abstract art, our handpainted pieces are
+                one-of-a-kind artworks that make a statement. A gift that
+                doubles as decor, personal, beautiful, and lasting.
               </p>
             </div>
 
@@ -277,7 +354,9 @@ const About = () => {
                 Pipe Cleaner Art
               </h3>
               <p className="text-gray-500 text-xs sm:text-sm leading-relaxed">
-                Quirky, creative, and completely handmade, our pipe cleaner art pieces are tiny works of art that bring a smile to anyone's face. Unique gifts for people who love something different.
+                Quirky, creative, and completely handmade, our pipe cleaner art
+                pieces are tiny works of art that bring a smile to anyone's
+                face. Unique gifts for people who love something different.
               </p>
             </div>
 
@@ -290,7 +369,9 @@ const About = () => {
                 Curated Hampers
               </h3>
               <p className="text-gray-500 text-xs sm:text-sm leading-relaxed">
-                Can't pick just one? Our handcrafted gift hampers bring together our best products in a beautifully assembled package, perfect for birthdays, festivals, Diwali and celebrations of all kinds.
+                Can't pick just one? Our handcrafted gift hampers bring together
+                our best products in a beautifully assembled package, perfect
+                for birthdays, festivals, Diwali and celebrations of all kinds.
               </p>
             </div>
           </div>
@@ -316,7 +397,9 @@ const About = () => {
               <Cake className="w-4.5 h-4.5" />
             </div>
             <div>
-              <h3 className="font-semibold text-primary text-base mb-1">Birthdays</h3>
+              <h3 className="font-semibold text-primary text-base mb-1">
+                Birthdays
+              </h3>
               <p className="text-gray-500 text-xs sm:text-sm leading-relaxed">
                 Make them feel truly seen on their special day.
               </p>
@@ -329,7 +412,9 @@ const About = () => {
               <Heart className="w-4.5 h-4.5 text-red-500" />
             </div>
             <div>
-              <h3 className="font-semibold text-primary text-base mb-1">Anniversaries</h3>
+              <h3 className="font-semibold text-primary text-base mb-1">
+                Anniversaries
+              </h3>
               <p className="text-gray-500 text-xs sm:text-sm leading-relaxed">
                 Celebrate love with something as lasting as the memory.
               </p>
@@ -342,7 +427,9 @@ const About = () => {
               <Sparkles className="w-4.5 h-4.5" />
             </div>
             <div>
-              <h3 className="font-semibold text-primary text-base mb-1">Weddings</h3>
+              <h3 className="font-semibold text-primary text-base mb-1">
+                Weddings
+              </h3>
               <p className="text-gray-500 text-xs sm:text-sm leading-relaxed">
                 A handcrafted gift they'll treasure forever.
               </p>
@@ -355,7 +442,9 @@ const About = () => {
               <Send className="w-4.5 h-4.5" />
             </div>
             <div>
-              <h3 className="font-semibold text-primary text-base mb-1">Farewells</h3>
+              <h3 className="font-semibold text-primary text-base mb-1">
+                Farewells
+              </h3>
               <p className="text-gray-500 text-xs sm:text-sm leading-relaxed">
                 Send someone off with something personal and heartfelt.
               </p>
@@ -368,7 +457,9 @@ const About = () => {
               <PartyPopper className="w-4.5 h-4.5" />
             </div>
             <div>
-              <h3 className="font-semibold text-primary text-base mb-1">Festivals</h3>
+              <h3 className="font-semibold text-primary text-base mb-1">
+                Festivals
+              </h3>
               <p className="text-gray-500 text-xs sm:text-sm leading-relaxed">
                 Diwali, Raksha Bandhan, Christmas, Valentine's Day and more.
               </p>
@@ -381,7 +472,9 @@ const About = () => {
               <Smile className="w-4.5 h-4.5" />
             </div>
             <div>
-              <h3 className="font-semibold text-primary text-base mb-1">Just Because</h3>
+              <h3 className="font-semibold text-primary text-base mb-1">
+                Just Because
+              </h3>
               <p className="text-gray-500 text-xs sm:text-sm leading-relaxed">
                 Because sometimes the best gifts need no occasion at all.
               </p>
@@ -401,22 +494,33 @@ const About = () => {
               <h2 className="text-3xl font-semibold text-primary mb-6 tracking-tight">
                 Hey, I'm Gaurav Kamal
               </h2>
-              
+
               <div className="space-y-4 text-gray-600 text-sm sm:text-base leading-relaxed">
                 <p>
-                  I'm the person behind <strong>Doodle Caboodle</strong>. I've been into sketching since college — especially portraits. I've always loved making handmade gifts, even as a kid.
+                  I'm the person behind <strong>Doodle Caboodle</strong>. I've
+                  been into sketching since college — especially portraits. I've
+                  always loved making handmade gifts, even as a kid.
                 </p>
                 <p>
-                  Along the way, I explored different creative paths and ended up working as a VFX artist on big time Bollywood and South Indian projects, including Disney and DC.
+                  Along the way, I explored different creative paths and ended
+                  up working as a VFX artist on big time Bollywood and South
+                  Indian projects, including Disney and DC.
                 </p>
                 <p>
-                  I keep exploring new things, but one thing stays constant: my love for art, crafts, and meaningful gifting. Doodle Caboodle is my way of turning emotions into something you can hold close forever.
+                  I keep exploring new things, but one thing stays constant: my
+                  love for art, crafts, and meaningful gifting. Doodle Caboodle
+                  is my way of turning emotions into something you can hold
+                  close forever.
                 </p>
               </div>
 
               <div className="mt-8 flex items-center gap-3">
-                <span className="text-base font-medium text-accent font-kalam">- Gaurav Kamal</span>
-                <span className="text-xs text-gray-400">Founder & Lead Artist</span>
+                <span className="text-base font-medium text-accent font-kalam">
+                  - Gaurav Kamal
+                </span>
+                <span className="text-xs text-gray-400">
+                  Founder & Lead Artist
+                </span>
               </div>
             </div>
 
@@ -436,7 +540,7 @@ const About = () => {
       </section>
 
       {/* Our Promise Section */}
-      <section className="py-24 px-4 max-w-4xl mx-auto">
+      <section className="py-24 px-4 container mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-2xl sm:text-3xl font-semibold text-primary">
             Our Promise to You
@@ -485,6 +589,217 @@ const About = () => {
             </span>
           </div>
         </div>
+
+        {/* Infinite Looping Review Marquee (2 Rows Bento Style) */}
+        {miniReviews.length > 0 && (
+          <div className="mt-12 w-full overflow-hidden relative flex flex-col gap-6">
+            <p className="text-center text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">
+              Verified Customer Reviews
+            </p>
+
+            {/* Fade overlays for smooth entry/exit edges */}
+            <div className="absolute left-0 top-10 bottom-0 w-20 bg-gradient-to-r from-[#FCFCFB] to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute right-0 top-10 bottom-0 w-20 bg-gradient-to-l from-[#FCFCFB] to-transparent z-10 pointer-events-none"></div>
+
+            {/* Row 1: Right to Left (Reviews 1 to 6) */}
+            <div className="flex w-max animate-reviews-left hover:[animation-play-state:paused] gap-4">
+              <div className="flex gap-4">
+                {miniReviews.slice(0, 6).map((r, i) => (
+                  <div
+                    key={`track1-r1-${i}`}
+                    className="w-[280px] sm:w-[350px] md:w-[380px] flex-shrink-0 bg-white border border-neutral-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition-all duration-300 flex items-start gap-4 whitespace-normal"
+                  >
+                    {r.src ? (
+                      <img
+                        src={r.src}
+                        alt={r.name}
+                        className="w-11 h-11 rounded-full object-cover flex-shrink-0 border border-neutral-100 mt-1"
+                      />
+                    ) : (
+                      <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                        <span className="text-primary font-bold text-sm">
+                          {r.name?.charAt(0)?.toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5 flex items-center gap-1">
+                        <span>📍</span> India
+                      </p>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <p className="text-sm font-bold text-gray-800 truncate">{r.name}</p>
+                        <div className="flex gap-0.5 flex-shrink-0">
+                          {[...Array(5)].map((_, si) => (
+                            <Star
+                              key={si}
+                              className="w-3.5 h-3.5"
+                              fill={si < r.rating ? "#D1B17A" : "#E5E7EB"}
+                              stroke="none"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 leading-relaxed line-clamp-3">
+                        {r.review}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-4">
+                {miniReviews.slice(0, 6).map((r, i) => (
+                  <div
+                    key={`track1-r2-${i}`}
+                    className="w-[280px] sm:w-[350px] md:w-[380px] flex-shrink-0 bg-white border border-neutral-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition-all duration-300 flex items-start gap-4 whitespace-normal"
+                  >
+                    {r.src ? (
+                      <img
+                        src={r.src}
+                        alt={r.name}
+                        className="w-11 h-11 rounded-full object-cover flex-shrink-0 border border-neutral-100 mt-1"
+                      />
+                    ) : (
+                      <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                        <span className="text-primary font-bold text-sm">
+                          {r.name?.charAt(0)?.toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5 flex items-center gap-1">
+                        <span>📍</span> India
+                      </p>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <p className="text-sm font-bold text-gray-800 truncate">{r.name}</p>
+                        <div className="flex gap-0.5 flex-shrink-0">
+                          {[...Array(5)].map((_, si) => (
+                            <Star
+                              key={si}
+                              className="w-3.5 h-3.5"
+                              fill={si < r.rating ? "#D1B17A" : "#E5E7EB"}
+                              stroke="none"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 leading-relaxed line-clamp-3">
+                        {r.review}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Row 2: Left to Right (Reviews 7 to 12) */}
+            <div className="flex w-max animate-reviews-right hover:[animation-play-state:paused] gap-4">
+              <div className="flex gap-4">
+                {miniReviews.slice(6, 12).map((r, i) => (
+                  <div
+                    key={`track2-r1-${i}`}
+                    className="w-[280px] sm:w-[350px] md:w-[380px] flex-shrink-0 bg-white border border-neutral-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition-all duration-300 flex items-start gap-4 whitespace-normal"
+                  >
+                    {r.src ? (
+                      <img
+                        src={r.src}
+                        alt={r.name}
+                        className="w-11 h-11 rounded-full object-cover flex-shrink-0 border border-neutral-100 mt-1"
+                      />
+                    ) : (
+                      <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                        <span className="text-primary font-bold text-sm">
+                          {r.name?.charAt(0)?.toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5 flex items-center gap-1">
+                        <span>📍</span> India
+                      </p>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <p className="text-sm font-bold text-gray-800 truncate">{r.name}</p>
+                        <div className="flex gap-0.5 flex-shrink-0">
+                          {[...Array(5)].map((_, si) => (
+                            <Star
+                              key={si}
+                              className="w-3.5 h-3.5"
+                              fill={si < r.rating ? "#D1B17A" : "#E5E7EB"}
+                              stroke="none"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 leading-relaxed line-clamp-3">
+                        {r.review}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-4">
+                {miniReviews.slice(6, 12).map((r, i) => (
+                  <div
+                    key={`track2-r2-${i}`}
+                    className="w-[280px] sm:w-[350px] md:w-[380px] flex-shrink-0 bg-white border border-neutral-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition-all duration-300 flex items-start gap-4 whitespace-normal"
+                  >
+                    {r.src ? (
+                      <img
+                        src={r.src}
+                        alt={r.name}
+                        className="w-11 h-11 rounded-full object-cover flex-shrink-0 border border-neutral-100 mt-1"
+                      />
+                    ) : (
+                      <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                        <span className="text-primary font-bold text-sm">
+                          {r.name?.charAt(0)?.toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5 flex items-center gap-1">
+                        <span>📍</span> India
+                      </p>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <p className="text-sm font-bold text-gray-800 truncate">{r.name}</p>
+                        <div className="flex gap-0.5 flex-shrink-0">
+                          {[...Array(5)].map((_, si) => (
+                            <Star
+                              key={si}
+                              className="w-3.5 h-3.5"
+                              fill={si < r.rating ? "#D1B17A" : "#E5E7EB"}
+                              stroke="none"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 leading-relaxed line-clamp-3">
+                        {r.review}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Dual Direction Marquee CSS Inject */}
+            <style dangerouslySetInnerHTML={{__html: `
+              @keyframes reviews-marquee-left-scroll {
+                0% { transform: translateX(0); }
+                100% { transform: translateX(calc(-50% - 8px)); }
+              }
+              @keyframes reviews-marquee-right-scroll {
+                0% { transform: translateX(calc(-50% - 8px)); }
+                100% { transform: translateX(0); }
+              }
+              .animate-reviews-left {
+                animation: reviews-marquee-left-scroll 32s linear infinite;
+              }
+              .animate-reviews-right {
+                animation: reviews-marquee-right-scroll 32s linear infinite;
+              }
+            `}} />
+          </div>
+        )}
       </section>
 
       {/* CTA Section */}
@@ -494,7 +809,8 @@ const About = () => {
             Let's Create Something Special
           </h2>
           <p className="text-gray-600 max-w-lg mx-auto mb-8 text-sm sm:text-base leading-relaxed">
-            Whether you have a specific idea in mind or need help finding the perfect gift, we are here to bring it to life.
+            Whether you have a specific idea in mind or need help finding the
+            perfect gift, we are here to bring it to life.
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 max-w-xs sm:max-w-md mx-auto">

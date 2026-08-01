@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { collection, getDocs } from "firebase/firestore";
@@ -22,6 +22,7 @@ const HeroSection: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   // Fetch banners from Firestore
   useEffect(() => {
@@ -86,10 +87,10 @@ const HeroSection: React.FC = () => {
 
   // Auto-advance carousel
   useEffect(() => {
-    if (heroImages.length === 0) return;
+    if (heroImages.length === 0 || !isPlaying) return;
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
-  }, [currentIndex, isTransitioning, heroImages.length]);
+  }, [currentIndex, isTransitioning, heroImages.length, isPlaying]);
 
   return (
     <div className="relative w-full h-[80vh] overflow-hidden bg-black">
@@ -182,24 +183,35 @@ const HeroSection: React.FC = () => {
         <ChevronRight size={24} />
       </button>
 
-      {/* Indicators */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 hidden md:flex space-x-2">
-        {heroImages.map((_, index) => (
+      {/* Indicators & Play/Pause */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center space-x-4">
+        <div className="hidden md:flex space-x-2">
+          {heroImages.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                if (isTransitioning) return;
+                setIsTransitioning(true);
+                setCurrentIndex(index);
+              }}
+              className={`w-2 h-2 rounded-full transition-all ${
+                index === currentIndex
+                  ? "bg-white w-8"
+                  : "bg-white/50 hover:bg-white/70"
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+        {heroImages.length > 0 && (
           <button
-            key={index}
-            onClick={() => {
-              if (isTransitioning) return;
-              setIsTransitioning(true);
-              setCurrentIndex(index);
-            }}
-            className={`w-2 h-2 rounded-full transition-all ${
-              index === currentIndex
-                ? "bg-white w-8"
-                : "bg-white/50 hover:bg-white/70"
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
+            onClick={() => setIsPlaying(!isPlaying)}
+            className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm transition-all focus:outline-none focus:ring-2 focus:ring-white/50"
+            aria-label={isPlaying ? "Pause slideshow" : "Play slideshow"}
+          >
+            {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+          </button>
+        )}
       </div>
     </div>
   );

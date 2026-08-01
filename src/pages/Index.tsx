@@ -18,6 +18,7 @@ import DiscountModal from "@/components/DiscountModal";
 import BestsellerCarousel from "@/components/BestsellerCarousel";
 import CategorySection from "@/components/CategorySection";
 import ShopByCategory from "@/components/ShopByCategory";
+import ReelsSection from "@/components/ReelsSection";
 import CustomInfo from "@/components/CustomInfo";
 import BGDoodle from "@/assets/Bottom BULK Design.png";
 import { useSelector } from "react-redux";
@@ -66,6 +67,8 @@ const Index = () => {
 
       <ShopByCategory />
 
+      <ReelsSection />
+
       {/* <ArtworkGrid /> */}
 
       {/* <OurWorks /> */}
@@ -91,7 +94,9 @@ const Index = () => {
         </div>
       </a>
 
-      <ProductReviewSection />
+      <div id="reviews-section">
+        <ProductReviewSection />
+      </div>
 
       {/* <CustomInfo /> */}
 

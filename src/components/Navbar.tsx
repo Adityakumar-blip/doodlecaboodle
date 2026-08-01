@@ -199,23 +199,25 @@ const Navbar = () => {
         {/* Announcement Bar */}
         {announcementMessages.length > 0 && (
           <div className="w-full bg-[#161616] text-[#D1B17A] h-9 flex items-center overflow-hidden border-b border-neutral-800 text-[11px] font-bold uppercase tracking-widest font-poppins">
-            <div className="flex whitespace-nowrap animate-marquee">
-              <div className="flex items-center space-x-12 px-6 flex-shrink-0">
-                {announcementMessages.map((msg, idx) => (
-                  <span key={idx} className="flex items-center gap-12">
-                    <span>{msg}</span>
-                    <span className="text-[#B6B3AE]/40">•</span>
+            <div className="inline-flex whitespace-nowrap animate-marquee">
+              {/* Copy A — repeated 8× to guarantee viewport fill */}
+              {Array.from({ length: 8 }).flatMap((_, ri) =>
+                announcementMessages.map((msg, idx) => (
+                  <span key={`a-${ri}-${idx}`} className="inline-flex items-center">
+                    <span className="px-6">{msg}</span>
+                    <span className="text-[#B6B3AE]/40 pr-6">◆</span>
                   </span>
-                ))}
-              </div>
-              <div className="flex items-center space-x-12 px-6 flex-shrink-0">
-                {announcementMessages.map((msg, idx) => (
-                  <span key={idx} className="flex items-center gap-12">
-                    <span>{msg}</span>
-                    <span className="text-[#B6B3AE]/40">•</span>
+                ))
+              )}
+              {/* Copy B — identical to A; animation snaps back here seamlessly */}
+              {Array.from({ length: 8 }).flatMap((_, ri) =>
+                announcementMessages.map((msg, idx) => (
+                  <span key={`b-${ri}-${idx}`} className="inline-flex items-center">
+                    <span className="px-6">{msg}</span>
+                    <span className="text-[#B6B3AE]/40 pr-6">◆</span>
                   </span>
-                ))}
-              </div>
+                ))
+              )}
             </div>
           </div>
         )}
@@ -655,17 +657,14 @@ const Navbar = () => {
 
       <style>{`
         @keyframes marquee {
-          0% {
-            transform: translateX(-50%);
-          }
-          100% {
-            transform: translateX(0%);
-          }
+          from { transform: translateX(0); }
+          to   { transform: translateX(-50%); }
         }
 
         .animate-marquee {
           display: inline-flex;
-          animation: marquee 20s linear infinite;
+          will-change: transform;
+          animation: marquee 50s linear infinite;
         }
 
         @keyframes fade-in {
