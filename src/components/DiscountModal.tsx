@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 
 const DiscountModal = () => {
+  const { configurations } = useSelector((state: any) => state.configuration);
+  const activeConfig = configurations?.[0];
+
   const [showModal, setShowModal] = useState(false);
   const [copied, setCopied] = useState(false);
-  const couponCode = "DC20";
+
+  const couponCode = activeConfig?.discountModalCouponCode || "DC20";
+  const modalDescription =
+    activeConfig?.discountModalDescription ||
+    "We’re thrilled to have you here.\nEnjoy 20% OFF on your first portrait! + Free Shipping on all products.";
 
   const loadConfettiScript = () => {
     return new Promise((resolve, reject) => {
@@ -22,12 +30,18 @@ const DiscountModal = () => {
   };
 
   useEffect(() => {
-    const hasVisited = localStorage.getItem("visited");
-    if (!hasVisited) {
-      setShowModal(true);
-      localStorage.setItem("visited", "true");
+    if (activeConfig) {
+      if (activeConfig.showDiscountModal) {
+        const hasVisited = localStorage.getItem("visited");
+        if (!hasVisited) {
+          setShowModal(true);
+          localStorage.setItem("visited", "true");
+        }
+      } else {
+        setShowModal(false);
+      }
     }
-  }, []);
+  }, [activeConfig]);
 
   const copyToClipboard = async () => {
     await loadConfettiScript();
@@ -59,11 +73,8 @@ const DiscountModal = () => {
         </button>
 
         {/* Welcome message */}
-        <p className="text-lg font-kalam text-gray-700 mb-6">
-          We’re thrilled to have you here.
-          <br />
-          Enjoy <strong>20% OFF</strong> on your
-          first portrait! + <strong> Free Shipping</strong> on all products.
+        <p className="text-lg font-kalam text-gray-700 mb-6 whitespace-pre-line">
+          {modalDescription}
         </p>
 
         {/* Coupon code */}

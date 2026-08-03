@@ -61,6 +61,7 @@ interface Coupon {
   validFrom: any;
   validUntil: any;
   categoryIds?: string[];
+  minPurchaseAmount?: number;
 }
 
 const Cart = ({
@@ -78,6 +79,7 @@ const Cart = ({
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
   const [personalNote, setPersonalNote] = useState("");
   const [wordCount, setWordCount] = useState(0);
   const [userDetails, setUserDetails] = useState<any>({
@@ -264,6 +266,7 @@ const Cart = ({
 
   const applyCoupon = async () => {
     try {
+      setCouponError(null);
       await loadConfettiScript();
       const couponsRef = collection(db, "coupons");
       const q = query(couponsRef, where("code", "==", couponCode));
@@ -271,6 +274,7 @@ const Cart = ({
 
       if (querySnapshot.empty) {
         setAppliedCoupon(null);
+        setCouponError("Coupon not found");
         toast.error("Coupon not found");
         return;
       }
@@ -291,6 +295,7 @@ const Cart = ({
 
       if (!isCouponValid) {
         setAppliedCoupon(null);
+        setCouponError("Invalid or expired coupon");
         toast.error("Invalid or expired coupon");
         return;
       }
@@ -309,8 +314,27 @@ const Cart = ({
 
         if (!hasValidCategory) {
           setAppliedCoupon(null);
+          setCouponError("This coupon is not applicable for the items in your cart");
           toast.error(
             "This coupon is not applicable for the items in your cart"
+          );
+          return;
+        }
+      }
+
+      // Check minimum purchase limit if set
+      if (couponData.minPurchaseAmount) {
+        const subtotal = cartItems.reduce(
+          (total, item) => total + item.price * item.quantity,
+          0
+        );
+        if (subtotal < couponData.minPurchaseAmount) {
+          setAppliedCoupon(null);
+          setCouponError(
+            `Minimum purchase of ₹${couponData.minPurchaseAmount} is required to use this coupon`
+          );
+          toast.error(
+            `Minimum purchase of ₹${couponData.minPurchaseAmount} is required to use this coupon`
           );
           return;
         }
@@ -323,10 +347,12 @@ const Cart = ({
         validFrom: new Date(validFrom),
         validUntil: new Date(validUntil),
       });
+      setCouponError(null);
       toast.success(`Coupon "${couponCode}" applied successfully!`);
       triggerConfetti(); // Trigger confetti animation on successful coupon application
     } catch (error) {
       console.error("Error applying coupon:", error);
+      setCouponError("Failed to apply coupon");
       toast.error("Failed to apply coupon");
       setAppliedCoupon(null);
     }
@@ -336,6 +362,7 @@ const Cart = ({
   const removeCoupon = () => {
     setAppliedCoupon(null);
     setCouponCode("");
+    setCouponError(null);
     toast.success("Coupon removed");
   };
 
@@ -455,6 +482,48 @@ const Cart = ({
       setShowSignupForm(false);
     }
   }, [isOpen, setIsCheckoutRequested]);
+
+  // Validate applied coupon dynamically against cart contents
+  useEffect(() => {
+    if (appliedCoupon) {
+      const subtotal = cartItems.reduce(
+        (total, item) => total + item.price * item.quantity,
+        0
+      );
+
+      // Validate minimum purchase amount limit
+      if (
+        appliedCoupon.minPurchaseAmount &&
+        subtotal < appliedCoupon.minPurchaseAmount
+      ) {
+        setAppliedCoupon(null);
+        setCouponCode("");
+        setCouponError(
+          `Coupon removed: Minimum purchase of ₹${appliedCoupon.minPurchaseAmount} required`
+        );
+        toast.error(
+          `Coupon removed: Minimum purchase of ₹${appliedCoupon.minPurchaseAmount} required`
+        );
+        return;
+      }
+
+      // Validate category restrictions
+      if (appliedCoupon.categoryIds && appliedCoupon.categoryIds.length > 0) {
+        const cartCategories = [
+          ...new Set(cartItems.map((item) => item.categoryId).filter(Boolean)),
+        ];
+        const hasValidCategory = cartCategories.some((categoryId) =>
+          appliedCoupon.categoryIds!.includes(categoryId)
+        );
+        if (!hasValidCategory) {
+          setAppliedCoupon(null);
+          setCouponCode("");
+          setCouponError("Coupon removed: Not applicable to items in cart");
+          toast.error("Coupon removed: Not applicable to items in cart");
+        }
+      }
+    }
+  }, [cartItems, appliedCoupon]);
 
   // Load Razorpay script dynamically
   const loadRazorpayScript = () => {
@@ -758,9 +827,10 @@ const Cart = ({
                       <input
                         type="text"
                         value={couponCode}
-                        onChange={(e) =>
-                          setCouponCode(e.target.value.toUpperCase())
-                        }
+                        onChange={(e) => {
+                          setCouponCode(e.target.value.toUpperCase());
+                          setCouponError(null);
+                        }}
                         placeholder="Enter coupon code"
                         className="flex-1 px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-300 text-sm"
                         disabled={loading || appliedCoupon !== null}
@@ -794,6 +864,10 @@ const Cart = ({
                           ? `${appliedCoupon.discountValue}% off`
                           : `₹${appliedCoupon.discountValue} off`}
                         )
+                      </p>
+                    ) : couponError ? (
+                      <p className="mt-2 text-sm text-red-600 font-medium">
+                        {couponError}
                       </p>
                     ) : (
                       <p className="mt-1 text-xs text-gray-500">

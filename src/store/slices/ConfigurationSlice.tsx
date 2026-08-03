@@ -8,6 +8,9 @@ export interface Configuration {
   quote: string;
   heroBanner: string;
   announcementMessages?: string[];
+  showDiscountModal?: boolean;
+  discountModalCouponCode?: string;
+  discountModalDescription?: string;
   createdAt?: any;
   updatedAt?: any;
 }
