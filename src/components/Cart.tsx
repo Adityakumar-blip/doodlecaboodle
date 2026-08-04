@@ -390,10 +390,6 @@ const Cart = ({
       (total, item) => total + item.price * item.quantity,
       0
     );
-    const baseTotal = cartItems.reduce(
-      (total, item) => total + (item.size?.priceAdjustment || 0) * item.quantity,
-      0
-    );
     let deliveryCharges = 0;
     let packagingCharges = 50;
     let discount = 0;
@@ -408,7 +404,7 @@ const Cart = ({
         appliedCoupon.discountValue
       ) {
         if (appliedCoupon.discountType === "percentage") {
-          discount = (baseTotal * appliedCoupon.discountValue) / 100;
+          discount = (subtotal * appliedCoupon.discountValue) / 100;
         } else if (appliedCoupon.discountType === "fixed") {
           discount = appliedCoupon.discountValue;
         }
@@ -485,7 +481,7 @@ const Cart = ({
 
   // Validate applied coupon dynamically against cart contents
   useEffect(() => {
-    if (appliedCoupon) {
+    if (appliedCoupon && cartItems.length > 0) {
       const subtotal = cartItems.reduce(
         (total, item) => total + item.price * item.quantity,
         0
