@@ -6,6 +6,43 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function productPath(categoryName?: string, productName?: string, fallbackId?: string | number) {
+  const productSlug =
+    productName?.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, "") ||
+    String(fallbackId || "product");
+  const categorySlug =
+    categoryName?.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, "") ||
+    "product";
+  return `/${categorySlug}/${productSlug}`;
+}
+
+export async function shareContent(options: {
+  title: string;
+  text?: string;
+  url: string;
+}): Promise<"shared" | "copied" | "cancelled" | "failed"> {
+  try {
+    if (navigator.share) {
+      await navigator.share({
+        title: options.title,
+        text: options.text,
+        url: options.url,
+      });
+      return "shared";
+    }
+    await navigator.clipboard.writeText(options.url);
+    return "copied";
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") return "cancelled";
+    try {
+      await navigator.clipboard.writeText(options.url);
+      return "copied";
+    } catch {
+      return "failed";
+    }
+  }
+}
+
 export function convertFirebaseTimestampToDate(timestamp) {
   // Create a Date object from the timestamp (in milliseconds)
   const date = new Date(timestamp);

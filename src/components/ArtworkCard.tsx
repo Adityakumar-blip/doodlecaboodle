@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Heart, ShoppingCart } from "lucide-react";
+import { Heart, ShoppingCart, Share2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { CartContext } from "@/context/CartContext";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebase/firebaseconfig";
+import { shareContent } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface ArtworkCardProps {
   id: string | number; // Added ID prop for navigation
@@ -87,6 +89,18 @@ const ArtworkCard = ({
     navigate(`/work-detail/${id}`, {
       state: { id: id },
     });
+  };
+
+  const handleShareClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const shareTitle = artworkName || title || "Artwork";
+    const result = await shareContent({
+      title: shareTitle,
+      text: `Check out "${shareTitle}" on Doodle Caboodle`,
+      url: `${window.location.origin}/work-detail/${id}`,
+    });
+    if (result === "copied") toast.success("Share link copied to clipboard!");
+    if (result === "failed") toast.error("Unable to share right now");
   };
 
   // Modified to prevent event propagation
@@ -190,14 +204,26 @@ const ArtworkCard = ({
             </div>
           )}
 
-          {/* Hover Add to Cart */}
-          <div className="absolute bottom-0 left-0 right-0 z-20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out">
+          {/* Hover actions: Add to Cart + Share */}
+          <div className="absolute bottom-0 left-0 right-0 z-20 flex translate-y-0 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-300 ease-out">
             <button
+              type="button"
               onClick={handleAddToCartClick}
-              className="w-full flex items-center justify-center gap-2 bg-primary/95 hover:bg-primary text-primary-foreground text-xs font-semibold py-2.5 backdrop-blur-sm transition-colors duration-200"
+              className="flex-1 flex items-center justify-center bg-primary/95 hover:bg-primary text-primary-foreground py-2.5 backdrop-blur-sm transition-colors duration-200"
+              aria-label="Add to cart"
+              title="Add to cart"
             >
-              <ShoppingCart size={14} />
-              <span>Add to Cart</span>
+              <ShoppingCart size={16} strokeWidth={2.25} />
+            </button>
+            <span className="w-px bg-white/25" aria-hidden="true" />
+            <button
+              type="button"
+              onClick={handleShareClick}
+              className="flex-1 flex items-center justify-center bg-brand-charcoal/95 hover:bg-brand-charcoal text-white py-2.5 backdrop-blur-sm transition-colors duration-200"
+              aria-label="Share product"
+              title="Share"
+            >
+              <Share2 size={16} strokeWidth={2.25} />
             </button>
           </div>
         </div>

@@ -37,6 +37,7 @@ import OrderDetails from "./components/OrderDetail";
 import NavDetailBrowse from "./components/NavDetailBrowse";
 import { fetchConfigurations } from "./store/slices/ConfigurationSlice";
 import BestSellers from "./pages/BestSellers";
+import SearchResults from "./pages/SearchResults";
 import { fetchMenus } from "./store/slices/MenuSlice";
 import { useSelector } from "react-redux";
 import { RootState } from "./store/store";
@@ -214,6 +215,7 @@ const AppContent = () => {
           <Route path="/get-yours" element={<CustomSketchOrder />} />
           <Route path="/order/:orderId" element={<OrderDetails />} />
           <Route path="/best-sellers" element={<BestSellers />} />
+          <Route path="/search" element={<SearchResults />} />
           <Route
             path="/:categoryName"
             element={<NavDetailBrowse />}

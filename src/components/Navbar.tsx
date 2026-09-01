@@ -9,6 +9,7 @@ import {
   MapPin,
   MoreVertical,
   Sparkles,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Cart from "./Cart";
@@ -23,6 +24,7 @@ import logo from "@/assets/LOGO.svg";
 import { useNavigate } from "react-router-dom";
 import CategoryBar from "./CategoryBar";
 import { fetchMenus } from "@/store/slices/MenuSlice";
+import GlobalSearchBox from "./GlobalSearchBox";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -45,7 +47,7 @@ const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState<any>(null);
   const [loginButtonHovered, setLoginButtonHovered] = useState(false);
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
 
   // Firebase Authentication State Listener
@@ -177,13 +179,6 @@ const Navbar = () => {
     }
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
-    }
-  };
-
   const handleCategoryClick = (category: any) => {
     setIsOpen(false); // Close mobile menu
     if (category?.name === "Portrait") {
@@ -249,44 +244,21 @@ const Navbar = () => {
             </a>
           </div>
 
-          {/* <div className="flex-1 hidden md:block max-w-md mx-4">
-            <form onSubmit={handleSearchSubmit} className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for art..."
-                className={cn(
-                  "w-full px-4 py-2 rounded-full border border-gray-300",
-                  "focus:outline-none focus:ring-2 focus:ring-pastel-pink",
-                  "bg-pastel-pink/10 text-gray-900 placeholder-gray-500",
-                  "transition-all duration-300 hover:shadow-md"
-                )}
-              />
-              <button
-                type="submit"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                aria-label="Search"
-              >
-                <svg
-                  className="w-5 h-5 text-pastel-pink"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </button>
-            </form>
-          </div> */}
+          {/* Desktop search */}
+          <div className="flex-1 hidden md:block max-w-md mx-4 lg:mx-8">
+            <GlobalSearchBox placeholder="Search for products..." />
+          </div>
 
           <div className="flex items-center space-x-4">
+            <button
+              type="button"
+              className="md:hidden text-primary-foreground hover:text-pastel-pink transition-colors"
+              aria-label="Open search"
+              onClick={() => setIsMobileSearchOpen((v) => !v)}
+            >
+              {isMobileSearchOpen ? <X size={20} /> : <Search size={20} />}
+            </button>
+
             {isAuthenticated ? (
               <button className="text-primary-foreground hidden md:block hover:text-pastel-pink transition-colors">
                 <a href="/profile">
@@ -383,6 +355,17 @@ const Navbar = () => {
         </div>
       </div>
 
+        {/* Mobile search panel */}
+        {isMobileSearchOpen && (
+          <div className="md:hidden w-full bg-primary border-t border-white/10 px-4 py-3 relative z-20">
+            <GlobalSearchBox
+              autoFocus
+              placeholder="Search products..."
+              onNavigate={() => setIsMobileSearchOpen(false)}
+            />
+          </div>
+        )}
+
         {/* Mobile Sidebar */}
         <div
           className={cn(
@@ -411,6 +394,13 @@ const Navbar = () => {
             </button>
           </div>
           <nav className="flex flex-col p-6 space-y-4">
+            <div className="pb-2">
+              <GlobalSearchBox
+                placeholder="Search products..."
+                inputClassName="!bg-gray-50 !text-gray-900 !placeholder:text-gray-400 !border-gray-200 focus:!bg-white"
+                onNavigate={() => setIsOpen(false)}
+              />
+            </div>
             <a
               href="/"
               className="text-lg font-medium text-gray-900 hover:text-pastel-pink transition-colors duration-200"

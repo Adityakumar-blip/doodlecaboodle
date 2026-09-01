@@ -20,7 +20,7 @@ import { uploadImagesToCloudinary } from "@/lib/UplaodCloudinary";
 import { db } from "@/firebase/firebaseconfig";
 import { CartContext } from "@/context/CartContext";
 import { toast } from "sonner";
-import { getYearFromFirebaseTimestamp } from "@/lib/utils";
+import { getYearFromFirebaseTimestamp, shareContent } from "@/lib/utils";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -321,6 +321,17 @@ const WorkDetail = () => {
     }
   };
 
+  const handleShare = async () => {
+    const shareTitle = artwork?.name || artwork?.title || "Artwork";
+    const result = await shareContent({
+      title: shareTitle,
+      text: `Check out "${shareTitle}" on Doodle Caboodle`,
+      url: window.location.href,
+    });
+    if (result === "copied") toast.success("Share link copied to clipboard!");
+    if (result === "failed") toast.error("Unable to share right now");
+  };
+
   const calculatePrice = () => {
     if (!artwork) return "₹0";
     const basePrice = parseFloat(artwork.price);
@@ -426,9 +437,20 @@ const WorkDetail = () => {
               >
                 {artwork?.artistName}
               </p>
-              <h1 className="font-serif text-2xl md:text-3xl font-medium text-gray-900 mb-2">
-                {artwork?.name}
-              </h1>
+              <div className="flex items-start gap-3">
+                <h1 className="font-serif text-2xl md:text-3xl font-medium text-gray-900 mb-2">
+                  {artwork?.name}
+                </h1>
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
+                  aria-label="Share artwork"
+                  title="Share"
+                >
+                  <Share size={16} />
+                </button>
+              </div>
               {artwork?.metaDescription && (
                 <p className="text-gray-500 text-sm mb-4">
                   {artwork.metaDescription}

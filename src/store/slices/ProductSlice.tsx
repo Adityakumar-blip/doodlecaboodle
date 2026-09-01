@@ -2,36 +2,45 @@ import { db } from "@/firebase/firebaseconfig";
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
-// Product-related types
-interface Product {
+export interface ProductImage {
+  url?: string;
+  [key: string]: unknown;
+}
+
+export interface Product {
   id: string;
-  imageUrl: string;
-  title: string;
-  artistName: string;
-  price: string;
-  category: string;
+  name?: string;
+  title?: string;
+  artistName?: string;
+  price?: string | number;
+  category?: string;
+  categoryName?: string;
+  imageUrl?: string;
+  images?: ProductImage[];
+  status?: string;
+  [key: string]: unknown;
 }
 
 interface ProductState {
   products: Product[];
   loading: boolean;
   error: string | null;
+  fetched: boolean;
 }
 
-// Initial state
 const initialState: ProductState = {
   products: [],
   loading: false,
   error: null,
+  fetched: false,
 };
 
-// Async thunk to fetch products from Firebase
+// Fetch active products once; subsequent dispatches are skipped while cached
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
   async (_, { rejectWithValue }) => {
     try {
       const productsRef = collection(db, "products");
-      // filter only active products
       const q = query(productsRef, where("status", "==", "active"));
       const snapshot = await getDocs(q);
 
@@ -44,6 +53,14 @@ export const fetchProducts = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message || "Failed to fetch products");
     }
+  },
+  {
+    condition: (_, { getState }) => {
+      const { products } = getState() as { products: ProductState };
+      // Skip Firebase call if already loaded or in flight
+      if (products.fetched || products.loading) return false;
+      return true;
+    },
   }
 );
 
@@ -64,15 +81,14 @@ export const fetchWroks = createAsyncThunk(
   }
 );
 
-// Product slice
 const productSlice = createSlice({
   name: "products",
   initialState,
   reducers: {
-    // Optional: Add reducer for clearing products if needed
     clearProducts: (state) => {
       state.products = [];
       state.error = null;
+      state.fetched = false;
     },
   },
   extraReducers: (builder) => {
@@ -86,6 +102,7 @@ const productSlice = createSlice({
         (state, action: PayloadAction<Product[]>) => {
           state.products = action.payload;
           state.loading = false;
+          state.fetched = true;
         }
       )
       .addCase(fetchProducts.rejected, (state, action: PayloadAction<any>) => {
@@ -95,8 +112,6 @@ const productSlice = createSlice({
   },
 });
 
-// Export actions
 export const { clearProducts } = productSlice.actions;
 
-// Export reducer
 export default productSlice.reducer;
