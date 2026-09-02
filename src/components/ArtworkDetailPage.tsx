@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { ShoppingCart, ArrowLeft, Plus, Minus, CreditCard } from "lucide-react";
+import { ShoppingCart, ArrowLeft, Plus, Minus, CreditCard, Share2 } from "lucide-react";
 import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { CartContext } from "@/context/CartContext";
 import { toast } from "sonner";
@@ -14,6 +14,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { shareContent } from "@/lib/utils";
 
 interface SizeOption {
   name: string;
@@ -161,6 +162,19 @@ const ArtworkDetailPage = () => {
         setSelectedVariant(null);
         setActiveImage(mergedImages?.[0]?.url || "");
 
+        window.VaakuOS?.viewProduct({
+          id: artworkData?.id || artworkData?.artworkId,
+          product_id: artworkData?.id,
+          name: artworkData?.name,
+          title: artworkData?.name,
+          price: Number(artworkData?.price) || 0,
+          currency: "INR",
+          image: mergedImages?.[0]?.url || artworkData?.images?.[0]?.url,
+          brand: artworkData?.artistName,
+          category: artworkData?.categoryName,
+          url: typeof window !== "undefined" ? window.location.href : undefined,
+        });
+
         // Fetch category info
         if (artworkData?.categoryId) {
           const categoryRef = doc(db, "productCategories", artworkData.categoryId);
@@ -240,6 +254,17 @@ const ArtworkDetailPage = () => {
         : artwork?.quantity === 0
       : // For all other categories → use the isOutOfStock key stored in DB
         artwork?.isOutOfStock ?? false;
+
+  const handleShare = async () => {
+    const shareTitle = artwork?.name || "Doodle Caboodle";
+    const result = await shareContent({
+      title: shareTitle,
+      text: `Check out "${shareTitle}" on Doodle Caboodle`,
+      url: window.location.href,
+    });
+    if (result === "copied") toast.success("Share link copied to clipboard!");
+    if (result === "failed") toast.error("Unable to share right now");
+  };
 
   const handleAddToCart = () => {
     if (!artwork) return;
@@ -503,12 +528,23 @@ const ArtworkDetailPage = () => {
               <h1 className="font-playfair text-2xl md:text-3xl font-semibold text-gray-900 leading-tight">
                 {artwork?.name}
               </h1>
-              {discountPercentage > 0 && (
-                <div className="bg-red-500 text-white font-extrabold px-3 py-2 text-center rounded-sm shrink-0 shadow-sm leading-none flex flex-col justify-center min-w-[56px] border border-red-600">
-                  <span className="text-sm md:text-base block">{discountPercentage}%</span>
-                  <span className="text-[9px] uppercase tracking-wider block mt-0.5 font-sans">OFF</span>
-                </div>
-              )}
+              <div className="flex items-start gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
+                  aria-label="Share product"
+                  title="Share"
+                >
+                  <Share2 size={18} strokeWidth={2.25} />
+                </button>
+                {discountPercentage > 0 && (
+                  <div className="bg-red-500 text-white font-extrabold px-3 py-2 text-center rounded-sm shadow-sm leading-none flex flex-col justify-center min-w-[56px] border border-red-600">
+                    <span className="text-sm md:text-base block">{discountPercentage}%</span>
+                    <span className="text-[9px] uppercase tracking-wider block mt-0.5 font-sans">OFF</span>
+                  </div>
+                )}
+              </div>
             </div>
             {artwork?.metaDescription && (
               <p className="text-gray-500 text-sm mb-4">

@@ -65,6 +65,34 @@ const getLocalCart = (): CartItem[] => {
 
 const setLocalCart = (items: CartItem[]) => {
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items));
+  // Market-standard cart mirror — VaakuOS SDK polls this automatically
+  try {
+    const total = items.reduce(
+      (s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1),
+      0
+    );
+    localStorage.setItem(
+      "vaakuos_cart_mirror",
+      JSON.stringify({
+        items: items.map((it) => ({
+          id: it.artworkId || it.id,
+          product_id: it.artworkId || it.id,
+          name: it.title,
+          title: it.title,
+          price: it.price,
+          quantity: it.quantity,
+          image: it.uploadedImageUrl,
+          brand: it.artistName,
+          category: it.categoryId,
+        })),
+        total,
+        currency: "INR",
+        checkout_url: typeof window !== "undefined" ? window.location.origin : undefined,
+      })
+    );
+  } catch {
+    /* ignore */
+  }
 };
 
 // CartProvider component
@@ -97,6 +125,34 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
             setCartItems(items);
             // Clear local storage after syncing
             localStorage.removeItem(LOCAL_STORAGE_KEY);
+            // Keep VaakuOS mirror in sync for logged-in Firebase carts
+            try {
+              const total = items.reduce(
+                (s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1),
+                0
+              );
+              localStorage.setItem(
+                "vaakuos_cart_mirror",
+                JSON.stringify({
+                  items: items.map((it) => ({
+                    id: it.artworkId || it.id,
+                    product_id: it.artworkId || it.id,
+                    name: it.title,
+                    title: it.title,
+                    price: it.price,
+                    quantity: it.quantity,
+                    image: it.uploadedImageUrl,
+                    brand: it.artistName,
+                    category: it.categoryId,
+                  })),
+                  total,
+                  currency: "INR",
+                  checkout_url: window.location.origin,
+                })
+              );
+            } catch {
+              /* ignore */
+            }
             setIsLoading(false);
           },
           (error) => {

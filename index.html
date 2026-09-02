@@ -94,8 +94,21 @@
         src="https://www.facebook.com/tr?id=1502969600803676&ev=PageView&noscript=1"
     /></noscript>
     <div id="root"></div>
-    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
-    <!-- <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script> -->
+    <!-- VaakuOS / Instacal SDK — loaded from backend like a real merchant install -->
+    <script>
+      window.ac = window.ac || function () { (ac.q = ac.q || []).push(arguments); };
+    </script>
+    <script
+      async
+      src="%VITE_VAAKUOS_API_URL%/sdk/vaakuos-cart.js"
+      data-api-key="%VITE_VAAKUOS_API_KEY%"
+      data-write-key="%VITE_VAAKUOS_WRITE_KEY%"
+      data-site-id="%VITE_VAAKUOS_SITE_ID%"
+      data-currency="INR"
+      data-phone-country="91"
+      data-watch-storage="vaakuos_cart_mirror,tempCart,cartItems"
+      data-debug="true"
+    ></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

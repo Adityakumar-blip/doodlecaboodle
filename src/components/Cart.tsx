@@ -99,6 +99,35 @@ const Cart = ({
   const auth = getAuth();
   const navigate = useNavigate();
 
+  // Push identity as soon as checkout fields are valid enough for recovery
+  useEffect(() => {
+    if (!userDetails?.email && !userDetails?.senderPhone) return;
+    window.VaakuOS?.identify({
+      email: userDetails.email || undefined,
+      phone: userDetails.senderPhone || userDetails.phone || undefined,
+      name: userDetails.name || undefined,
+      externalId: auth.currentUser?.uid,
+    });
+  }, [
+    userDetails.email,
+    userDetails.senderPhone,
+    userDetails.phone,
+    userDetails.name,
+    auth.currentUser?.uid,
+  ]);
+
+  // Checkout form opened = highest-intent abandon point
+  useEffect(() => {
+    if (!showCheckoutForm) return;
+    window.VaakuOS?.checkout({
+      checkoutUrl: window.location.href,
+      total: cartItems.reduce(
+        (s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1),
+        0
+      ),
+    });
+  }, [showCheckoutForm]);
+
   // Load confetti script dynamically
   const loadConfettiScript = () => {
     return new Promise((resolve, reject) => {
@@ -619,6 +648,29 @@ const Cart = ({
                 personalNote,
               };
 
+              // Close abandoned-cart recovery for this cart
+              window.VaakuOS?.identify({
+                email: userDetails.email,
+                phone: userDetails.senderPhone || userDetails.phone,
+                name: userDetails.name,
+                externalId: auth.currentUser?.uid,
+              });
+              window.VaakuOS?.trackOrder({
+                orderId:
+                  verifyResponse?.data?.custom_order_id ||
+                  response.razorpay_order_id,
+                total: parseFloat(charges.total),
+                currency: "INR",
+                coupon: appliedCoupon?.code,
+                items: cartItems.map((it) => ({
+                  id: String(it.artworkId || it.id),
+                  name: String(it.title || "Item"),
+                  price: Number(it.price) || 0,
+                  quantity: Number(it.quantity) || 1,
+                  image: it.uploadedImageUrl,
+                })),
+              });
+
               // await setDoc(
               //   doc(db, "users", auth.currentUser.uid, "orders", order.orderId),
               //   order
@@ -691,6 +743,13 @@ const Cart = ({
 
   // Handle proceed to checkout
   const handleProceedToCheckout = () => {
+    window.VaakuOS?.checkout({
+      checkoutUrl: window.location.href,
+      total: cartItems.reduce(
+        (s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1),
+        0
+      ),
+    });
     if (isAuthenticated) {
       setShowCheckoutForm(true);
     } else {
