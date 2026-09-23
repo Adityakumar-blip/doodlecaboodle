@@ -99,15 +99,19 @@ const Cart = ({
   const auth = getAuth();
   const navigate = useNavigate();
 
-  // Push identity as soon as checkout fields are valid enough for recovery
+  // Push identity for cart recovery once the shopper pauses typing, so
+  // half-typed emails/phones never become contacts.
   useEffect(() => {
     if (!userDetails?.email && !userDetails?.senderPhone) return;
-    window.VaakuOS?.identify({
-      email: userDetails.email || undefined,
-      phone: userDetails.senderPhone || userDetails.phone || undefined,
-      name: userDetails.name || undefined,
-      externalId: auth.currentUser?.uid,
-    });
+    const t = setTimeout(() => {
+      window.VaakuOS?.identify({
+        email: userDetails.email || undefined,
+        phone: userDetails.senderPhone || userDetails.phone || undefined,
+        name: userDetails.name || undefined,
+        externalId: auth.currentUser?.uid,
+      });
+    }, 1500);
+    return () => clearTimeout(t);
   }, [
     userDetails.email,
     userDetails.senderPhone,
@@ -119,13 +123,8 @@ const Cart = ({
   // Checkout form opened = highest-intent abandon point
   useEffect(() => {
     if (!showCheckoutForm) return;
-    window.VaakuOS?.checkout({
-      checkoutUrl: window.location.href,
-      total: cartItems.reduce(
-        (s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1),
-        0
-      ),
-    });
+    // Cart contents come from the vaakuos_cart_mirror written by CartContext.
+    window.VaakuOS?.checkout({ checkoutUrl: window.location.href });
   }, [showCheckoutForm]);
 
   // Load confetti script dynamically
@@ -743,13 +742,6 @@ const Cart = ({
 
   // Handle proceed to checkout
   const handleProceedToCheckout = () => {
-    window.VaakuOS?.checkout({
-      checkoutUrl: window.location.href,
-      total: cartItems.reduce(
-        (s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1),
-        0
-      ),
-    });
     if (isAuthenticated) {
       setShowCheckoutForm(true);
     } else {

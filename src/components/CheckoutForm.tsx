@@ -194,6 +194,7 @@ const CheckoutForm = ({
         <Label htmlFor="receiverPhone">Receiver Phone</Label>
         <Input
           id="receiverPhone"
+          data-vaakuos-ignore
           value={userDetails.receiverPhone}
           onChange={(e) =>
             setUserDetails({ ...userDetails, receiverPhone: e.target.value })

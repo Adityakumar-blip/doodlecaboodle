@@ -400,6 +400,8 @@ const UserProfile = () => {
   const handleSignOut = async () => {
     try {
       await auth.signOut();
+      // Forget this shopper so the next person on this browser isn't tracked as them.
+      window.VaakuOS?.reset();
       window.location.href = "/";
     } catch (err) {
       console.error("Error signing out:", err);

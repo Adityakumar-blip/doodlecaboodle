@@ -110,6 +110,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
+      // A different account on this browser makes the SDK start a fresh identity.
+      if (user) {
+        window.VaakuOS?.identify({ externalId: user.uid, email: user.email || undefined });
+      }
       setIsLoading(true);
 
       if (user) {

@@ -171,6 +171,8 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      // Forget this shopper so the next person on this browser isn't tracked as them.
+      window.VaakuOS?.reset();
       setIsMenuDropdownOpen(false);
       setIsOpen(false);
       window.location.href = "/";

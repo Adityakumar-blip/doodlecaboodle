@@ -3,15 +3,13 @@
 interface ImportMetaEnv {
   readonly VITE_VAAKUOS_API_URL?: string;
   readonly VITE_VAAKUOS_WRITE_KEY?: string;
-  readonly VITE_VAAKUOS_API_KEY?: string;
-  readonly VITE_VAAKUOS_SITE_ID?: string;
 }
 
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
-/** Loaded by public/sdk/vaakuos-cart.js snippet — not a local module. */
+/** VaakuOS SDK v4, loaded by the snippet in index.html — not a local module. */
 interface Window {
   VaakuOS?: {
     version?: string;
@@ -21,8 +19,9 @@ interface Window {
     identify: (traits: Record<string, unknown>) => void;
     checkout: (input?: Record<string, unknown>) => void;
     trackOrder: (order: Record<string, unknown>) => void;
+    track: (event: string, props?: Record<string, unknown>) => void;
     flush: () => void;
+    reset: () => void;
     getAnonymousId: () => string;
-    getUser: () => Record<string, unknown>;
   };
 }
