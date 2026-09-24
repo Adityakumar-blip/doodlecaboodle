@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
-import { collection, onSnapshot, addDoc } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, doc, getDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import { db } from "@/firebase/firebaseconfig";
 
@@ -112,7 +112,24 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       setCurrentUser(user);
       // A different account on this browser makes the SDK start a fresh identity.
       if (user) {
-        window.VaakuOS?.identify({ externalId: user.uid, email: user.email || undefined });
+        window.VaakuOS?.identify({
+          externalId: user.uid,
+          email: user.email || undefined,
+          name: user.displayName || undefined,
+          phone: user.phoneNumber || undefined,
+        });
+        // Profile name/phone live in Firestore; a restored session never fills a form.
+        getDoc(doc(db, "users", user.uid))
+          .then((snap) => {
+            const data = snap.data();
+            if (!data) return;
+            window.VaakuOS?.identify({
+              externalId: user.uid,
+              name: data.name || undefined,
+              phone: data.phone || data.senderPhone || undefined,
+            });
+          })
+          .catch(() => {});
       }
       setIsLoading(true);
 

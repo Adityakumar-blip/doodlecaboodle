@@ -720,6 +720,7 @@ const Cart = ({
         },
         modal: {
           ondismiss: () => {
+            window.VaakuOS?.track("payment_cancelled", { order_id });
             setLoading(false);
             toast.info("Payment cancelled");
           },
@@ -727,9 +728,17 @@ const Cart = ({
       };
 
       const rzp = new (window as any).Razorpay(options);
-      rzp.on("payment.failed", () => {
+      rzp.on("payment.failed", (resp: any) => {
+        window.VaakuOS?.track("payment_failed", {
+          order_id,
+          reason: resp?.error?.description,
+        });
         setLoading(false);
         toast.error("Payment failed. Please try again.");
+      });
+      window.VaakuOS?.track("payment_started", {
+        order_id,
+        total: parseFloat(charges.total),
       });
       rzp.open();
     } catch (error) {
